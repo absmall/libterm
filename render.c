@@ -8,11 +8,14 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 	for( i = 0; i < length; i ++ ) {
 		switch(buf[i]) {
 			case '\n':
-				term->ccol++;
-				term->crow=0;
+				term->crow++;
+				term->ccol=0;
+				if( term->crow >= term->height ) {
+					term_shiftrows(term);
+				}
 				break;
 			default:
-				term->grid[term->ccol][term->crow++] = buf[i];
+				term->grid[term->crow][term->ccol++] = buf[i];
 		}
 	}
 	

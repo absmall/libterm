@@ -48,6 +48,21 @@ bool term_allocate_grid(term_t_i *term)
 	return true;
 }
 
+void term_shiftrows(term_t_i *term)
+{
+	uint32_t *firstrow;
+	int i;
+
+	// Just cycle the pointers, and move the first row to the end, but clear it
+	firstrow = term->grid[0];
+	for( i = 1; i < term->history; i ++ ) {
+		term->grid[ i - 1 ] = term->grid[ i ];
+	}
+	memset( firstrow, 0, sizeof(uint32_t) * term->width );
+	term->grid[ i - 1 ] = firstrow;
+	term->crow --;
+}
+
 void term_release_grid(term_t_i *term)
 {
 	int i;

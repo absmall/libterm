@@ -31,6 +31,7 @@ void term_release_grid(term_t_i *term);
 void term_process_output_data(term_t_i *term, char *buf, int length);
 bool term_fork(term_t_i *term);
 void term_slay(term_t_i *term);
+void term_shiftrows(term_t_i *term);
 
 #define TO_S(x) ((term_t_i *)x)
 #define TO_H(x) ((term_t)x)

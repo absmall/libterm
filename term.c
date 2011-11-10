@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "libterm_internal.h"
 
@@ -58,6 +59,7 @@ bool term_create(int width, int height, int scrollback, term_t *t)
 		return false;
 	}
 
+	memset( term, 0, sizeof(term_t_i) );
 	term->width = width;
 	term->height = height;
 	term->history = height + scrollback;
