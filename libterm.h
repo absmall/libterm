@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+
 typedef void *term_t;
 
 // Create a terminal object with the specified dimensions. Scrollback

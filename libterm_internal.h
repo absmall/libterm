@@ -26,6 +26,8 @@ typedef struct term_t_i {
 	void (*update)(term_t handle, int x, int y, int width, int height);
 } term_t_i;
 
+bool term_allocate_grid(term_t_i *term);
+void term_release_grid(term_t_i *term);
 void term_process_output_data(term_t_i *term, char *buf, int length);
 bool term_fork(term_t_i *term);
 void term_slay(term_t_i *term);

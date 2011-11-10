@@ -6,7 +6,7 @@ qterm: qterm.o libterm.so
 cterm: cterm.o libterm.so
 	gcc -Wall -g3 -o $@ $< -L. -lterm
 
-libterm.so: term.o fork.o term_render.o
+libterm.so: term.o fork.o render.o memory.o
 	gcc -Wall -g3 -shared -o $@ $^ -lutil
 
 %.o:%.c
