@@ -1,8 +1,8 @@
 qshell: qshell.o libterm.so
-	gcc -g3 -o $@ $< -L. -lterm
+	gcc -Wall -g3 -o $@ $< -L. -lterm
 
-libterm.so: term.o
-	gcc -g3 -shared -o $@ $^
+libterm.so: term.o fork.o term_render.o
+	gcc -Wall -g3 -shared -o $@ $^ -lutil
 
 %.o:%.c
-	gcc -g3 -c -o $@ -I. $<
+	gcc -Wall -g3 -c -o $@ -I. $<

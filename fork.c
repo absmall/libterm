@@ -1,4 +1,5 @@
 #include <pty.h>
+#include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -18,6 +19,7 @@ bool term_fork(term_t_i *term)
 	} else {
 		term->child = pid;
 	}
+	return true;
 }
 
 void term_slay(term_t_i *term)
