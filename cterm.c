@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <curses.h>
 #include <unistd.h>
 #include <libterm.h>
 #include <sys/select.h>
@@ -6,17 +7,22 @@
 #define WIDTH	80
 #define HEIGHT	25
 
+WINDOW *wnd;
+
 void update(term_t handle, int x, int y, int width, int height)
 {
 	int i, j;
 	const uint32_t **grid = term_get_grid(handle);
 
+
 	for( i = 0; i < HEIGHT; i ++ ) {
 		for( j = 0; j < WIDTH; j ++ ) {
-			fputc( grid[i][j], stdout );
+			wmove( wnd, i, j );
+			wdelch( wnd );
+			winsch( wnd, grid[i][j] );
 		}
-		printf( "\n" );
 	}
+	wrefresh(wnd);
 }
 
 int main(int argc, char *argv[])
@@ -26,6 +32,12 @@ int main(int argc, char *argv[])
 	int file_handle;
 	int stdin_handle;
 	term_t handle;
+
+	initscr();
+
+	wnd = newwin(HEIGHT, WIDTH, 0, 0);
+	wclear( wnd );
+
 	term_create(WIDTH, HEIGHT, 0, &handle);
 
 	term_register_update(handle, update);
@@ -50,6 +62,8 @@ int main(int argc, char *argv[])
 	}
 
 	term_free(handle);
+
+	endwin();
 
 	return 0;
 }

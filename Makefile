@@ -4,7 +4,7 @@ qterm: qterm.o libterm.so
 	gcc -Wall -g3 -o $@ $< -L. -lterm
 
 cterm: cterm.o libterm.so
-	gcc -Wall -g3 -o $@ $< -L. -lterm
+	gcc -Wall -g3 -o $@ $< -L. -lterm -lcurses
 
 libterm.so: term.o fork.o render.o memory.o
 	gcc -Wall -g3 -shared -o $@ $^ -lutil
