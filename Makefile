@@ -1,4 +1,9 @@
-qshell: qshell.o libterm.so
+all: qterm cterm
+
+qterm: qterm.o libterm.so
+	gcc -Wall -g3 -o $@ $< -L. -lterm
+
+cterm: cterm.o libterm.so
 	gcc -Wall -g3 -o $@ $< -L. -lterm
 
 libterm.so: term.o fork.o term_render.o
