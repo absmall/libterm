@@ -20,5 +20,8 @@ const uint32_t **term_get_grid(term_t handle);
 // This function should be called to process data from the child process
 void term_process_child(term_t handle);
 
+// Send input to the shell
+void term_send_data(term_t handle, char *string, int length);
+
 // Release all resources associated with a terminal
 void term_free(term_t handle);

@@ -89,6 +89,15 @@ void term_process_child(term_t handle)
 	term_process_output_data(term, buf, length);
 }
 
+void term_send_data(term_t handle, char *string, int length)
+{
+	term_t_i *term;
+
+	term = TO_S(handle);
+
+	write(term->fd, string, length);
+}
+
 void term_release_grid(term_t_i *term)
 {
 	int i;
