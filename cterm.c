@@ -52,7 +52,9 @@ int main(int argc, char *argv[])
 		select( file_handle+1, &rfds, NULL, NULL, NULL );
 
 		if(FD_ISSET(file_handle, &rfds)) {
-			term_process_child(handle);
+			if( !term_process_child(handle) ) {
+				break;
+			}
 		} else if(FD_ISSET(stdin_handle, &rfds)) {
 			char buf[100];
 			length = read(stdin_handle, buf, 100);

@@ -30,7 +30,7 @@ const uint32_t **term_get_grid(term_t handle)
 	return (const uint32_t **)term->grid;
 }
 
-void term_process_child(term_t handle)
+bool term_process_child(term_t handle)
 {
 	int length;
 	char buf[100];
@@ -39,7 +39,11 @@ void term_process_child(term_t handle)
 	term = TO_S(handle);
 
 	length = read( term->fd, buf, 100 );
+	if( length == -1 ) {
+		return false;
+	}
 	term_process_output_data(term, buf, length);
+	return true;
 }
 
 void term_send_data(term_t handle, char *string, int length)

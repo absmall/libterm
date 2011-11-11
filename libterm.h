@@ -19,7 +19,7 @@ int term_get_file_descriptor(term_t handle);
 const uint32_t **term_get_grid(term_t handle);
 
 // This function should be called to process data from the child process
-void term_process_child(term_t handle);
+bool term_process_child(term_t handle);
 
 // Send input to the shell
 void term_send_data(term_t handle, char *string, int length);
