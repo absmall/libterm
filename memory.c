@@ -4,7 +4,7 @@
 
 bool term_allocate_grid(term_t_i *term)
 {
-	int i;
+	int i, j;
 
 	term->grid = malloc(sizeof(uint32_t *)*term->history);
 	if( term->grid == NULL ) {
@@ -41,7 +41,9 @@ bool term_allocate_grid(term_t_i *term)
 			free(term);
 			return false;
 		}
-		memset(term->grid[i], 0, sizeof(uint32_t)*term->width);
+		for( j = 0; j < term->width; j ++ ) {
+			term->grid[ i ][ j ] = ' ';
+		}
 		memset(term->attribs[i], 0, sizeof(uint32_t)*term->width);
 	}
 
@@ -58,8 +60,10 @@ void term_shiftrows(term_t_i *term)
 	for( i = 1; i < term->history; i ++ ) {
 		term->grid[ i - 1 ] = term->grid[ i ];
 	}
-	memset( firstrow, 0, sizeof(uint32_t) * term->width );
 	term->grid[ i - 1 ] = firstrow;
+	for( i = 0; i < term->width; i ++ ) {
+		firstrow[ i ] = ' ';
+	}
 	term->crow --;
 }
 
