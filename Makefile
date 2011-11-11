@@ -1,13 +1,2 @@
-all: qterm cterm
-
-qterm: qterm.o libterm.so
-	gcc -Wall -g3 -o $@ $< -L. -lterm
-
-cterm: cterm.o libterm.so
-	gcc -Wall -g3 -o $@ $< -L. -lterm -lcurses
-
-libterm.so: term.o fork.o render.o memory.o
-	gcc -Wall -g3 -shared -o $@ $^ -lutil
-
-%.o:%.c
-	gcc -Wall -g3 -c -o $@ -I. $<
+CFLAGS = -g3 -Wall
+include */Makefile

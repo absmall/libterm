@@ -3,10 +3,17 @@
 
 typedef void *term_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Create a terminal object with the specified dimensions. Scrollback
 // indicates the number of lines to be preserved after they have scrolled
 // off the display
 bool term_create(int width, int height, int scrollback, term_t *handle);
+
+void term_set_user_data(term_t handle, void *user_data);
+void *term_get_user_data(term_t handle);
 
 // Callback functions for when the screen state changes
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height));
@@ -26,3 +33,7 @@ void term_send_data(term_t handle, char *string, int length);
 
 // Release all resources associated with a terminal
 void term_free(term_t handle);
+
+#ifdef __cplusplus
+}
+#endif

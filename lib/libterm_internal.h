@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "libterm.h"
+#include <libterm.h>
 
 typedef struct term_t_i {
 	// Width in characters
@@ -24,6 +24,8 @@ typedef struct term_t_i {
 	int fd;
 	// render callback
 	void (*update)(term_t handle, int x, int y, int width, int height);
+	// opaque user data
+	void *user_data;
 } term_t_i;
 
 bool term_allocate_grid(term_t_i *term);

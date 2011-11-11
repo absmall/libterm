@@ -88,3 +88,17 @@ void term_free(term_t handle)
 	term_slay(term);
 	term_release_grid(term);
 }
+
+void term_set_user_data(term_t handle, void *user_data)
+{
+	term_t_i *term = TO_S(handle);
+
+	term->user_data = user_data;
+}
+
+void *term_get_user_data(term_t handle)
+{
+	term_t_i *term = TO_S(handle);
+
+	return term->user_data;
+}
