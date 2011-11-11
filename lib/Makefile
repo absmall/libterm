@@ -11,4 +11,4 @@ include common.mk
 SRC = term.c fork.c render.c memory.c
 
 obj/libterm.so: $(addprefix obj/,$(SRC:.c=.o))
-	gcc -Wall -g3 -shared -o $@ $^ -lutil
+	gcc $(CFLAGS) -shared -o $@ $^ -lutil
