@@ -7,15 +7,20 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 
 	for( i = 0; i < length; i ++ ) {
 		switch(buf[i]) {
+			case '\r':
+				term->ccol=0;
+				break;
 			case '\n':
 				term->crow++;
-				term->ccol=0;
 				if( term->crow >= term->height ) {
 					term_shiftrows(term);
 				}
 				break;
 			default:
-				term->grid[term->crow][term->ccol++] = buf[i];
+				if( term->crow < term->height && term->ccol < term->width ) {
+					term->grid[term->crow][term->ccol] = buf[i];
+				}
+				term->ccol++;
 		}
 	}
 	
