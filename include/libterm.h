@@ -29,7 +29,7 @@ const uint32_t **term_get_grid(term_t handle);
 bool term_process_child(term_t handle);
 
 // Send input to the shell
-void term_send_data(term_t handle, char *string, int length);
+void term_send_data(term_t handle, const char *string, int length);
 
 // Release all resources associated with a terminal
 void term_free(term_t handle);

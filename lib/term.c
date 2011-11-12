@@ -46,7 +46,7 @@ bool term_process_child(term_t handle)
 	return true;
 }
 
-void term_send_data(term_t handle, char *string, int length)
+void term_send_data(term_t handle, const char *string, int length)
 {
 	term_t_i *term;
 
