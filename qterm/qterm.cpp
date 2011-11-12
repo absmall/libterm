@@ -61,9 +61,15 @@ void QTerm::paintEvent(QPaintEvent *event)
 	int i, j;
 	const uint32_t **grid;
 	QPainter painter(this);
+	QFont font;
 
+	font.setStyleHint(QFont::TypeWriter);
+	font.setFamily("Monospace");
+	font.setFixedPitch(true);
+	font.setKerning(false);
 	painter.setBackgroundMode(Qt::TransparentMode);
 	painter.setBrush(QColor(0, 0, 0));
+	painter.setFont(font);
 
 	// First erase the grid with its current dimensions
 	painter.drawRect(event->rect());
