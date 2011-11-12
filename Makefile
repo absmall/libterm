@@ -2,5 +2,5 @@ CFLAGS = -g3 -Wall
 
 all: obj/cterm
 
-include cterm/Makefile
-include lib/Makefile
+include cterm/module.mk
+include lib/module.mk
