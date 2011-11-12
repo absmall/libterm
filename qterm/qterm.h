@@ -14,6 +14,7 @@ class QTerm : public QWidget
     Q_OBJECT
 public:
     QTerm(QWidget *parent = 0);
+    QTerm(QWidget *parent, term_t terminal);
 	~QTerm( );
  
 protected:

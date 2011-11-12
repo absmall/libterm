@@ -23,6 +23,18 @@ QTerm::QTerm(QWidget *parent) : QWidget(parent)
 	QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
 }
 
+QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
+{
+	char_width = 0;
+	char_height = 0;
+
+	this->terminal = terminal;
+	term_set_user_data( terminal, this );
+	term_register_update( terminal, term_update );
+	notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
+	QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
+}
+
 QTerm::~QTerm()
 {
 	term_free( terminal );
@@ -75,9 +87,11 @@ void QTerm::keyPressEvent(QKeyEvent *event)
  
 int main(int argc, char *argv[])
 {
+	term_t terminal;
     QApplication app(argc, argv);
  
-    QTerm term;
+	term_create( WIDTH, HEIGHT, 0, &terminal );
+    QTerm term(NULL, terminal);
     term.show();
  
     return app.exec();
