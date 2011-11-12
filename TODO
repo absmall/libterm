@@ -5,3 +5,6 @@
 -Change font in qt terminal
 -Support attributes (color, etc.)
 -Control default background and foreground color of qt terminal
+-Support cursor selection
+-Support controlling which shell is executed
+-Support history!=0
