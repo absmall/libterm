@@ -26,6 +26,7 @@ QTerm::QTerm(QWidget *parent) : QWidget(parent)
 QTerm::~QTerm()
 {
 	term_free( terminal );
+	delete notifier;
 }
 
 void QTerm::term_update(term_t handle, int x, int y, int width, int height)
@@ -56,7 +57,7 @@ void QTerm::paintEvent(QPaintEvent *event)
 	painter.drawRect(event->rect());
 	
 	char_width = painter.fontMetrics().maxWidth();
-	char_height = painter.fontMetrics().height();
+	char_height = painter.fontMetrics().lineSpacing();
 
 	painter.setPen(QColor(255, 255, 255));
 	grid = term_get_grid( terminal );

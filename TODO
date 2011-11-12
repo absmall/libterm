@@ -8,3 +8,4 @@
 -Support cursor selection
 -Support controlling which shell is executed
 -Support history!=0
+-Draw a cursor
