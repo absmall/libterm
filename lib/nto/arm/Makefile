@@ -1,2 +1,2 @@
-LIST=OS
+LIST=VARIANT
 include recurse.mk

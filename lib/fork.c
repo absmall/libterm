@@ -1,4 +1,8 @@
+#ifdef __QNX__
+#include <unix.h>
+#else
 #include <pty.h>
+#endif
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
