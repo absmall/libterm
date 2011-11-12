@@ -1,0 +1,7 @@
+-Support backspace
+-Support escape codes
+-Find out why ls doesn't use color by default
+-Support resize
+-Change font in qt terminal
+-Support attributes (color, etc.)
+-Control default background and foreground color of qt terminal
