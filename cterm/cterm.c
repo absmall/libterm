@@ -38,7 +38,9 @@ int main(int argc, char *argv[])
 	wnd = newwin(HEIGHT, WIDTH, 0, 0);
 	wclear( wnd );
 
-	term_create(WIDTH, HEIGHT, 0, &handle);
+	term_create(&handle);
+	term_set_shell(handle, "/bin/bash -l");
+	term_begin(handle, WIDTH, HEIGHT, 0);
 
 	term_register_update(handle, update);
 	stdin_handle = fileno(stdin);

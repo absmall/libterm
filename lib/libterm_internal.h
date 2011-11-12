@@ -24,6 +24,8 @@ typedef struct term_t_i {
 	int fd;
 	// render callback
 	void (*update)(term_t handle, int x, int y, int width, int height);
+	// Name of the shell to use
+	char *shell;
 	// opaque user data
 	void *user_data;
 } term_t_i;

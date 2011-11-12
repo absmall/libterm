@@ -16,7 +16,8 @@ QTerm::QTerm(QWidget *parent) : QWidget(parent)
 	char_width = 0;
 	char_height = 0;
 
-	term_create( WIDTH, HEIGHT, 0, &terminal );
+	term_create( &terminal );
+	term_begin( terminal, WIDTH, HEIGHT, 0 );
 	term_set_user_data( terminal, this );
 	term_register_update( terminal, term_update );
 	notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
@@ -96,7 +97,8 @@ int main(int argc, char *argv[])
 	term_t terminal;
     QApplication app(argc, argv);
  
-	term_create( WIDTH, HEIGHT, 0, &terminal );
+	term_create( &terminal );
+	term_begin( terminal, WIDTH, HEIGHT, 0 );
     QTerm term(NULL, terminal);
     term.show();
  

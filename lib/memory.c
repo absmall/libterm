@@ -77,6 +77,5 @@ void term_release_grid(term_t_i *term)
 	}
 	free(term->grid);
 	free(term->attribs);
-	free(term);
 }
 

@@ -10,8 +10,15 @@ extern "C" {
 // Create a terminal object with the specified dimensions. Scrollback
 // indicates the number of lines to be preserved after they have scrolled
 // off the display
-bool term_create(int width, int height, int scrollback, term_t *handle);
+bool term_create(term_t *handle);
 
+// Set the shell to use
+bool term_set_shell(term_t handle, char *shell);
+
+// Begin a terminal session. Set up all parameters before calling this function
+bool term_begin( term_t handle, int width, int height, int scrollback );
+
+// Functions to set and get an opaque blob of data attached to the terminal instance
 void term_set_user_data(term_t handle, void *user_data);
 void *term_get_user_data(term_t handle);
 

@@ -17,7 +17,43 @@ bool term_fork(term_t_i *term)
 	if(pid < 0 ) {
 		return false;
 	} else if( pid == 0 ) {
-		execl("/bin/sh", "/bin/sh", "-l", NULL);
+		if( term->shell != NULL ) {
+			bool inspace;
+			int count = 1;
+			char *ptr;
+			char **args;
+
+			// Count the tokens
+			for( inspace = true, ptr = term->shell; *ptr != '\0'; ptr ++ ) {
+				if( *ptr != ' ' && inspace ) {
+					count ++;
+				}
+				inspace = (*ptr == ' ');
+			}
+
+			// Allocate space for tokens
+			args = malloc( sizeof( char * ) * count );
+
+			// Package the tokens
+			count = 0;
+			for( inspace = true, ptr = term->shell; *ptr != '\0'; ptr ++ ) {
+				if( *ptr != ' ' && inspace ) {
+					args[ count ] = ptr;
+					count ++;
+				} else if ( *ptr == ' ' && !inspace ) {
+					*ptr = '\0';
+					inspace = true;
+					continue;
+				}
+				inspace = (*ptr == ' ');
+			}
+
+			// And a terminator
+			args[ count ] = NULL;
+			execvp( args[ 0 ], args );
+		} else {
+			execl("/bin/sh", "/bin/sh", "-l", NULL);
+		}
 	} else {
 		term->child = pid;
 	}

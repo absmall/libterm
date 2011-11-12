@@ -55,7 +55,7 @@ void term_send_data(term_t handle, const char *string, int length)
 	write(term->fd, string, length);
 }
 
-bool term_create(int width, int height, int scrollback, term_t *t)
+bool term_create(term_t *t)
 {
 	term_t_i *term = malloc(sizeof(term_t_i));
 
@@ -64,6 +64,24 @@ bool term_create(int width, int height, int scrollback, term_t *t)
 	}
 
 	memset( term, 0, sizeof(term_t_i) );
+
+	*t = TO_H(term);
+	return true;
+}
+
+bool term_set_shell(term_t handle, char *shell)
+{
+	term_t_i *term = TO_S( handle );
+
+	term->shell = strdup( shell );
+
+	return term->shell != NULL;
+}
+
+bool term_begin(term_t handle, int width, int height, int scrollback)
+{
+	term_t_i *term = TO_S(handle);
+
 	term->width = width;
 	term->height = height;
 	term->history = height + scrollback;
@@ -77,7 +95,6 @@ bool term_create(int width, int height, int scrollback, term_t *t)
 		return false;
 	}
 
-	*t = TO_H(term);
 	return true;
 }
 
@@ -85,8 +102,12 @@ void term_free(term_t handle)
 {
 	term_t_i *term = TO_S(handle);
 
-	term_slay(term);
-	term_release_grid(term);
+	term_slay( term );
+	term_release_grid( term );
+	if( term->shell != NULL ) {
+		free( term->shell );
+	}
+	free( term );
 }
 
 void term_set_user_data(term_t handle, void *user_data)
