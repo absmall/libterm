@@ -26,6 +26,8 @@ typedef struct term_t_i {
 	void (*update)(term_t handle, int x, int y, int width, int height);
 	// Name of the shell to use
 	char *shell;
+	// Type of terminal to emulate
+	term_type type;
 	// opaque user data
 	void *user_data;
 } term_t_i;

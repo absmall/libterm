@@ -64,6 +64,7 @@ bool term_create(term_t *t)
 	}
 
 	memset( term, 0, sizeof(term_t_i) );
+	term->type = TERM_TYPE_VT100;
 
 	*t = TO_H(term);
 	return true;

@@ -7,10 +7,17 @@ typedef void *term_t;
 extern "C" {
 #endif
 
+typedef enum {
+	TERM_TYPE_VT100
+} term_type;
+
 // Create a terminal object with the specified dimensions. Scrollback
 // indicates the number of lines to be preserved after they have scrolled
 // off the display
 bool term_create(term_t *handle);
+
+// Specify what type of terminal to emulate
+bool term_set_emulation(term_t handle, term_type type);
 
 // Set the shell to use
 bool term_set_shell(term_t handle, char *shell);

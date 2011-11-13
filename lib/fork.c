@@ -37,6 +37,12 @@ bool term_fork(term_t_i *term)
 			}
 		}
 
+		switch( term->type ) {
+			case TERM_TYPE_VT100:
+				setenv("TERM", "vt100", 1);
+				break;
+		}
+
 		// Break up the command line where there are spaces
 		// Count the tokens
 		for( inspace = true, ptr = shell; *ptr != '\0'; ptr ++ ) {
