@@ -89,7 +89,14 @@ void QTerm::paintEvent(QPaintEvent *event)
 
 void QTerm::keyPressEvent(QKeyEvent *event)
 {
-	term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
+	switch(event->key()) {
+		case Qt::Key_Return:
+			term_send_data( terminal, "\n", 1 );
+			break;
+		default:
+			term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
+			break;
+	}
 }
  
 int main(int argc, char *argv[])

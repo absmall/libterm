@@ -8,9 +8,9 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 	for( i = 0; i < length; i ++ ) {
 		switch(buf[i]) {
 			case '\r':
-				term->ccol=0;
 				break;
 			case '\n':
+				term->ccol=0;
 				term->crow++;
 				if( term->crow >= term->height ) {
 					term_shiftrows(term);

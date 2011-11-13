@@ -1,0 +1,21 @@
+This package includes three components:
+1) A shared library for terminal functionality (libterm.so)
+2) A curses-based terminal (cterm)
+3) A qt-based terminal (qterm)
+
+Building for linux:
+-------------------
+1) In the libterm directory, run 'make'. This will build libterm.so and cterm
+in the libterm/obj directory. 
+2) In the qterm directory, run 'qmake', then 'make'. This will build qterm in
+the libterm/qterm directory
+
+Building for playbook:
+----------------------
+1) In the libterm/lib directory, run 'make'. This will build libterm.so in the
+libterm/lib/nto/arm/so.le.v7 directory
+2) In the libterm/qt directory, run the qmake application that comes as part
+of the Qt for playbook build.
+3) In the same directory, run 'make qtermbb.bar'. This will build qtermbb.bar in
+the libterm/qterm directory, which can be loaded to playbook.
+Note: cterm is not supported on playbook
