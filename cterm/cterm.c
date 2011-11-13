@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	wclear( wnd );
 
 	term_create(&handle);
-	term_set_shell(handle, "/bin/bash -l");
+	term_set_shell(handle, "/bin/bash");
 	term_begin(handle, WIDTH, HEIGHT, 0);
 
 	term_register_update(handle, update);

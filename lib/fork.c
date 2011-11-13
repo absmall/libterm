@@ -13,7 +13,7 @@
 bool term_fork(term_t_i *term)
 {
 	bool inspace;
-	int count = 1;
+	int count = 2;
 	char *ptr;
 	char **args;
 	char *shell;
@@ -25,7 +25,7 @@ bool term_fork(term_t_i *term)
 		return false;
 	} else if( pid == 0 ) {
 		// Default shell if no other is specified
-		shell = "/bin/sh -l";
+		shell = "/bin/sh";
 		// See if the application is overriding the shell
 		if( term->shell != NULL ) {
 			shell = term->shell;
@@ -64,6 +64,7 @@ bool term_fork(term_t_i *term)
 		}
 
 		// And a terminator
+		args[ count++ ] = "-l";
 		args[ count ] = NULL;
 		execvp( args[ 0 ], args );
 	} else {
