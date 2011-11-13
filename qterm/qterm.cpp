@@ -95,12 +95,20 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 int main(int argc, char *argv[])
 {
 	term_t terminal;
-    QApplication app(argc, argv);
+	if( !term_create( &terminal ) ) {
+		fprintf(stderr, "Failed to create terminal\n");
+		exit(1);
+	}
+	if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
+		fprintf(stderr, "Failed to begin terminal\n");
+		exit(1);
+	}
+	{
+		QApplication app(argc, argv);
+	 
+		QTerm term(NULL, terminal);
+		term.show();
  
-	term_create( &terminal );
-	term_begin( terminal, WIDTH, HEIGHT, 0 );
-    QTerm term(NULL, terminal);
-    term.show();
- 
-    return app.exec();
+		return app.exec();
+	}
 }

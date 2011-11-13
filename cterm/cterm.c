@@ -32,8 +32,9 @@ int main(int argc, char *argv[])
 	int file_handle;
 	int stdin_handle;
 	term_t handle;
+	WINDOW *screen;
 
-	initscr();
+	screen = initscr();
 
 	wnd = newwin(HEIGHT, WIDTH, 0, 0);
 	wclear( wnd );
@@ -65,9 +66,12 @@ int main(int argc, char *argv[])
 
 	}
 
-	term_free(handle);
+	term_free( handle );
 
-	endwin();
+	delwin( wnd );
+	delwin( screen );
+
+	endwin( );
 
 	return 0;
 }
