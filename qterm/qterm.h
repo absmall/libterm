@@ -22,6 +22,7 @@ protected:
 	void keyPressEvent(QKeyEvent *);
  
 private:
+	void init( );
 	int char_width;
 	int char_height;
 	int cursor_x;

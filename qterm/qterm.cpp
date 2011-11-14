@@ -14,22 +14,18 @@
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
-	char_width = 0;
-	char_height = 0;
-	cursor_x = -1;
-	cursor_y = -1;
-	cursor_on = 1;
-
 	term_create( &terminal );
 	term_begin( terminal, WIDTH, HEIGHT, 0 );
-	term_set_user_data( terminal, this );
-	term_register_update( terminal, term_update );
-	term_register_cursor( terminal, term_update_cursor );
-	notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
-	QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
+	init();
 }
 
 QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
+{
+	this->terminal = terminal;
+	init();
+}
+
+void QTerm::init()
 {
 	char_width = 0;
 	char_height = 0;
@@ -37,8 +33,8 @@ QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
 	cursor_y = -1;
 	cursor_on = 1;
 
-	this->terminal = terminal;
 	term_set_user_data( terminal, this );
+	term_register_update( terminal, term_update );
 	term_register_cursor( terminal, term_update_cursor );
 	notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
 	QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
