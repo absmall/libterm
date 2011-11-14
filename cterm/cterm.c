@@ -8,6 +8,8 @@
 #define HEIGHT    25
 
 WINDOW *wnd;
+int cursor_x = -1;
+int cursor_y = -1;
 
 void update(term_t handle, int x, int y, int width, int height)
 {
@@ -15,14 +17,29 @@ void update(term_t handle, int x, int y, int width, int height)
     const uint32_t **grid = term_get_grid(handle);
 
 
+    wattroff( wnd, A_REVERSE );
     for( i = 0; i < HEIGHT; i ++ ) {
         for( j = 0; j < WIDTH; j ++ ) {
             wmove( wnd, i, j );
             wdelch( wnd );
-            winsch( wnd, grid[i][j] );
+            if( j == cursor_x && i == cursor_y ) {
+                wattron( wnd, A_REVERSE );
+                winsch( wnd, grid[i][j] );
+                wattroff( wnd, A_REVERSE );
+            } else {
+                winsch( wnd, grid[i][j] );
+            }
         }
     }
     wrefresh(wnd);
+}
+
+void cursor(term_t handle, int x, int y)
+{
+    cursor_x = x;
+    cursor_y = y;
+
+    update( handle, x, y, 1, 1 );
 }
 
 int main(int argc, char *argv[])
@@ -44,6 +61,7 @@ int main(int argc, char *argv[])
     term_begin(handle, WIDTH, HEIGHT, 0);
 
     term_register_update(handle, update);
+    term_register_cursor(handle, cursor);
     stdin_handle = fileno(stdin);
     file_handle = term_get_file_descriptor(handle);
 
