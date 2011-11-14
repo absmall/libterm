@@ -3,12 +3,6 @@
 #include <libterm.h>
 #include <QVBoxLayout>
 
-#if 0
-class QTerm : public QWidget
-{
-};
-#endif
-
 class QTerm : public QWidget
 {
 	Q_OBJECT

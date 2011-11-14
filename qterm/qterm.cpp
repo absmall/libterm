@@ -49,19 +49,27 @@ QTerm::~QTerm()
 void QTerm::term_update(term_t handle, int x, int y, int width, int height)
 {
 	QTerm *term = (QTerm *)term_get_user_data( handle );
-	// Keep things simple, just redraw the whole display
-	term->repaint(term->contentsRect());
+
+	term->update( x * term->char_width, y * term->char_height,
+	              width * term->char_width, height * term->char_height );
 }
 
 void QTerm::term_update_cursor(term_t handle, int x, int y)
 {
 	QTerm *term = (QTerm *)term_get_user_data( handle );
 
+    // Update old cursor location
+	term->update( term->cursor_x * term->char_width,
+	              term->cursor_y * term->char_height,
+	              term->char_width, term->char_height );
+
 	term->cursor_x = x;
 	term->cursor_y = y;
 
-	// Keep things simple, just redraw the whole display
-	term->repaint(term->contentsRect());
+    // Update new cursor location
+	term->update( term->cursor_x * term->char_width,
+	              term->cursor_y * term->char_height,
+	              term->char_width, term->char_height );
 }
 
 void QTerm::terminal_data()
@@ -89,8 +97,13 @@ void QTerm::paintEvent(QPaintEvent *event)
 	// First erase the grid with its current dimensions
 	painter.drawRect(event->rect());
 	
-	char_width = painter.fontMetrics().maxWidth();
-	char_height = painter.fontMetrics().lineSpacing();
+	if( char_width != painter.fontMetrics().maxWidth()
+	 || char_height != painter.fontMetrics().lineSpacing() ) {
+		char_width = painter.fontMetrics().maxWidth();
+		char_height = painter.fontMetrics().lineSpacing();
+		update( contentsRect() );
+		return;
+	}
 
 	painter.setPen(QColor(255, 255, 255));
 	painter.setBrush(QColor(255, 255, 255));
