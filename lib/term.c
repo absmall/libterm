@@ -108,6 +108,9 @@ void term_free(term_t handle)
 	if( term->shell != NULL ) {
 		free( term->shell );
 	}
+	if( term->escape_code != NULL ) {
+		free( term->escape_code );
+	}
 	free( term );
 }
 
