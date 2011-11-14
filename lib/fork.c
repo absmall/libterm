@@ -1,5 +1,7 @@
-#ifdef __QNX__
+#if defined(__QNX__)
 #include <unix.h>
+#elif defined(__MACH__)
+#include <util.h>
 #else
 #include <pty.h>
 #endif
