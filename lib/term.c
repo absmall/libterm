@@ -30,6 +30,24 @@ const uint32_t **term_get_grid(term_t handle)
 	return (const uint32_t **)term->grid;
 }
 
+const uint32_t **term_get_attribs(term_t handle)
+{
+	term_t_i *term;
+
+	term = TO_S(handle);
+
+	return (const uint32_t **)term->attribs;
+}
+
+const uint32_t **term_get_colours(term_t handle)
+{
+	term_t_i *term;
+
+	term = TO_S(handle);
+
+	return (const uint32_t **)term->colours;
+}
+
 bool term_process_child(term_t handle)
 {
 	int length;

@@ -15,10 +15,16 @@ typedef struct term_t_i {
 	int crow;
 	// Cursor column
 	int ccol;
+	// The attributes with which to write
+	int cattr;
+	// The colour with which to write
+	int ccolour;
 	// Grid of characters
 	uint32_t **grid;
 	// Grid of attributes
 	uint32_t **attribs;
+	// Color of characters
+	uint32_t **colours;
 	// pid of the child
 	pid_t child;
 	// pty file descriptor

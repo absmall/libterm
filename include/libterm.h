@@ -11,6 +11,13 @@ typedef enum {
 	TERM_TYPE_VT100
 } term_type;
 
+// Attributes
+#define TERM_ATTRIB_BOLD		(1<<0)
+#define TERM_ATTRIB_UNDERSCORE	(1<<1)
+#define TERM_ATTRIB_BLINK		(1<<2)
+#define TERM_ATTRIB_REVERSE		(1<<3)
+#define TERM_ATTRIB_CONCEALED	(1<<4)
+
 // Create a terminal object with the specified dimensions. Scrollback
 // indicates the number of lines to be preserved after they have scrolled
 // off the display
@@ -38,6 +45,8 @@ int term_get_file_descriptor(term_t handle);
 
 // Retrieve the grid of characters
 const uint32_t **term_get_grid(term_t handle);
+const uint32_t **term_get_attribs(term_t handle);
+const uint32_t **term_get_colours(term_t handle);
 
 // This function should be called to process data from the child process
 bool term_process_child(term_t handle);
