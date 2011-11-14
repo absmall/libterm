@@ -39,6 +39,9 @@ void *term_get_user_data(term_t handle);
 // Callback functions for when the screen state changes
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height));
 
+// Callback functions for when the cursor moves
+void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y));
+
 // Get a file descriptor to wait for data from the child process. Waiting on
 // this file handle should be integrated in the programs event processing loop
 int term_get_file_descriptor(term_t handle);

@@ -6,6 +6,7 @@
 #include <qterm.h>
 #include <stdio.h>
 #include <QKeyEvent>
+#include <QTimer>
 #include <sys/select.h>
 
 #define WIDTH	80
@@ -15,11 +16,15 @@ QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
 	char_width = 0;
 	char_height = 0;
+	cursor_x = -1;
+	cursor_y = -1;
+	cursor_on = 1;
 
 	term_create( &terminal );
 	term_begin( terminal, WIDTH, HEIGHT, 0 );
 	term_set_user_data( terminal, this );
 	term_register_update( terminal, term_update );
+	term_register_cursor( terminal, term_update_cursor );
 	notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
 	QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
 }
@@ -28,10 +33,13 @@ QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
 {
 	char_width = 0;
 	char_height = 0;
+	cursor_x = -1;
+	cursor_y = -1;
+	cursor_on = 1;
 
 	this->terminal = terminal;
 	term_set_user_data( terminal, this );
-	term_register_update( terminal, term_update );
+	term_register_cursor( terminal, term_update_cursor );
 	notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
 	QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
 }
@@ -49,6 +57,16 @@ void QTerm::term_update(term_t handle, int x, int y, int width, int height)
 	term->repaint(term->contentsRect());
 }
 
+void QTerm::term_update_cursor(term_t handle, int x, int y)
+{
+	QTerm *term = (QTerm *)term_get_user_data( handle );
+
+	term->cursor_x = x;
+	term->cursor_y = y;
+
+	// Keep things simple, just redraw the whole display
+	term->repaint(term->contentsRect());
+}
 
 void QTerm::terminal_data()
 {
@@ -56,7 +74,7 @@ void QTerm::terminal_data()
 		exit(0);
 	}
 }
- 
+
 void QTerm::paintEvent(QPaintEvent *event)
 {
 	int i, j;
@@ -79,10 +97,18 @@ void QTerm::paintEvent(QPaintEvent *event)
 	char_height = painter.fontMetrics().lineSpacing();
 
 	painter.setPen(QColor(255, 255, 255));
+	painter.setBrush(QColor(255, 255, 255));
 	grid = term_get_grid( terminal );
 	for( i = 0; i < HEIGHT; i ++ ) {
 		for( j = 0; j < WIDTH; j ++ ) {
-			painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
+			if( cursor_on && j == cursor_x && i == cursor_y ) {
+				painter.drawRect(j * char_width + 1, i * char_height + 1, char_width - 2, char_height - 2);
+				painter.setPen(QColor(0, 0, 0));
+				painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
+				painter.setPen(QColor(255, 255, 255));
+			} else {
+				painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
+			}
 		}
 	}
 }

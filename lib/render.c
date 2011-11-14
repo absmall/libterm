@@ -3,6 +3,8 @@
 
 void term_process_output_data(term_t_i *term, char *buf, int length)
 {
+	bool change = false;
+	bool cursor_change = false;
 	int i;
 
 	for( i = 0; i < length; i ++ ) {
@@ -15,20 +17,24 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 #endif
 
 		if( term->escape_mode ) {
+			change = true;
 			i += term_send_escape( term, buf + i, length  - i );
 			if( i == length ) break;
 		}
 		switch(buf[i]) {
 			case '\b':
 				term->ccol--;
+				cursor_change = true;
 				break;
 			case '\r':
 				break;
 			case '\n':
 				term->ccol=0;
 				term->crow++;
+				cursor_change = true;
 				if( term->crow >= term->height ) {
 					term_shiftrows(term);
+					change = true;
 				}
 				break;
 			case 27:
@@ -40,10 +46,13 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 					term->grid[term->crow][term->ccol] = buf[i];
 					term->attribs[term->crow][term->ccol] = term->cattr;
 					term->colours[term->crow][term->ccol] = term->ccolour;
+					change = true;
 				}
 				term->ccol++;
+				cursor_change = true;
 		}
 	}
-	
-	if( term->update != NULL ) term->update(TO_H(term), 0, 0, term->width, term->height);
+
+	if( change && term->update != NULL ) term->update(TO_H(term), 0, 0, term->width, term->height);
+	if( cursor_change && term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow);
 }

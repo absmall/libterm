@@ -12,6 +12,15 @@ void term_register_update(term_t handle, void (*update)(term_t handle, int x, in
 	term->update = update;
 }
 
+void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y))
+{
+	term_t_i *term;
+
+	term = TO_S(handle);
+
+	term->cursor_update = update;
+}
+
 int term_get_file_descriptor(term_t handle)
 {
 	term_t_i *term;
