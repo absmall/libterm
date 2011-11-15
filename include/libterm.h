@@ -8,15 +8,15 @@ extern "C" {
 #endif
 
 typedef enum {
-    TERM_TYPE_VT100
+	TERM_TYPE_VT100
 } term_type;
 
 // Attributes
-#define TERM_ATTRIB_BOLD        (1<<0)
-#define TERM_ATTRIB_UNDERSCORE  (1<<1)
-#define TERM_ATTRIB_BLINK       (1<<2)
-#define TERM_ATTRIB_REVERSE     (1<<3)
-#define TERM_ATTRIB_CONCEALED   (1<<4)
+#define TERM_ATTRIB_BOLD		(1<<0)
+#define TERM_ATTRIB_UNDERSCORE	(1<<1)
+#define TERM_ATTRIB_BLINK		(1<<2)
+#define TERM_ATTRIB_REVERSE		(1<<3)
+#define TERM_ATTRIB_CONCEALED	(1<<4)
 
 // Create a terminal object with the specified dimensions. Scrollback
 // indicates the number of lines to be preserved after they have scrolled
