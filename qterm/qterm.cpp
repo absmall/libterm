@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     {
+        QCoreApplication::addLibraryPath("app/native/lib");
         QApplication app(argc, argv);
      
         QTerm term(NULL, terminal);
