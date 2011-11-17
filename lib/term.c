@@ -36,7 +36,7 @@ const uint32_t **term_get_grid(term_t handle)
 
 	term = TO_S(handle);
 
-	return (const uint32_t **)term->grid;
+	return (const uint32_t **)term->grid + term->row;
 }
 
 const uint32_t **term_get_attribs(term_t handle)
@@ -46,6 +46,25 @@ const uint32_t **term_get_attribs(term_t handle)
 	term = TO_S(handle);
 
 	return (const uint32_t **)term->attribs;
+}
+
+void term_scroll( term_t handle, int row )
+{
+	term_t_i *term;
+
+	term = TO_S(handle);
+
+	term->row = row;
+	
+	if( row < 0 ) {
+		row = 0;
+	}
+
+	if( row > term->history - term->height ) {
+		row = term->history - term->height;
+	}
+
+	term->row = row;
 }
 
 const uint32_t **term_get_colours(term_t handle)
@@ -113,6 +132,7 @@ bool term_begin(term_t handle, int width, int height, int scrollback)
 	term->width = width;
 	term->height = height;
 	term->history = height + scrollback;
+	term->crow = scrollback;
 
 	if( !term_allocate_grid(term) ) {
 		return false;

@@ -36,6 +36,9 @@ bool term_begin( term_t handle, int width, int height, int scrollback );
 void term_set_user_data(term_t handle, void *user_data);
 void *term_get_user_data(term_t handle);
 
+// Scroll to a row
+void term_scroll( term_t handle, int row );
+
 // Callback functions for when the screen state changes
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height));
 
