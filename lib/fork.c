@@ -8,7 +8,10 @@
 #include <pwd.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <signal.h>
+#include <sys/wait.h>
 #include <sys/types.h>
 #include <libterm_internal.h>
 
@@ -19,10 +22,18 @@ bool term_fork(term_t_i *term)
 	char *ptr;
 	char **args;
 	char *shell;
+	int status;
 	int pid;
+	int read_byte;
+	int pipefd[2];
 	struct passwd *passwd;
+
+	if( pipe( pipefd ) ) {
+		return false;
+	}
+
 	pid = forkpty(&term->fd, NULL, NULL, NULL);
-	
+
 	if(pid < 0 ) {
 		return false;
 	} else if( pid == 0 ) {
@@ -44,6 +55,9 @@ bool term_fork(term_t_i *term)
 				setenv("TERM", "vt100", 1);
 				break;
 		}
+
+		close( pipefd[ 0 ] );
+		fcntl( pipefd[ 1 ], F_SETFD, FD_CLOEXEC );
 
 		// Break up the command line where there are spaces
 		// Count the tokens
@@ -77,9 +91,27 @@ bool term_fork(term_t_i *term)
 		// And a terminator
 		args[ count++ ] = "-l";
 		args[ count ] = NULL;
-		execvp( args[ 0 ], args );
+		status = execvp( args[ 0 ], args );
+		write( pipefd[ 1 ], &status, 1 );
+		exit(status);
 	} else {
+		close( pipefd[ 1 ] );
 		term->child = pid;
+		while( 1 ) {
+			read_byte = read( pipefd[ 0 ], &status, 1 );
+			if( read_byte == 1 ) {
+				waitpid( term->child, &status, 0 );
+				close( pipefd[ 0 ] );
+				errno = status;
+				return false;
+			} else {
+				if( errno == EINTR ) {
+					continue;
+				} else {
+					break;
+				}
+			}
+		}
 	}
 	return true;
 }
