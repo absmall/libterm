@@ -118,5 +118,7 @@ bool term_fork(term_t_i *term)
 
 void term_slay(term_t_i *term)
 {
-	kill(term->child, SIGTERM);
+	if( term->child != 0 ) {
+		kill(term->child, SIGTERM);
+	}
 }

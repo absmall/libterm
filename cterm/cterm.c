@@ -61,15 +61,15 @@ int main(int argc, char *argv[])
 
 	if( !term_create(&handle) ) {
 		fprintf( stderr, "Failed to create a terminal handle (%s)\n", strerror( errno ) );
-		exit(1);
+		goto done;
 	}
 	if( !term_set_shell(handle, "/bin/bash") ) {
 		fprintf( stderr, "Failed to set shell (%s)\n", strerror( errno ) );
-		exit(1);
+		goto done;
 	}
 	if( !term_begin(handle, WIDTH, HEIGHT, 0) ) {
 		fprintf( stderr, "Failed to initialize terminal (%s)\n", strerror( errno ) );
-		exit(1);
+		goto done;
 	}
 
 	term_register_update(handle, update);
@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
 		}
 
 	}
+
+done:
 
 	term_free( handle );
 

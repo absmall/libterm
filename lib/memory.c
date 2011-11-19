@@ -83,6 +83,8 @@ bool term_allocate_grid(term_t_i *term)
 		memset(term->colours[i], 0, sizeof(uint32_t)*term->width);
 	}
 
+	term->allocated = true;
+
 	return true;
 }
 
@@ -132,6 +134,7 @@ void term_release_grid(term_t_i *term)
 {
 	int i;
 
+	if( !term->allocated ) return;
 	for( i = 0; i < term->history; i ++ ) {
 		free(term->grid[i]);
 		free(term->attribs[i]);
@@ -140,5 +143,7 @@ void term_release_grid(term_t_i *term)
 	free(term->colours);
 	free(term->attribs);
 	free(term->grid);
+
+	term->allocated = false;
 }
 
