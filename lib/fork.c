@@ -91,9 +91,10 @@ bool term_fork(term_t_i *term)
 		// And a terminator
 		args[ count++ ] = "-l";
 		args[ count ] = NULL;
-		status = execvp( args[ 0 ], args );
+		execvp( args[ 0 ], args );
+		status = errno;
 		write( pipefd[ 1 ], &status, 1 );
-		exit(status);
+		exit( status );
 	} else {
 		close( pipefd[ 1 ] );
 		term->child = pid;
@@ -102,7 +103,7 @@ bool term_fork(term_t_i *term)
 			if( read_byte == 1 ) {
 				waitpid( term->child, &status, 0 );
 				close( pipefd[ 0 ] );
-				errno = status;
+				errno = WEXITSTATUS( status );
 				return false;
 			} else {
 				if( errno == EINTR ) {
