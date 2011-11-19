@@ -56,6 +56,9 @@ bool term_fork(term_t_i *term)
 
 		// Allocate space for tokens
 		args = malloc( sizeof( char * ) * count );
+		if( args == NULL ) {
+			exit(1);
+		}
 
 		// Package the tokens
 		count = 0;

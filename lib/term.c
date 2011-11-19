@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -86,6 +87,7 @@ bool term_process_child(term_t handle)
 
 	length = read( term->fd, buf, 100 );
 	if( length == -1 ) {
+		errno = ECHILD;
 		return false;
 	}
 	term_process_output_data(term, buf, length);
@@ -106,6 +108,7 @@ bool term_create(term_t *t)
 	term_t_i *term = malloc(sizeof(term_t_i));
 
 	if( term == NULL ) {
+		errno = ENOMEM;
 		return false;
 	}
 
@@ -122,6 +125,10 @@ bool term_set_shell(term_t handle, char *shell)
 
 	term->shell = strdup( shell );
 
+	if( term->shell == NULL ) {
+		errno = ENOMEM;
+	}
+
 	return term->shell != NULL;
 }
 
@@ -135,6 +142,7 @@ bool term_begin(term_t handle, int width, int height, int scrollback)
 	term->crow = scrollback;
 
 	if( !term_allocate_grid(term) ) {
+		errno = ENOMEM;
 		return false;
 	}
 

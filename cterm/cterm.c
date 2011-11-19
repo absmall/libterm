@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <errno.h>
 #include <curses.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <libterm.h>
 #include <sys/select.h>
@@ -56,9 +59,18 @@ int main(int argc, char *argv[])
 	wnd = newwin(HEIGHT, WIDTH, 0, 0);
 	wclear( wnd );
 
-	term_create(&handle);
-	term_set_shell(handle, "/bin/bash");
-	term_begin(handle, WIDTH, HEIGHT, 0);
+	if( !term_create(&handle) ) {
+		fprintf( stderr, "Failed to create a terminal handle (%s)\n", strerror( errno ) );
+		exit(1);
+	}
+	if( !term_set_shell(handle, "/bin/bash") ) {
+		fprintf( stderr, "Failed to set shell (%s)\n", strerror( errno ) );
+		exit(1);
+	}
+	if( !term_begin(handle, WIDTH, HEIGHT, 0) ) {
+		fprintf( stderr, "Failed to initialize terminal (%s)\n", strerror( errno ) );
+		exit(1);
+	}
 
 	term_register_update(handle, update);
 	term_register_cursor(handle, cursor);
