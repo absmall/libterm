@@ -5,15 +5,13 @@ This package includes three components:
 
 Building for linux:
 -------------------
-1) In the libterm directory, run 'cmake .; make'. This will build libterm.so and cterm
-in the libterm/obj directory. 
+1) In the libterm directory, run 'cmake .; make'. This will build libterm.so and cterm.
 2) In the qterm directory, run 'qmake', then 'make'. This will build qterm in
 the libterm/qterm directory
 
 Building for playbook:
 ----------------------
-1) In the libterm/lib directory, run 'make'. This will build libterm.so in the
-libterm/lib/nto/arm/so.le.v7 directory
+1) In the libterm/lib directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=ntoarm.cmake .; make'. This will build libterm.so
 2) In the libterm/qterm directory, run the qmake application that comes as part
 of the Qt for playbook build as '/path/to/qt/qmake qtermbb.pro'.
 3) In the same directory, run 'make qtermbb.bar'. This will build qtermbb.bar in
