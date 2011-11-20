@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(libterm)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(libterm)
 
-add_subdirectory(lib)
-add_subdirectory(cterm)
+ADD_SUBDIRECTORY(lib)
+ADD_SUBDIRECTORY(cterm)

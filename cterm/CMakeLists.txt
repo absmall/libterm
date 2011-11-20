@@ -1,3 +1,4 @@
-include_directories(../include)
-add_executable(cterm cterm.c)
-target_link_libraries(cterm term curses)
+INCLUDE_DIRECTORIES(../include)
+ADD_EXECUTABLE(cterm cterm.c)
+TARGET_LINK_LIBRARIES(cterm term curses)
+INSTALL(TARGETS cterm RUNTIME DESTINATION bin)
