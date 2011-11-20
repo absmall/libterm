@@ -5,9 +5,7 @@ This package includes three components:
 
 Building for linux:
 -------------------
-1) In the libterm directory, run 'cmake .; make'. This will build libterm.so and cterm.
-2) In the qterm directory, run 'qmake', then 'make'. This will build qterm in
-the libterm/qterm directory
+1) In the libterm directory, run 'cmake .; make'. This will build libterm.so, cterm and qterm.
 
 Building for playbook:
 ----------------------
