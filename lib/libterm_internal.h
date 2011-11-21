@@ -19,6 +19,8 @@ typedef struct term_t_i {
 	int cattr;
 	// The colour with which to write
 	int ccolour;
+	// Flag to indicate that memory has been allocated for the grid
+	bool allocated;
 	// Grid of characters
 	uint32_t **grid;
 	// Grid of attributes

@@ -4,4 +4,3 @@
 -Support attributes (color, etc.)
 -Control default background and foreground color of qt terminal
 -Support cursor selection in QT
--Support history!=0

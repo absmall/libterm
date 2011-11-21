@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <libterm_internal.h>
@@ -9,12 +10,14 @@ bool term_allocate_grid(term_t_i *term)
 	term->grid = malloc(sizeof(uint32_t *)*term->history);
 	if( term->grid == NULL ) {
 		free(term);
+		errno = ENOMEM;
 		return false;
 	}
 	term->attribs = malloc(sizeof(uint32_t *)*term->history);
 	if( term->attribs == NULL ) {
 		free(term->grid);
 		free(term);
+		errno = ENOMEM;
 		return false;
 	}
 	term->colours = malloc(sizeof(uint32_t *)*term->history);
@@ -22,6 +25,7 @@ bool term_allocate_grid(term_t_i *term)
 		free(term->attribs);
 		free(term->grid);
 		free(term);
+		errno = ENOMEM;
 		return false;
 	}
 	for( i = 0; i < term->history; i ++ ) {
@@ -35,6 +39,7 @@ bool term_allocate_grid(term_t_i *term)
 			free(term->attribs);
 			free(term->grid);
 			free(term);
+			errno = ENOMEM;
 			return false;
 		}
 		term->attribs[i] = malloc(sizeof(uint32_t)*term->width);
@@ -50,6 +55,7 @@ bool term_allocate_grid(term_t_i *term)
 			free(term->attribs);
 			free(term->grid);
 			free(term);
+			errno = ENOMEM;
 			return false;
 		}
 		term->colours[i] = malloc(sizeof(uint32_t)*term->width);
@@ -67,6 +73,7 @@ bool term_allocate_grid(term_t_i *term)
 			free(term->attribs);
 			free(term->grid);
 			free(term);
+			errno = ENOMEM;
 			return false;
 		}
 		for( j = 0; j < term->width; j ++ ) {
@@ -75,6 +82,8 @@ bool term_allocate_grid(term_t_i *term)
 		memset(term->attribs[i], 0, sizeof(uint32_t)*term->width);
 		memset(term->colours[i], 0, sizeof(uint32_t)*term->width);
 	}
+
+	term->allocated = true;
 
 	return true;
 }
@@ -125,6 +134,7 @@ void term_release_grid(term_t_i *term)
 {
 	int i;
 
+	if( !term->allocated ) return;
 	for( i = 0; i < term->history; i ++ ) {
 		free(term->grid[i]);
 		free(term->attribs[i]);
@@ -133,5 +143,7 @@ void term_release_grid(term_t_i *term)
 	free(term->colours);
 	free(term->attribs);
 	free(term->grid);
+
+	term->allocated = false;
 }
 

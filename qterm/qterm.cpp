@@ -8,6 +8,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <sys/select.h>
+#include <errno.h>
 
 #define WIDTH	80
 #define HEIGHT	25
@@ -141,11 +142,11 @@ int main(int argc, char *argv[])
 {
 	term_t terminal;
 	if( !term_create( &terminal ) ) {
-		fprintf(stderr, "Failed to create terminal\n");
+		fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
 		exit(1);
 	}
 	if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
-		fprintf(stderr, "Failed to begin terminal\n");
+		fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );
 		exit(1);
 	}
 	{

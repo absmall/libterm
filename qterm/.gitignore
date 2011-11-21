@@ -2,3 +2,5 @@
 Makefile
 moc_qterm.cpp
 qterm
+qtermbb
+qtermbb.bar
