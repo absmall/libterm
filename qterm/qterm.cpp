@@ -11,7 +11,7 @@
 #include <errno.h>
 
 #define WIDTH	80
-#define HEIGHT	25
+#define HEIGHT	17
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
