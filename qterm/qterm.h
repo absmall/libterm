@@ -19,6 +19,7 @@ private:
     void init( );
     int char_width;
     int char_height;
+    int char_descent;
     int cursor_x;
     int cursor_y;
     int cursor_on;
