@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -99,6 +100,19 @@ void term_send_data(term_t handle, const char *string, int length)
 	term_t_i *term;
 
 	term = TO_S(handle);
+
+#if 0
+	{
+		int i;
+		for( i = 0; i < length; i ++ ) {
+			if( isgraph( string[ i ] ) ) {
+				printf( "Output character %d (%c)\n", string[ i ], string[ i ] );
+			} else {
+				printf( "Output character %d\n", string[ i ] );
+			}
+		}
+	}
+#endif
 
 	write(term->fd, string, length);
 }
