@@ -43,8 +43,8 @@ void QTerm::init()
 
 QTerm::~QTerm()
 {
-	term_free( terminal );
 	delete notifier;
+	term_free( terminal );
 }
 
 void QTerm::term_update(term_t handle, int x, int y, int width, int height)
@@ -132,6 +132,9 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_Backspace:
 			term_send_data( terminal, "\b", 1 );
 			break;
+        case Qt::Key_CapsLock:
+        case Qt::Key_Shift:
+            break;
 		default:
 			term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
 			break;

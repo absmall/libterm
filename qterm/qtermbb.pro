@@ -5,10 +5,11 @@ SOURCES += qterm.cpp
 HEADERS += qterm.h
 LIBS += -L../lib/ -lterm
 INCLUDEPATH=../include
+#-devMode -debugToken debugToken.bar
 package.target = $${TARGET}.bar
 package.depends = $${TARGET}
 package.commands = blackberry-nativepackager \
-	-devMode -debugToken debugToken.bar \
+    -devMode \
     -package $${TARGET}.bar -arg -platform -arg blackberry \
     blackberry-tablet.xml $${TARGET} \
     -e icon.png res/icon.png \
