@@ -129,6 +129,9 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_Return:
 			term_send_data( terminal, "\n", 1 );
 			break;
+		case Qt::Key_Backspace:
+			term_send_data( terminal, "\b", 1 );
+			break;
 		default:
 			term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
 			break;
