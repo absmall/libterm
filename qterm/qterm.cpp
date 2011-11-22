@@ -9,6 +9,9 @@
 #include <QTimer>
 #include <sys/select.h>
 #include <errno.h>
+#ifdef __QNX__
+#include <bbsupport/Keyboard>
+#endif
 
 #define WIDTH    80
 #define HEIGHT    17
@@ -39,6 +42,9 @@ void QTerm::init()
     term_register_cursor( terminal, term_update_cursor );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
+#ifdef __QNX__
+    BlackBerry::Keyboard::instance().show();
+#endif
 }
 
 QTerm::~QTerm()
