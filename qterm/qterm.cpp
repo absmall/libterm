@@ -88,8 +88,10 @@ void QTerm::terminal_data()
 
 void QTerm::paintEvent(QPaintEvent *event)
 {
-    int i, j;
+    int i, j, color;
     const uint32_t **grid;
+    const uint32_t **attribs;
+    const uint32_t **colors;
     QPainter painter(this);
     QFont font;
 
@@ -98,7 +100,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     font.setFixedPitch(true);
     font.setKerning(false);
     painter.setBackgroundMode(Qt::TransparentMode);
-    painter.setBrush(QColor(0, 0, 0));
+    painter.setBrush(QColor(8, 0, 0));
     painter.setFont(font);
 
     // First erase the grid with its current dimensions
@@ -116,6 +118,8 @@ void QTerm::paintEvent(QPaintEvent *event)
     painter.setPen(QColor(255, 255, 255));
     painter.setBrush(QColor(255, 255, 255));
     grid = term_get_grid( terminal );
+    attribs = term_get_attribs( terminal );
+    colors = term_get_colours( terminal );
     for( i = 0; i < HEIGHT; i ++ ) {
         for( j = 0; j < WIDTH; j ++ ) {
             if( cursor_on && j == cursor_x && i == cursor_y ) {
@@ -124,6 +128,8 @@ void QTerm::paintEvent(QPaintEvent *event)
                 painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
                 painter.setPen(QColor(255, 255, 255));
             } else {
+                color = term_get_fg_color( attribs[ i ][ j ], colors[ i ][ j ] );
+                painter.setPen(QColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF));
                 painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
             }
         }

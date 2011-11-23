@@ -59,6 +59,90 @@ const uint32_t **term_get_colours(term_t handle)
     return (const uint32_t **)term->colours + term->row;
 }
 
+static int term_get_color(uint32_t attrib, uint32_t colour, uint32_t *color)
+{
+    if( attrib & TERM_ATTRIB_BOLD ) {
+        switch( colour ) {
+            case TERM_COLOR_BLACK:
+                *color = 0x002F4F4F;
+                break;
+            case TERM_COLOR_RED:
+                *color = 0x00FF9999;
+                break;
+            case TERM_COLOR_GREEN:
+                *color = 0x00B3FF99;
+                break;
+            case TERM_COLOR_YELLOW:
+                *color = 0x00FFF599;
+                break;
+            case TERM_COLOR_BLUE:
+                *color = 0x0099D1FF;
+                break;
+            case TERM_COLOR_MAGENTA:
+                *color = 0x00B899FF;
+                break;
+            case TERM_COLOR_CYAN:
+                *color = 0x0099FFD6;
+                break;
+            case TERM_COLOR_WHITE:
+                *color = 0x00FF99F0;
+                break;
+            default:
+                return EINVAL;
+        }
+    } else {
+        switch( colour ) {
+            case TERM_COLOR_BLACK:
+                *color = 0x00000000;
+                break;
+            case TERM_COLOR_RED:
+                *color = 0x00FF3333;
+                break;
+            case TERM_COLOR_GREEN:
+                *color = 0x0066FF33;
+                break;
+            case TERM_COLOR_YELLOW:
+                *color = 0x00FFEB33;
+                break;
+            case TERM_COLOR_BLUE:
+                *color = 0x0033A3FF;
+                break;
+            case TERM_COLOR_MAGENTA:
+                *color = 0x007033FF;
+                break;
+            case TERM_COLOR_CYAN:
+                *color = 0x0033FFAD;
+                break;
+            case TERM_COLOR_WHITE:
+                *color = 0x00FFF8DC;
+                break;
+            default:
+                return EINVAL;
+        }    }
+
+    return 0;
+}
+
+uint32_t term_get_fg_color(uint32_t attrib, uint32_t colour)
+{
+    uint32_t out;
+    if( !term_get_color(attrib, (colour >> TERM_FG_SHIFT) & TERM_FG_MASK, &out) ) {
+        return out;
+    } else {
+        return 0x00FFFFFF;
+    }
+}
+
+uint32_t term_get_bg_color(uint32_t attrib, uint32_t colour)
+{
+    uint32_t out;
+    if( !term_get_color(attrib, (colour >> TERM_BG_SHIFT) & TERM_BG_MASK, &out) ) {
+        return out;
+    } else {
+        return 0x00000000;
+    }
+}
+
 void term_scroll( term_t handle, int row )
 {
     term_t_i *term;
