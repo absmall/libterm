@@ -1,6 +1,6 @@
 -Support escape codes
 -Support resize
 -Change font in qt terminal
--Support attributes (color, etc.)
+-Support attributes (blink, reverse, underline)
 -Control default background and foreground color of qt terminal
 -Support cursor selection in QT
