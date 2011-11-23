@@ -18,6 +18,21 @@ typedef enum {
 #define TERM_ATTRIB_REVERSE     (1<<3)
 #define TERM_ATTRIB_CONCEALED   (1<<4)
 
+#define TERM_COLOR_BLACK        0
+#define TERM_COLOR_RED          1
+#define TERM_COLOR_GREEN        2
+#define TERM_COLOR_YELLOW       3
+#define TERM_COLOR_BLUE         4
+#define TERM_COLOR_MAGENTA      5
+#define TERM_COLOR_CYAN         6
+#define TERM_COLOR_WHITE        7
+
+#define TERM_FG_SHIFT           0
+#define TERM_FG_MASK            0xFF
+#define TERM_BG_SHIFT           8
+#define TERM_BG_MASK            0xFF00
+
+
 // Create a terminal object with the specified dimensions. Scrollback
 // indicates the number of lines to be preserved after they have scrolled
 // off the display

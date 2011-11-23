@@ -47,7 +47,16 @@ const uint32_t **term_get_attribs(term_t handle)
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->attribs;
+    return (const uint32_t **)term->attribs + term->row;
+}
+
+const uint32_t **term_get_colours(term_t handle)
+{
+    term_t_i *term;
+
+    term = TO_S(handle);
+
+    return (const uint32_t **)term->colours + term->row;
 }
 
 void term_scroll( term_t handle, int row )
@@ -67,15 +76,6 @@ void term_scroll( term_t handle, int row )
     }
 
     term->row = row;
-}
-
-const uint32_t **term_get_colours(term_t handle)
-{
-    term_t_i *term;
-
-    term = TO_S(handle);
-
-    return (const uint32_t **)term->colours;
 }
 
 bool term_process_child(term_t handle)

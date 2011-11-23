@@ -75,51 +75,83 @@ void escape_sgm(term_t_i *term)
                 break;
             case 30:
                 // Black
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_BLACK << TERM_FG_SHIFT;
                 break;
             case 31:
                 // Red
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_RED << TERM_FG_SHIFT;
                 break;
             case 32:
                 // Green
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_GREEN << TERM_FG_SHIFT;
                 break;
             case 33:
                 // Yellow
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_YELLOW << TERM_FG_SHIFT;
                 break;
             case 34:
                 // Blue
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_BLUE << TERM_FG_SHIFT;
                 break;
             case 35:
                 // Magenta
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_MAGENTA << TERM_FG_SHIFT;
                 break;
             case 36:
                 // Cyan
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_CYAN << TERM_FG_SHIFT;
                 break;
             case 37:
                 // White
+                term->ccolour &= ~TERM_FG_MASK;
+                term->ccolour |= TERM_COLOR_WHITE << TERM_FG_SHIFT;
                 break;
             case 40:
                 // Black
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_BLACK << TERM_BG_SHIFT;
                 break;
             case 41:
                 // Red
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_RED << TERM_BG_SHIFT;
                 break;
             case 42:
                 // Green
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_GREEN << TERM_BG_SHIFT;
                 break;
             case 43:
                 // Yellow
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_YELLOW << TERM_BG_SHIFT;
                 break;
             case 44:
                 // Blue
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_BLUE << TERM_BG_SHIFT;
                 break;
             case 45:
                 // Magenta
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_MAGENTA << TERM_BG_SHIFT;
                 break;
             case 46:
                 // Cyan
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_CYAN << TERM_BG_SHIFT;
                 break;
             case 47:
                 // White
+                term->ccolour &= ~TERM_BG_MASK;
+                term->ccolour |= TERM_COLOR_WHITE << TERM_BG_SHIFT;
                 break;
         }
         if( (*nptr) == 'm' ) break;
