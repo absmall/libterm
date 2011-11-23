@@ -89,6 +89,8 @@ void QTerm::terminal_data()
 void QTerm::paintEvent(QPaintEvent *event)
 {
     int i, j, color;
+    int new_width;
+    int new_height;
     const uint32_t **grid;
     const uint32_t **attribs;
     const uint32_t **colors;
@@ -106,10 +108,18 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
     
-    if( char_width != painter.fontMetrics().maxWidth()
-     || char_height != painter.fontMetrics().lineSpacing() ) {
-        char_width = painter.fontMetrics().maxWidth();
-        char_height = painter.fontMetrics().lineSpacing();
+    new_width = painter.fontMetrics().maxWidth();
+    // Workaround for a bug in OSX - Dave reports that maxWidth returns 0,
+    // when width of different characters returns the correct value
+    if( new_width == 0 ) {
+        new_width = painter.fontMetrics().width(QChar('X'));
+    }
+    new_height = painter.fontMetrics().lineSpacing();
+    
+    if( char_width != new_width
+     || char_height != new_height ) {
+        char_width = new_width;
+        char_height = new_height;
         char_descent = painter.fontMetrics().descent();
         update( contentsRect() );
         return;
