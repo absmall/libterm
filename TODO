@@ -1,6 +1,9 @@
 -Support escape codes
 -Support resize
 -Change font in qt terminal
--Support attributes (color, etc.)
+-Support attributes (blink, reverse, underline)
 -Control default background and foreground color of qt terminal
 -Support cursor selection in QT
+-Find out why 'exit' doesn't work on playbook
+-Find out why terminal crashes somewhere in the Qt library when you swipe it up to close
+-Scrollbar for qterm

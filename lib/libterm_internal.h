@@ -15,6 +15,9 @@ typedef struct term_t_i {
     int crow;
     // Cursor column
     int ccol;
+    // Saved cursor position
+    int csavedrow;
+    int csavedcol;
     // The attributes with which to write
     int cattr;
     // The colour with which to write

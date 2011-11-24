@@ -5,7 +5,116 @@
 #include <string.h>
 #include <libterm_internal.h>
 
-void escape_EL0(term_t_i *term)
+static int escape_compare( char *code, char *data, int datalen, int *retlen )
+{
+    typedef enum {
+        CHAR,
+        STARTNUMBER,
+        NUMBER
+    } Mode;
+    Mode m = CHAR;
+    int i, j, codelen;
+
+    codelen = strlen(code);
+    for( i = 0, j = 0; i < codelen && j < datalen; ) {
+        if( m == CHAR ) {
+            if( code[ i ] == '%' ) {
+                i ++;
+                if( code[ i ] == 'd' ) {
+                    m = STARTNUMBER;
+                }
+                i ++;
+            } else if( code[ i ] == data[ j ] ) {
+                i ++;
+                j ++;
+            } else {
+                return 0;
+            }
+        } else if( m == STARTNUMBER ) {
+            if( isdigit( data[ j ] ) ) {
+                j ++;
+                m = NUMBER;
+            } else {
+                return 0;
+            }
+        } else if( m == NUMBER ) {
+            if( isdigit( data[ j ] ) ) {
+                j ++;
+            } else {
+                m = CHAR;
+            }
+        }
+    }
+
+    if( i == codelen ) {
+        *retlen = j;
+        return 2;
+    } else {
+        return 1;
+    }
+}
+
+void escape_cup(term_t_i *term)
+{
+    char *n;
+
+    term->crow = strtoul( term->escape_code + 2, &n, 10 );
+    term->ccol = strtoul( n + 1, NULL, 10 );
+}
+
+void escape_cuu(term_t_i *term)
+{
+    int up = atoi( term->escape_code + 2 );
+    if( term->crow < up ) {
+        term->crow = 0;
+    }  else {
+        term->crow -= up;
+    }
+}
+
+void escape_cud(term_t_i *term)
+{
+    int down = atoi( term->escape_code + 2 );
+    if( term->crow + down >= term->history ) {
+        term->crow = term->history - 1;
+    }  else {
+        term->crow += down;
+    }
+}
+
+void escape_cuf(term_t_i *term)
+{
+    int right = atoi( term->escape_code + 2 );
+    if( term->ccol + right >= term->width ) {
+        term->ccol = term->width - 1;
+    }  else {
+        term->ccol += right;
+    }
+}
+
+void escape_cub(term_t_i *term)
+{
+    int left = atoi( term->escape_code + 2 );
+    if( term->ccol < left ) {
+        term->ccol = 0;
+    }  else {
+        term->ccol -= left;
+    }
+}
+
+void escape_SCP(term_t_i *term)
+{
+    term->csavedrow = term->crow;
+    term->csavedcol = term->ccol;
+}
+
+void escape_RCP(term_t_i *term)
+{
+    term->crow = term->csavedrow;
+    term->ccol = term->csavedcol;
+}
+
+void escape_el(term_t_i *term)
 {
     int i;
     for( i = term->ccol; i < term->width; i ++ ) {
@@ -13,10 +122,41 @@ void escape_EL0(term_t_i *term)
     }
 }
 
-void escape_SGR0(term_t_i *term)
+void escape_clear(term_t_i *term)
+{
+    int i, j;
+    for( i = 0; i < term->height; i ++ ) {
+        for( j = 0; j < term->width; j ++ ) {
+            term->grid[ i ][ j ] = ' ';
+            term->attribs[ i ][ j ] = 0;
+        }
+    }
+    term->ccol = 0;
+    term->crow = 0;
+}
+
+void escape_sgr0(term_t_i *term)
 {
     term->cattr = 0;
     term->ccolour = 0;
+}
+
+// Begin keypad transmit mode.
+void escape_smkx(term_t_i *term)
+{
+    // FIXME
+}
+
+// Change scrolling region
+void escape_csr(term_t_i *term)
+{
+    // FIXME
+}
+
+// Home cursor
+void escape_home(term_t_i *term)
+{
+    // FIXME
 }
 
 int match_sgm(term_t_i *term, int *length)
@@ -164,12 +304,18 @@ struct static_escape_code {
     char *code;
     void (*apply_escape_code)(term_t_i *term);
 } static_escape_codes [] = {
-    { "\x1b[K", escape_EL0 },
-    { "\x1b[0m", escape_SGR0 }
-#if 0
-    { "\x1b[0d", "???" },
-    { "\x1b[01;d", "???" 
-#endif
+    { "\x1b[%d;%dH", escape_cup },
+    { "\x1b[%d;%df", escape_cup },
+    { "\x1b[%dA", escape_cuu },
+    { "\x1b[%dB", escape_cud },
+    { "\x1b[%dC", escape_cuf },
+    { "\x1b[%dD", escape_cub },
+    { "\x1b[2J", escape_clear },
+    { "\x1b[K", escape_el },
+    { "\x1b[0m", escape_sgr0 },
+    { "\x1b[?1h\x1b", escape_smkx },
+    { "\x1b[%d;%dr", escape_csr },
+    { "\x1b[H", escape_home },
 };
 
 struct dynamic_escape_code {
@@ -200,16 +346,15 @@ int term_send_escape(term_t_i *term, char *buf, int length)
     
     // See if this is a prefix, or is equal to any static escape_code
     for( i = 0; i < sizeof(static_escape_codes)/sizeof(struct static_escape_code); i ++ ) {
-        int codelen = strlen( static_escape_codes[ i ].code );
-        if( term->escape_bytes < codelen ) {
-            if( strncmp(static_escape_codes[ i ].code, term->escape_code, term->escape_bytes ) == 0 ) {
-                isprefix = true;
-            }
-        } else if( strncmp(static_escape_codes[ i ].code, term->escape_code, codelen ) == 0 ) {
+        int codelen;
+        int ret = escape_compare( static_escape_codes[ i ].code, term->escape_code, term->escape_bytes, &codelen );
+        if( ret == 2 ) {
             static_escape_codes[ i ].apply_escape_code( term );
             term->escape_bytes = 0;
             term->escape_mode = 0;
             return codelen - previous_length;
+        } else if( ret == 1 ) {
+            isprefix = true;
         }
     }
 
@@ -236,7 +381,11 @@ int term_send_escape(term_t_i *term, char *buf, int length)
         // process this again, and discard whatever we have accumulated
         printf( "Unknown escape code:" );
         for(i = 0; i < term->escape_bytes; i ++ ) {
-            printf( " %d", term->escape_code[ i ] );
+            if( isprint(term->escape_code[ i ] ) ) {
+                printf( " %c", term->escape_code[ i ] );
+            } else {
+                printf( " 0x%02X", term->escape_code[ i ] );
+            }
         }
         printf( "\n" );
         term->escape_bytes = 0;
