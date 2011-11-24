@@ -54,14 +54,18 @@ static int escape_compare( char *code, char *data, int datalen, int *retlen )
     }
 }
 
+// Move to row #1 col #2
 void escape_cup(term_t_i *term)
 {
     char *n;
 
-    term->crow = strtoul( term->escape_code + 2, &n, 10 );
-    term->ccol = strtoul( n + 1, NULL, 10 );
+    term->crow = strtoul( term->escape_code + 2, &n, 10 ) - 1;
+    if( term->crow >= term->height ) term->crow = term->height - 1;
+    term->ccol = strtoul( n + 1, NULL, 10 ) - 1;
+    if( term->ccol >= term->width ) term->crow = term->width - 1;
 }
 
+// Move cursor up #1 lines
 void escape_cuu(term_t_i *term)
 {
     int up = atoi( term->escape_code + 2 );
@@ -72,6 +76,7 @@ void escape_cuu(term_t_i *term)
     }
 }
 
+// Move down #1 lines
 void escape_cud(term_t_i *term)
 {
     int down = atoi( term->escape_code + 2 );
@@ -82,6 +87,7 @@ void escape_cud(term_t_i *term)
     }
 }
 
+// Move right #1 spaces
 void escape_cuf(term_t_i *term)
 {
     int right = atoi( term->escape_code + 2 );
@@ -92,6 +98,7 @@ void escape_cuf(term_t_i *term)
     }
 }
 
+// Move cursor left #1 spaces
 void escape_cub(term_t_i *term)
 {
     int left = atoi( term->escape_code + 2 );
@@ -102,18 +109,21 @@ void escape_cub(term_t_i *term)
     }
 }
 
-void escape_SCP(term_t_i *term)
+// Save cursor position
+void escape_sc(term_t_i *term)
 {
     term->csavedrow = term->crow;
     term->csavedcol = term->ccol;
 }
 
-void escape_RCP(term_t_i *term)
+// Restore cursor to position of last sc
+void escape_rc(term_t_i *term)
 {
     term->crow = term->csavedrow;
     term->ccol = term->csavedcol;
 }
 
+// Clear to end of line
 void escape_el(term_t_i *term)
 {
     int i;
@@ -122,6 +132,7 @@ void escape_el(term_t_i *term)
     }
 }
 
+// Clear screen and home cursor
 void escape_clear(term_t_i *term)
 {
     int i, j;
@@ -131,10 +142,11 @@ void escape_clear(term_t_i *term)
             term->attribs[ i ][ j ] = 0;
         }
     }
+    term->crow = term->history - term->height;
     term->ccol = 0;
-    term->crow = 0;
 }
 
+// Turn off all attributes
 void escape_sgr0(term_t_i *term)
 {
     term->cattr = 0;
@@ -156,7 +168,8 @@ void escape_csr(term_t_i *term)
 // Home cursor
 void escape_home(term_t_i *term)
 {
-    // FIXME
+    term->crow = term->history - term->height;
+    term->ccol = 0;
 }
 
 // End underscore mode
@@ -168,7 +181,13 @@ void escape_rmul(term_t_i *term)
 // Clear to end of display
 void escape_ed(term_t_i *term)
 {
-    // FIXME
+    int i, j;
+    for( i = term->crow; i < term->height; i ++ ) {
+        for( j = term->ccol; j < term->width; j ++ ) {
+            term->grid[ i ][ j ] = ' ';
+            term->attribs[ i ][ j ] = 0;
+        }
+    }
 }
 
 // Out of "keypad-transmit" mode
