@@ -18,14 +18,14 @@ typedef enum {
 #define TERM_ATTRIB_REVERSE     (1<<3)
 #define TERM_ATTRIB_CONCEALED   (1<<4)
 
-#define TERM_COLOR_BLACK        0
-#define TERM_COLOR_RED          1
-#define TERM_COLOR_GREEN        2
-#define TERM_COLOR_YELLOW       3
-#define TERM_COLOR_BLUE         4
-#define TERM_COLOR_MAGENTA      5
-#define TERM_COLOR_CYAN         6
-#define TERM_COLOR_WHITE        7
+#define TERM_COLOR_BLACK        1
+#define TERM_COLOR_RED          2
+#define TERM_COLOR_GREEN        3
+#define TERM_COLOR_YELLOW       4
+#define TERM_COLOR_BLUE         5
+#define TERM_COLOR_MAGENTA      6
+#define TERM_COLOR_CYAN         7
+#define TERM_COLOR_WHITE        8
 
 #define TERM_FG_SHIFT           0
 #define TERM_FG_MASK            0xFF
@@ -68,6 +68,10 @@ int term_get_file_descriptor(term_t handle);
 const uint32_t **term_get_grid(term_t handle);
 const uint32_t **term_get_attribs(term_t handle);
 const uint32_t **term_get_colours(term_t handle);
+
+// Convert an attribute and colour pair into RGB888
+uint32_t term_get_fg_color(uint32_t attrib, uint32_t colour);
+uint32_t term_get_bg_color(uint32_t attrib, uint32_t colour);
 
 // This function should be called to process data from the child process
 bool term_process_child(term_t handle);

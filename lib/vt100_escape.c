@@ -138,6 +138,7 @@ void escape_clear(term_t_i *term)
 void escape_sgr0(term_t_i *term)
 {
     term->cattr = 0;
+    term->ccolour = 0;
 }
 
 int match_sgm(term_t_i *term, int *length)
