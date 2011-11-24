@@ -159,6 +159,24 @@ void escape_home(term_t_i *term)
     // FIXME
 }
 
+// End underscore mode
+void escape_rmul(term_t_i *term)
+{
+    term->cattr &= ~TERM_ATTRIB_UNDERSCORE;
+}
+
+// Clear to end of display
+void escape_ed(term_t_i *term)
+{
+    // FIXME
+}
+
+// Out of "keypad-transmit" mode
+void escape_rmkx(term_t_i *term)
+{
+    // FIXME
+}
+
 int match_sgm(term_t_i *term, int *length)
 {
     int i;
@@ -316,6 +334,9 @@ struct static_escape_code {
     { "\x1b[?1h\x1b", escape_smkx },
     { "\x1b[%d;%dr", escape_csr },
     { "\x1b[H", escape_home },
+    { "\x1b[m", escape_rmul },
+    { "\x1b[J", escape_ed },
+    { "\x1b[?1l\x1b>", escape_rmkx },
 };
 
 struct dynamic_escape_code {
