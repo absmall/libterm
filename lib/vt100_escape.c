@@ -141,6 +141,24 @@ void escape_sgr0(term_t_i *term)
     term->ccolour = 0;
 }
 
+// Begin keypad transmit mode.
+void escape_smkx(term_t_i *term)
+{
+    // FIXME
+}
+
+// Change scrolling region
+void escape_csr(term_t_i *term)
+{
+    // FIXME
+}
+
+// Home cursor
+void escape_home(term_t_i *term)
+{
+    // FIXME
+}
+
 int match_sgm(term_t_i *term, int *length)
 {
     int i;
@@ -295,6 +313,9 @@ struct static_escape_code {
     { "\x1b[2J", escape_clear },
     { "\x1b[K", escape_el },
     { "\x1b[0m", escape_sgr0 },
+    { "\x1b[?1h\x1b", escape_smkx },
+    { "\x1b[%d;%dr", escape_csr },
+    { "\x1b[H", escape_home },
 };
 
 struct dynamic_escape_code {
