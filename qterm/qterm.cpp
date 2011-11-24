@@ -41,7 +41,9 @@ void QTerm::init()
     term_register_update( terminal, term_update );
     term_register_cursor( terminal, term_update_cursor );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
+    exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
+    QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
 #ifdef __QNX__
     BlackBerry::Keyboard::instance().show();
 #endif
@@ -50,6 +52,7 @@ void QTerm::init()
 QTerm::~QTerm()
 {
     delete notifier;
+    delete exit_notifier;
     term_free( terminal );
 }
 
@@ -84,6 +87,11 @@ void QTerm::terminal_data()
     if( !term_process_child( terminal ) ) {
         exit(0);
     }
+}
+
+void QTerm::terminate()
+{
+    exit(0);
 }
 
 void QTerm::paintEvent(QPaintEvent *event)
