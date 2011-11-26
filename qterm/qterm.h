@@ -3,6 +3,7 @@
 #include <libterm.h>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <qpiekey.h>
 
 class QTerm : public QWidget
 {
@@ -30,7 +31,7 @@ private:
     static void term_update(term_t handle, int x, int y, int width, int height);
     static void term_update_cursor(term_t handle, int x, int y);
     QSocketNotifier *notifier;
-    QPushButton *button;
+    QPieKey *piekey;
 
 private slots:
     void terminal_data();
