@@ -63,6 +63,7 @@ void QTerm::init()
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
+    QObject::connect(piekey, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
 #ifdef BPS_VERSION
     virtualkeyboard_show();
@@ -117,6 +118,11 @@ void QTerm::term_update_cursor(term_t handle, int x, int y)
     term->update( term->cursor_x * term->char_width,
                   term->cursor_y * term->char_height,
                   term->char_width, term->char_height );
+}
+
+void QTerm::piekeypress(char key)
+{
+    term_send_data( terminal, &key, 1 );
 }
 
 void QTerm::terminal_data()
@@ -239,6 +245,7 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
+    piekey->select("agmsy4");
     piekey->activate(event->x(), event->y());
 }
 

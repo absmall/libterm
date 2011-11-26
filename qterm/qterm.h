@@ -39,4 +39,5 @@ private slots:
     void terminal_data();
     void terminate();
     void blink_cursor();
+    void piekeypress(char key);
 };

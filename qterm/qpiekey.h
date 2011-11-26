@@ -1,5 +1,6 @@
 #include <QWidget>
 #include <QBitmap>
+#include <string>
 
 class QPieKey : public QWidget
 {
@@ -10,11 +11,15 @@ public:
 
     void initialize(int sections, const char *charlist);
     void activate(int x, int y);
+    void select(const char *selection);
  
 protected:
     void paintEvent(QPaintEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+
+signals:
+    void keypress(char key);
 
 private:
     void size_ring();
@@ -22,6 +27,8 @@ private:
     int sections;
     int highlighted_section;
     char *charlist;
+    char *highlighted_chars;
     QBitmap *bitmap;
+    std::string selection;
     int size;
 };
