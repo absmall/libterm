@@ -48,6 +48,7 @@ void QTerm::init()
     cursor_y = -1;
     cursor_on = 1;
     piekey = new QPieKey(this);
+    piekey->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
 
 #ifdef __QNX__
     resize(1024, 600);
@@ -239,13 +240,8 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
-    // Center the widget on the mouse coordinates
-    int width, height;
 
-    width = piekey->width();
-    height = piekey->height();
-    piekey->setGeometry(event->x() - width / 2, event->y() - height / 2, width, height);
-    piekey->show();
+    piekey->activate(event->x(), event->y());
 }
 
 void QTerm::mouseReleaseEvent(QMouseEvent *event)
