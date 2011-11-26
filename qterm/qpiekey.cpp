@@ -3,15 +3,22 @@
 #include <QPainter>
 #include <QPaintEvent>
 
+#define SIZE 60
+
 QPieKey::QPieKey(QWidget *parent) : QWidget(parent)
 {
-    bitmap = new QBitmap(40,40);
+    bitmap = new QBitmap(SIZE*2,SIZE*2);
     QPainter painter(bitmap);
 
+    setFixedSize(SIZE*2, SIZE*2);
+
     bitmap->clear();
-    painter.drawEllipse(0, 0, 40, 40);
-    setFixedSize(40, 40);
+    painter.setBrush(Qt::color1);
+    painter.drawEllipse(1, 1, SIZE*2-2, SIZE*2-2);
+    painter.setBrush(Qt::color0);
+    painter.drawEllipse(SIZE/2, SIZE/2, SIZE, SIZE);
     setMask(*bitmap);
+    hide();
 }
 
 QPieKey::~QPieKey()
