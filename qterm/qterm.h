@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <qpiekey.h>
 
 class QTerm : public QWidget
 {
@@ -36,6 +37,7 @@ private:
     QSocketNotifier *exit_notifier;
     QTimer *cursor_timer;
     QPushButton *button;
+    QPieKey *piekey;
 
 private slots:
     void terminal_data();

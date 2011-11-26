@@ -47,7 +47,7 @@ void QTerm::init()
     cursor_x = -1;
     cursor_y = -1;
     cursor_on = 1;
-    button = new QPushButton(this);
+    piekey = new QPieKey(this);
 
 #ifdef __QNX__
     resize(1024, 600);
@@ -77,6 +77,7 @@ QTerm::~QTerm()
     delete notifier;
     delete exit_notifier;
     delete button;
+    delete piekey;
     term_free( terminal );
 }
 
@@ -241,16 +242,16 @@ void QTerm::mousePressEvent(QMouseEvent *event)
     // Center the widget on the mouse coordinates
     int width, height;
 
-    width = button->width();
-    height = button->height();
-    button->setGeometry(event->x() - width / 2, event->y() - height / 2, width, height);
-    button->show();
+    width = piekey->width();
+    height = piekey->height();
+    piekey->setGeometry(event->x() - width / 2, event->y() - height / 2, width, height);
+    piekey->show();
 }
 
 void QTerm::mouseReleaseEvent(QMouseEvent *event)
 {
     // Center the widget on the mouse coordinates
-    button->hide();
+    piekey->hide();
 }
  
 void QTerm::resizeEvent(QResizeEvent *event)

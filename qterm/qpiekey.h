@@ -1,4 +1,5 @@
 #include <QWidget>
+#include <QBitmap>
 
 class QPieKey : public QWidget
 {
@@ -9,4 +10,6 @@ public:
  
 protected:
     void paintEvent(QPaintEvent *event);
+private:
+    QBitmap *bitmap;
 };
