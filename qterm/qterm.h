@@ -2,6 +2,7 @@
 #include <QSocketNotifier>
 #include <libterm.h>
 #include <QVBoxLayout>
+#include <QPushButton>
 
 class QTerm : public QWidget
 {
@@ -14,6 +15,8 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
  
 private:
     void init( );
@@ -27,6 +30,7 @@ private:
     static void term_update(term_t handle, int x, int y, int width, int height);
     static void term_update_cursor(term_t handle, int x, int y);
     QSocketNotifier *notifier;
+    QPushButton *button;
 
 private slots:
     void terminal_data();
