@@ -44,6 +44,7 @@ void QTerm::init()
     term_register_cursor( terminal, term_update_cursor );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
+    QObject::connect(piekey, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
     BlackBerry::Keyboard::instance().show();
 #endif
@@ -80,6 +81,11 @@ void QTerm::term_update_cursor(term_t handle, int x, int y)
     term->update( term->cursor_x * term->char_width,
                   term->cursor_y * term->char_height,
                   term->char_width, term->char_height );
+}
+
+void QTerm::piekeypress(char key)
+{
+    term_send_data( terminal, &key, 1 );
 }
 
 void QTerm::terminal_data()
@@ -159,6 +165,7 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
+    piekey->select("agmsy4");
     piekey->activate(event->x(), event->y());
 }
 

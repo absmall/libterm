@@ -9,6 +9,7 @@ QPieKey::QPieKey(QWidget *parent) : QWidget(parent)
 {
     sections = 0;
     size = 0;
+    charlist = NULL;
 
     hide();
 }
@@ -19,6 +20,7 @@ QPieKey::~QPieKey()
 
 void QPieKey::paintEvent(QPaintEvent *event)
 {
+    int inSelection = 0, selectedChar;
     int i, j;
     double charangle;
     QPainter painter(this);
@@ -28,7 +30,7 @@ void QPieKey::paintEvent(QPaintEvent *event)
     painter.drawRect(event->rect());
 
     if( sections ) {
-        painter.setBrush(QColor(150, 150, 150));
+        painter.setBrush(QColor(180, 180, 180));
         if( highlighted_section != -1 ) {
             painter.drawPie(0, 0, size*2, size*2, (90-(angle*(highlighted_section+0.5))*180/M_PI)*16, angle*180/M_PI*16);
         }
@@ -41,6 +43,22 @@ void QPieKey::paintEvent(QPaintEvent *event)
                 // on each side to separate a section from its neighbour
                 character = QChar(charlist[i*sections+j]);
                 charangle = angle*((j+1.0)/(sections+1.0)+i-0.5);
+                selectedChar = (highlighted_section == -1 || highlighted_section == i)
+                    && (strchr( selection.c_str(), character.toLatin1() ) != NULL);
+                if( selectedChar != inSelection ) {
+                    QFont font;
+                    inSelection = selectedChar;
+                    font.setBold(inSelection);
+                    if( inSelection ) {
+                        if( font.pixelSize() != -1 ) {
+                            font.setPixelSize(font.pixelSize() + 3);
+                        }
+                        if( font.pointSize() != -1 ) {
+                            font.setPointSize(font.pointSize() + 3);
+                        }
+                    }
+                    painter.setFont(font);
+                }
 
                 painter.drawText(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, character);
             }
@@ -69,6 +87,15 @@ void QPieKey::mouseMoveEvent(QMouseEvent *event)
     }
 
     if( section != highlighted_section ) {
+        if( section == -1 ) {
+            // We're losing our selection, send the signal now
+            for(int i = 0; i < sections; i ++ ) {
+                size_t s;
+                if( (s = selection.find( charlist[highlighted_section*sections+i] )) != -1 ) {
+                    emit(keypress(selection[s]));
+                }
+            }
+        }
         highlighted_section = section;
         update(0,0, size*2, size*2);
     }
@@ -83,6 +110,10 @@ void QPieKey::mouseReleaseEvent(QMouseEvent *event)
 
 void QPieKey::initialize(int sections, const char *charlist)
 {
+    if( this->charlist != NULL ) {
+        delete [] this->charlist;
+    }
+
     this->sections = sections;
     this->charlist = new char[sections*sections];
     memcpy(this->charlist, charlist, sections*sections);
@@ -98,6 +129,12 @@ void QPieKey::activate(int x, int y)
     setGeometry(x - width() / 2, y - height() / 2, width(), height());
     show();
     grabMouse();
+}
+
+void QPieKey::select(const char *selection)
+{
+    this->selection = selection;
+    update(0,0, size*2, size*2);
 }
 
 void QPieKey::size_ring()

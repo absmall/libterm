@@ -34,4 +34,5 @@ private:
 
 private slots:
     void terminal_data();
+    void piekeypress(char key);
 };
