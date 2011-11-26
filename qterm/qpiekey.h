@@ -8,11 +8,12 @@ public:
     QPieKey(QWidget *parent = 0);
     ~QPieKey( );
 
-    void initialize(int sections, char *charlist);
+    void initialize(int sections, const char *charlist);
     void activate(int x, int y);
  
 protected:
     void paintEvent(QPaintEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
 private:
     void size_ring();

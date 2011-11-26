@@ -77,7 +77,6 @@ QTerm::~QTerm()
 {
     delete notifier;
     delete exit_notifier;
-    delete button;
     delete piekey;
     term_free( terminal );
 }
@@ -240,16 +239,9 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
-
     piekey->activate(event->x(), event->y());
 }
 
-void QTerm::mouseReleaseEvent(QMouseEvent *event)
-{
-    // Center the widget on the mouse coordinates
-    piekey->hide();
-}
- 
 void QTerm::resizeEvent(QResizeEvent *event)
 {
     if( char_width != 0 && char_height != 0 ) {

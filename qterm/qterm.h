@@ -2,8 +2,6 @@
 #include <QSocketNotifier>
 #include <libterm.h>
 #include <QTimer>
-#include <QVBoxLayout>
-#include <QPushButton>
 #include <qpiekey.h>
 
 class QTerm : public QWidget
@@ -19,7 +17,6 @@ protected:
     void keyPressEvent(QKeyEvent *);
     void resizeEvent(QResizeEvent *);
     void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
  
 private:
     void init( );
@@ -36,7 +33,6 @@ private:
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
     QTimer *cursor_timer;
-    QPushButton *button;
     QPieKey *piekey;
 
 private slots:
