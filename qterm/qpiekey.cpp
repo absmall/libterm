@@ -47,7 +47,14 @@ void QPieKey::paintEvent(QPaintEvent *event)
     }
 }
 
-void QPieKey::initialize(int sections, char *charlist)
+void QPieKey::mouseReleaseEvent(QMouseEvent *event)
+{
+    hide();
+    releaseMouse();
+}
+ 
+
+void QPieKey::initialize(int sections, const char *charlist)
 {
     this->sections = sections;
     this->charlist = new char[sections*sections];
@@ -63,6 +70,7 @@ void QPieKey::activate(int x, int y)
     // Center the widget on the mouse coordinates
     setGeometry(x - width() / 2, y - height() / 2, width(), height());
     show();
+    grabMouse();
 }
 
 void QPieKey::size_ring()

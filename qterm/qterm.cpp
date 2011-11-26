@@ -159,16 +159,9 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
-
     piekey->activate(event->x(), event->y());
 }
 
-void QTerm::mouseReleaseEvent(QMouseEvent *event)
-{
-    // Center the widget on the mouse coordinates
-    piekey->hide();
-}
- 
 int main(int argc, char *argv[])
 {
     term_t terminal;
