@@ -49,6 +49,7 @@ void QTerm::init()
 #ifdef __QNX__
     BlackBerry::Keyboard::instance().show();
 #endif
+    setAttribute(Qt::WA_AcceptTouchEvents);
 }
 
 QTerm::~QTerm()
@@ -166,8 +167,45 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
+#ifndef __QNX__
     piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
+#endif
 }
+
+bool QTerm::event(QEvent *event)
+{
+    int i;
+    QList<QTouchEvent::TouchPoint> touchPoints;
+
+    switch(event->type()) {
+        case QEvent::TouchBegin:
+        case QEvent::TouchUpdate:
+        case QEvent::TouchEnd:
+            touchPoints = static_cast<QTouchEvent *>(event)->touchPoints();
+
+            switch(event->type()) {
+            case QEvent::TouchBegin:
+                if( touchPoints.length() == 2 ) {
+                    piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
+                                          touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                }
+                break;
+            case QEvent::TouchUpdate:
+                piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
+                piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                break;
+            case QEvent::TouchEnd:
+                if( touchPoints.length() < 2 ) {
+                    piekeyboard->release();
+                }
+                break;
+            }
+            break;
+        default:
+            return QWidget::event(event);
+    }
+}
+
 
 int main(int argc, char *argv[])
 {

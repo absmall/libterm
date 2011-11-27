@@ -73,16 +73,21 @@ void QPieKey::paintEvent(QPaintEvent *event)
 
 void QPieKey::mouseMoveEvent(QMouseEvent *event)
 {
+    moveTouch(event->x(), event->y());
+}
+
+void QPieKey::moveTouch(int x, int y)
+{
     int section;
     double distance;
     double mouseangle;
     // Find whether we are in the wheel
-    distance = sqrt((event->x()-size)*(event->x()-size)+(event->y()-size)*(event->y()-size));
+    distance = sqrt((x-size)*(x-size)+(y-size)*(y-size));
 
     if( distance * 2 < size ) {
         section = -1;
     } else {
-        mouseangle = atan2(((double)size - event->x()), ((double)event->y() - size)) + M_PI;
+        mouseangle = atan2(((double)size - x), ((double)y - size)) + M_PI;
         section = ((int)((mouseangle + 0.5) / angle)) % sections;
     }
 
@@ -106,11 +111,10 @@ void QPieKey::mouseMoveEvent(QMouseEvent *event)
 
 void QPieKey::mouseReleaseEvent(QMouseEvent *event)
 {
-    hide();
     releaseMouse();
+    emit released();
 }
  
-
 void QPieKey::initialize(int sections, const char *charlist)
 {
     int i;

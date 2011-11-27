@@ -12,6 +12,7 @@ public:
     void initialize(int sections, const char *charlist);
     void activate(int x, int y);
     void select(const char *selection);
+    void moveTouch(int x, int y);
  
 protected:
     void paintEvent(QPaintEvent *event);
@@ -21,6 +22,7 @@ protected:
 signals:
     void keypress(char key);
     void selectionChanged(char *keys);
+    void released();
 
 private:
     void size_ring();

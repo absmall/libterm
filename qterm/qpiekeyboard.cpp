@@ -7,6 +7,10 @@ QPieKeyboard::QPieKeyboard(QWidget *parent) : QWidget(parent), left(parent), rig
     QObject::connect(&testTimer, SIGNAL(timeout()), this, SLOT(testTime()));
     QObject::connect(&left, SIGNAL(selectionChanged(char *)), this, SLOT(leftSelectionChanged(char *)));
     QObject::connect(&right, SIGNAL(selectionChanged(char *)), this, SLOT(rightSelectionChanged(char *)));
+    QObject::connect(&left, SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
+    QObject::connect(&right, SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
+    QObject::connect(&left, SIGNAL(released()), this, SLOT(released()));
+    QObject::connect(&right, SIGNAL(released()), this, SLOT(released()));
 
     leftSelection = NULL;
     rightSelection = NULL;
@@ -58,6 +62,15 @@ void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
     }
 }
 
+void QPieKeyboard::moveTouch(int touchId, int x, int y)
+{
+    if( touchId == 0 ) {
+        left.moveTouch(x, y);
+    } else if( touchId == 1 ) {
+        right.moveTouch(x, y);
+    }
+}
+
 char *QPieKeyboard::reorder(int sections, char *keylist)
 {
     int i, j;
@@ -76,6 +89,7 @@ char *QPieKeyboard::reorder(int sections, char *keylist)
 
 void QPieKeyboard::testTime()
 {
+    testTimer.stop();
     right.activate(testX, testY);
     if( leftSelection != NULL ) {
         right.select( leftSelection );
@@ -98,4 +112,15 @@ void QPieKeyboard::rightSelectionChanged(char *selection)
 {
     rightSelection = selection;
     left.select( rightSelection );
+}
+
+void QPieKeyboard::release()
+{
+    left.hide();
+    right.hide();
+}
+
+void QPieKeyboard::released()
+{
+    release();
 }

@@ -17,6 +17,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *);
     void mousePressEvent(QMouseEvent *event);
+    bool event(QEvent *event);
  
 private:
     void init( );
