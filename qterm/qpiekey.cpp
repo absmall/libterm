@@ -100,6 +100,7 @@ void QPieKey::moveTouch(int x, int y)
                     emit(keypress(selection[s]));
                 }
             }
+            emit selectionChanged(NULL);
         } else {
             // We're gaining a selection, notify our parent
             emit selectionChanged(charlist[ section ]);
@@ -140,6 +141,7 @@ void QPieKey::initialize(int sections, const char *charlist)
 void QPieKey::activate(int x, int y)
 {
     // Center the widget on the mouse coordinates
+    highlighted_section = -1;
     setGeometry(x - width() / 2, y - height() / 2, width(), height());
     show();
     grabMouse();
@@ -147,7 +149,11 @@ void QPieKey::activate(int x, int y)
 
 void QPieKey::select(const char *selection)
 {
-    this->selection = selection;
+    if( selection != NULL ) {
+        this->selection = selection;
+    }  else {
+        this->selection = "";
+    }
     update(0,0, size*2, size*2);
 }
 
