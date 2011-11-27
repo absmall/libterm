@@ -41,7 +41,7 @@ void QPieKey::paintEvent(QPaintEvent *event)
                 // angle*(i+0.5). We want to center 'sections' characters
                 // with equal angular spacing in this area. Add a full width
                 // on each side to separate a section from its neighbour
-                character = QChar(charlist[i*sections+j]);
+                character = QChar(charlist[i][j]);
                 charangle = angle*((j+1.0)/(sections+1.0)+i-0.5);
                 selectedChar = (highlighted_section == -1 || highlighted_section == i)
                     && (strchr( selection.c_str(), character.toLatin1() ) != NULL);
@@ -91,10 +91,13 @@ void QPieKey::mouseMoveEvent(QMouseEvent *event)
             // We're losing our selection, send the signal now
             for(int i = 0; i < sections; i ++ ) {
                 size_t s;
-                if( (s = selection.find( charlist[highlighted_section*sections+i] )) != -1 ) {
+                if( (s = selection.find( charlist[highlighted_section][i] )) != -1 ) {
                     emit(keypress(selection[s]));
                 }
             }
+        } else {
+            // We're gaining a selection, notify our parent
+            emit selectionChanged(charlist[ section ]);
         }
         highlighted_section = section;
         update(0,0, size*2, size*2);
@@ -110,13 +113,20 @@ void QPieKey::mouseReleaseEvent(QMouseEvent *event)
 
 void QPieKey::initialize(int sections, const char *charlist)
 {
+    int i;
     if( this->charlist != NULL ) {
+        for(i = 0; i < this->sections; i ++ ) {
+            delete this->charlist[i];
+        }
         delete [] this->charlist;
     }
 
     this->sections = sections;
-    this->charlist = new char[sections*sections];
-    memcpy(this->charlist, charlist, sections*sections);
+    this->charlist = new char *[sections];
+    for( i = 0; i < sections; i ++ ) {
+        this->charlist[i] = new char[sections];
+        memcpy(this->charlist[i], charlist + i*sections, sections);
+    }
 
     angle = 2*M_PI / sections;
     highlighted_section = -1;

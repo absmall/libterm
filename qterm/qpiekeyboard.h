@@ -24,7 +24,12 @@ private:
     int testDelay;
     int testX, testY;
     QTimer testTimer;
+    char *leftSelection;
+    char *rightSelection;
 
 private slots:
     void testTime();
+    void piekeypressed(char key);
+    void leftSelectionChanged(char *selection);
+    void rightSelectionChanged(char *selection);
 };
