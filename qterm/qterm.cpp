@@ -49,6 +49,7 @@ void QTerm::init()
     cursor_on = 1;
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+    piekeyboard->testMode(3);
 
 #ifdef __QNX__
     resize(1024, 600);
