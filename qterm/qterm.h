@@ -2,7 +2,9 @@
 #include <QSocketNotifier>
 #include <libterm.h>
 #include <QTimer>
-#include <qpiekey.h>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <qpiekeyboard.h>
 
 class QTerm : public QWidget
 {
@@ -33,7 +35,7 @@ private:
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
     QTimer *cursor_timer;
-    QPieKey *piekey;
+    QPieKeyboard *piekeyboard;
 
 private slots:
     void terminal_data();

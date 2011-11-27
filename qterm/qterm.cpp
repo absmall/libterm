@@ -47,8 +47,8 @@ void QTerm::init()
     cursor_x = -1;
     cursor_y = -1;
     cursor_on = 1;
-    piekey = new QPieKey(this);
-    piekey->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+    piekeyboard = new QPieKeyboard(this);
+    piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
 
 #ifdef __QNX__
     resize(1024, 600);
@@ -63,7 +63,6 @@ void QTerm::init()
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
-    QObject::connect(piekey, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
 #ifdef BPS_VERSION
     virtualkeyboard_show();
@@ -78,7 +77,7 @@ QTerm::~QTerm()
 {
     delete notifier;
     delete exit_notifier;
-    delete piekey;
+    delete piekeyboard;
     term_free( terminal );
 }
 
@@ -245,8 +244,7 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
-    piekey->select("agmsy4");
-    piekey->activate(event->x(), event->y());
+    piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
 }
 
 void QTerm::resizeEvent(QResizeEvent *event)
