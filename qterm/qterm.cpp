@@ -36,15 +36,15 @@ void QTerm::init()
     cursor_x = -1;
     cursor_y = -1;
     cursor_on = 1;
-    piekey = new QPieKey(this);
-    piekey->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+    piekeyboard = new QPieKeyboard(this);
+    piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
 
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
     term_register_cursor( terminal, term_update_cursor );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
-    QObject::connect(piekey, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
+    QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
     BlackBerry::Keyboard::instance().show();
 #endif
@@ -53,7 +53,7 @@ void QTerm::init()
 QTerm::~QTerm()
 {
     delete notifier;
-    delete piekey;
+    delete piekeyboard;
     term_free( terminal );
 }
 
@@ -165,8 +165,7 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
-    piekey->select("agmsy4");
-    piekey->activate(event->x(), event->y());
+    piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
 }
 
 int main(int argc, char *argv[])
