@@ -38,6 +38,7 @@ void QTerm::init()
     cursor_on = 1;
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+    piekeyboard->testMode(3);
 
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
