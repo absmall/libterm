@@ -20,13 +20,14 @@ protected:
 
 signals:
     void keypress(char key);
+    void selectionChanged(char *keys);
 
 private:
     void size_ring();
     double angle;
     int sections;
     int highlighted_section;
-    char *charlist;
+    char **charlist;
     char *highlighted_chars;
     QBitmap *bitmap;
     std::string selection;
