@@ -19,6 +19,7 @@ protected:
     void keyPressEvent(QKeyEvent *);
     void resizeEvent(QResizeEvent *);
     void mousePressEvent(QMouseEvent *event);
+    bool event(QEvent *event);
  
 private:
     void init( );

@@ -72,6 +72,7 @@ void QTerm::init()
 #endif
 #endif
     cursor_timer->start(BLINK_SPEED);
+    setAttribute(Qt::WA_AcceptTouchEvents);
 }
 
 QTerm::~QTerm()
@@ -245,7 +246,9 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 
 void QTerm::mousePressEvent(QMouseEvent *event)
 {
+#ifndef __QNX__
     piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
+#endif
 }
 
 void QTerm::resizeEvent(QResizeEvent *event)
@@ -264,6 +267,40 @@ void QTerm::resizeEvent(QResizeEvent *event)
 #else
         term_resize( terminal, event->size().width() / char_width, event->size().height() / char_height, 0 );
 #endif
+    }
+}
+
+bool QTerm::event(QEvent *event)
+{
+    int i;
+    QList<QTouchEvent::TouchPoint> touchPoints;
+
+    switch(event->type()) {
+        case QEvent::TouchBegin:
+        case QEvent::TouchUpdate:
+        case QEvent::TouchEnd:
+            touchPoints = static_cast<QTouchEvent *>(event)->touchPoints();
+
+            switch(event->type()) {
+            case QEvent::TouchBegin:
+                if( touchPoints.length() == 2 ) {
+                    piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
+                                          touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                }
+                break;
+            case QEvent::TouchUpdate:
+                piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
+                piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                break;
+            case QEvent::TouchEnd:
+                if( touchPoints.length() < 2 ) {
+                    piekeyboard->release();
+                }
+                break;
+            }
+            break;
+        default:
+            return QWidget::event(event);
     }
 }
 
