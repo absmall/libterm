@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <qnx xmlns="http://www.qnx.com/schemas/application/1.0">
     <id>org.demo.qterm</id>
-    <filename>qtermbb</filename>
+    <filename>qterm</filename>
     <name>Terminal</name>
     <versionNumber>1.0.0</versionNumber>
     <description>Playbook terminal</description>
