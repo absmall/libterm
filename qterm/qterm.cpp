@@ -289,8 +289,10 @@ bool QTerm::event(QEvent *event)
                 }
                 break;
             case QEvent::TouchUpdate:
-                piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
-                piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                if( touchPoints.length() >= 2 ) {
+                    piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
+                    piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                }
                 break;
             case QEvent::TouchEnd:
                 if( touchPoints.length() < 2 ) {
