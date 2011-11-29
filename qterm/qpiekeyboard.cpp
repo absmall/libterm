@@ -1,6 +1,6 @@
 #include <qpiekeyboard.h>
 
-QPieKeyboard::QPieKeyboard(QWidget *parent) : QWidget(parent), left(parent), right(parent), testTimer(this)
+QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), left(parent), right(parent), testTimer(this)
 {
     testDelay = 0;
     sections = 0;

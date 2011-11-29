@@ -3,7 +3,7 @@
 #include <QTimer>
 #include <qpiekey.h>
 
-class QPieKeyboard : public QWidget
+class QPieKeyboard : public QObject
 {
     Q_OBJECT
 public:
