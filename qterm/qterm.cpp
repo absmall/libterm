@@ -47,6 +47,7 @@ void QTerm::init()
     cursor_x = -1;
     cursor_y = -1;
     cursor_on = 1;
+    piekey_active = 0;
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
     piekeyboard->testMode(3);
@@ -283,12 +284,13 @@ bool QTerm::event(QEvent *event)
 
             switch(event->type()) {
             case QEvent::TouchBegin:
-                if( touchPoints.length() == 2 ) {
+                break;
+            case QEvent::TouchUpdate:
+                if( touchPoints.length() >= 2 && !piekey_active ) {
+                    piekey_active = 1;
                     piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
                                           touchPoints[1].pos().x(), touchPoints[1].pos().y() );
                 }
-                break;
-            case QEvent::TouchUpdate:
                 if( touchPoints.length() >= 2 ) {
                     piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
                     piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
@@ -297,6 +299,7 @@ bool QTerm::event(QEvent *event)
             case QEvent::TouchEnd:
                 if( touchPoints.length() < 2 ) {
                     piekeyboard->release();
+                    piekey_active = 0;
                 }
                 break;
             }

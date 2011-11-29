@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <qpiekeyboard.h>
 
 QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), left(parent), right(parent), testTimer(this)
@@ -65,9 +66,9 @@ void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
 void QPieKeyboard::moveTouch(int touchId, int x, int y)
 {
     if( touchId == 0 ) {
-        left.moveTouch(x, y);
+        left.moveTouch(x - left.x(), y - left.y());
     } else if( touchId == 1 ) {
-        right.moveTouch(x, y);
+        right.moveTouch(x - right.x(), y - right.y());
     }
 }
 
