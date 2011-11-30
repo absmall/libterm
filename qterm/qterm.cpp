@@ -73,6 +73,7 @@ void QTerm::init()
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
+    resize(1024,600);
 }
 
 QTerm::~QTerm()
