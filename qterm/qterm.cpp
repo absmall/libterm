@@ -177,7 +177,6 @@ void QTerm::mousePressEvent(QMouseEvent *event)
 
 bool QTerm::event(QEvent *event)
 {
-    int i;
     QList<QTouchEvent::TouchPoint> touchPoints;
 
     switch(event->type()) {
@@ -187,33 +186,37 @@ bool QTerm::event(QEvent *event)
             touchPoints = static_cast<QTouchEvent *>(event)->touchPoints();
 
             switch(event->type()) {
-            case QEvent::TouchBegin:
-                break;
-            case QEvent::TouchUpdate:
-                if( touchPoints.length() >= 2 ) {
-                    if( !piekey_active ) {
-                        piekey_active = 1;
-                        piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
-                                              touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                case QEvent::TouchBegin:
+                    return true;
+                case QEvent::TouchUpdate:
+                    if( touchPoints.length() >= 2 ) {
+                        if( !piekey_active ) {
+                            piekey_active = 1;
+                            piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
+                                                  touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                        }
+                        piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
+                        piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                    } else {
+                        if( piekey_active ) {
+                            piekeyboard->release();
+                            piekey_active = 0;
+                        }
                     }
-                    piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
-                    piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
-                } else {
-                    if( piekey_active ) {
-                        piekeyboard->release();
-                        piekey_active = 0;
-                    }
-                }
-                break;
-            case QEvent::TouchEnd:
-                piekeyboard->release();
-                piekey_active = 0;
-                break;
+                    return true;
+                case QEvent::TouchEnd:
+                    piekeyboard->release();
+                    piekey_active = 0;
+                    return true;
+                default:
+                    break;
             }
             break;
         default:
             return QWidget::event(event);
     }
+
+    return false;
 }
 
 
