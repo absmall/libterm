@@ -39,7 +39,9 @@ void QTerm::init()
     piekey_active = 0;
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+#ifndef __QNX__
     piekeyboard->testMode(3);
+#endif
 
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
@@ -48,7 +50,7 @@ void QTerm::init()
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
-    BlackBerry::Keyboard::instance().show();
+//    BlackBerry::Keyboard::instance().show();
 #endif
     setAttribute(Qt::WA_AcceptTouchEvents);
 }
