@@ -47,15 +47,13 @@ void QPieKeyboard::initialize(int sections, const char *keylist)
 
 void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
 {
+    leftSelection = NULL;
+    rightSelection = NULL;
     left.activate(x1, y1);
-    if( rightSelection != NULL ) {
-        left.select( rightSelection );
-    }
+    left.select( rightSelection );
     if( !testDelay ) {
         right.activate(x2, y2);
-        if( leftSelection != NULL ) {
-            right.select( leftSelection );
-        }
+        right.select( leftSelection );
     } else {
         testX = x2;
         testY = y2;
@@ -92,9 +90,7 @@ void QPieKeyboard::testTime()
 {
     testTimer.stop();
     right.activate(testX, testY);
-    if( leftSelection != NULL ) {
-        right.select( leftSelection );
-    }
+    right.select( leftSelection );
 }
 
 void QPieKeyboard::piekeypressed(char key)

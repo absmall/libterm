@@ -50,7 +50,9 @@ void QTerm::init()
     piekey_active = 0;
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+#ifndef __QNX__
     piekeyboard->testMode(3);
+#endif
 
 #ifdef __QNX__
     resize(1024, 600);
@@ -66,10 +68,7 @@ void QTerm::init()
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 #ifdef __QNX__
-#ifdef BPS_VERSION
-    virtualkeyboard_show();
-#else
-    BlackBerry::Keyboard::instance().show();
+//    BlackBerry::Keyboard::instance().show();
 #endif
 #endif
     cursor_timer->start(BLINK_SPEED);
