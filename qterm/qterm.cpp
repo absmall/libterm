@@ -190,21 +190,24 @@ bool QTerm::event(QEvent *event)
             case QEvent::TouchBegin:
                 break;
             case QEvent::TouchUpdate:
-                if( touchPoints.length() >= 2 && !piekey_active ) {
-                    piekey_active = 1;
-                    piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
-                                          touchPoints[1].pos().x(), touchPoints[1].pos().y() );
-                }
                 if( touchPoints.length() >= 2 ) {
+                    if( !piekey_active ) {
+                        piekey_active = 1;
+                        piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
+                                              touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                    }
                     piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
                     piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                } else {
+                    if( piekey_active ) {
+                        piekeyboard->release();
+                        piekey_active = 0;
+                    }
                 }
                 break;
             case QEvent::TouchEnd:
-                if( touchPoints.length() < 2 ) {
-                    piekeyboard->release();
-                    piekey_active = 0;
-                }
+                piekeyboard->release();
+                piekey_active = 0;
                 break;
             }
             break;
