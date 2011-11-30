@@ -47,6 +47,13 @@ void QPieKeyboard::initialize(int sections, const char *keylist)
 
 void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
 {
+    if( x2 < x1 ) {
+        x2 ^= x1 ^= x2 ^= x1;
+        y2 ^= y1 ^= y2 ^= y1;
+        swapped = 1;
+    } else {
+        swapped = 0;
+    }
     leftSelection = NULL;
     rightSelection = NULL;
     left.activate(x1, y1);
@@ -63,7 +70,7 @@ void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
 
 void QPieKeyboard::moveTouch(int touchId, int x, int y)
 {
-    if( touchId == 0 ) {
+    if( touchId ^ swapped == 0 ) {
         left.moveTouch(x - left.x(), y - left.y());
     } else if( touchId == 1 ) {
         right.moveTouch(x - right.x(), y - right.y());
