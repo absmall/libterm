@@ -53,6 +53,7 @@ void QTerm::init()
 //    BlackBerry::Keyboard::instance().show();
 #endif
     setAttribute(Qt::WA_AcceptTouchEvents);
+    resize(1024,600);
 }
 
 QTerm::~QTerm()
