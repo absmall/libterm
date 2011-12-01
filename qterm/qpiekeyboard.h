@@ -20,6 +20,7 @@ signals:
 
 private:
     char *reorder(int sections, char *keylist);
+    bool swapped;
     int sections;
     QPieKey left;
     QPieKey right;
