@@ -56,6 +56,13 @@ void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
     }
     leftSelection = NULL;
     rightSelection = NULL;
+    if( x1 < x2 ) {
+        x1 ^= x2 ^= x1 ^= x2;
+        y1 ^= y2 ^= y1 ^= y2;
+        swapped = true;
+    } else {
+        swapped = false;
+    }
     left.activate(x1, y1);
     left.select( rightSelection );
     if( !testDelay ) {
@@ -70,7 +77,11 @@ void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
 
 void QPieKeyboard::moveTouch(int touchId, int x, int y)
 {
-    if( touchId ^ swapped == 0 ) {
+    if( swapped ) {
+        touchId ^= 1;
+    }
+
+    if( touchId == 0 ) {
         left.moveTouch(x - left.x(), y - left.y());
     } else if( touchId == 1 ) {
         right.moveTouch(x - right.x(), y - right.y());
