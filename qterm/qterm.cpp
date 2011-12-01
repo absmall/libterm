@@ -188,8 +188,10 @@ bool QTerm::event(QEvent *event)
 
             switch(event->type()) {
                 case QEvent::TouchBegin:
+                    fprintf(stderr, "Touch begin\n");
                     return true;
                 case QEvent::TouchUpdate:
+                    fprintf(stderr, "Touch update %d\n", touchPoints.length());
                     if( touchPoints.length() >= 2 ) {
                         if( !piekey_active ) {
                             piekey_active = 1;
@@ -206,6 +208,7 @@ bool QTerm::event(QEvent *event)
                     }
                     return true;
                 case QEvent::TouchEnd:
+                    fprintf(stderr, "Touch end\n");
                     piekeyboard->release();
                     piekey_active = 0;
                     return true;
