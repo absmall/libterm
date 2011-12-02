@@ -9,7 +9,7 @@ Building for linux:
 
 Building for playbook:
 ----------------------
-1) In the libterm/lib directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=ntoarm.cmake .; make'. This will build libterm.so
+1) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=ntoarm.cmake .; make'. This will build lib/libterm.so
 2) In the libterm/qterm directory, run the qmake application that comes as part
 of the Qt for playbook build as '/path/to/qt/qmake qtermbb.pro'.
 3) In the same directory, run 'make qtermbb.bar'. This will build qtermbb.bar in
