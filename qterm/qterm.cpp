@@ -15,6 +15,7 @@
 
 #define WIDTH    80
 #define HEIGHT    17
+#define BLINK_SPEED 1000
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
@@ -42,11 +43,14 @@ void QTerm::init()
     term_register_cursor( terminal, term_update_cursor );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
+    cursor_timer = new QTimer( this );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
+    QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 #ifdef __QNX__
     BlackBerry::Keyboard::instance().show();
 #endif
+    cursor_timer->start(BLINK_SPEED);
 }
 
 QTerm::~QTerm()
@@ -92,6 +96,14 @@ void QTerm::terminal_data()
 void QTerm::terminate()
 {
     exit(0);
+}
+
+void QTerm::blink_cursor()
+{
+    cursor_on ^= 1;
+    update( cursor_x * char_width,
+                  cursor_y * char_height,
+                  char_width, char_height );
 }
 
 void QTerm::paintEvent(QPaintEvent *event)

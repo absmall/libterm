@@ -1,7 +1,7 @@
 #include <QWidget>
 #include <QSocketNotifier>
 #include <libterm.h>
-#include <QVBoxLayout>
+#include <QTimer>
 
 class QTerm : public QWidget
 {
@@ -28,8 +28,10 @@ private:
     static void term_update_cursor(term_t handle, int x, int y);
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
+    QTimer *cursor_timer;
 
 private slots:
     void terminal_data();
     void terminate();
+    void blink_cursor();
 };
