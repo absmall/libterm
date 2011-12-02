@@ -24,6 +24,7 @@ private:
     int cursor_y;
     int cursor_on;
     term_t terminal;
+    static void term_bell(term_t handle);
     static void term_update(term_t handle, int x, int y, int width, int height);
     static void term_update_cursor(term_t handle, int x, int y);
     QSocketNotifier *notifier;

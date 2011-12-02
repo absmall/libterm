@@ -60,6 +60,9 @@ void term_register_update(term_t handle, void (*update)(term_t handle, int x, in
 // Callback functions for when the cursor moves
 void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y));
 
+// Callback functions for when the cursor moves
+void term_register_bell(term_t handle, void (*bell)(term_t handle));
+
 // Get a file descriptor to wait for data from the child process. Waiting on
 // this file handle should be integrated in the programs event processing loop
 int term_get_file_descriptor(term_t handle);

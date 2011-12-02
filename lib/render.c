@@ -22,6 +22,10 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
             if( i == length ) break;
         }
         switch(buf[i]) {
+            case 7:
+                // Bell
+                if( term->bell != NULL ) term->bell(TO_H(term));
+                break;
             case '\b':
                 term->ccol--;
                 cursor_change = true;

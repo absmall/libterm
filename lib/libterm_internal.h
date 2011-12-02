@@ -38,6 +38,8 @@ typedef struct term_t_i {
     void (*update)(term_t handle, int x, int y, int width, int height);
     // cursor callback
     void (*cursor_update)(term_t handle, int x, int y);
+    // bell callback
+    void (*bell)(term_t handle);
     // Whether we're in the midst of processing an escape code
     bool escape_mode;
     // Bytes that have been received so far for an escape code

@@ -41,6 +41,7 @@ void QTerm::init()
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
     term_register_cursor( terminal, term_update_cursor );
+    term_register_bell( terminal, term_bell );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
     cursor_timer = new QTimer( this );
@@ -58,6 +59,10 @@ QTerm::~QTerm()
     delete notifier;
     delete exit_notifier;
     term_free( terminal );
+}
+
+void QTerm::term_bell(term_t handle)
+{
 }
 
 void QTerm::term_update(term_t handle, int x, int y, int width, int height)
