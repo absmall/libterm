@@ -10,7 +10,12 @@
 #include <sys/select.h>
 #include <errno.h>
 #ifdef __QNX__
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <bbsupport/Keyboard>
+#include <bbsupport/Notification>
 #endif
 
 #define WIDTH    80
@@ -63,6 +68,14 @@ QTerm::~QTerm()
 
 void QTerm::term_bell(term_t handle)
 {
+#ifdef __QNX__
+    char command[] = "msg::play_sound\ndat:json:{\"sound\":\"notification_general\"}";
+    int f = open("/pps/services/multimedia/sound/control", O_RDWR);
+    write(f, command, sizeof(command));
+    ::close(f);
+#else
+    QApplication::beep();
+#endif
 }
 
 void QTerm::term_update(term_t handle, int x, int y, int width, int height)
