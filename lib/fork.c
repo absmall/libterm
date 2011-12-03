@@ -27,12 +27,17 @@ bool term_fork(term_t_i *term)
     int read_byte;
     int pipefd[2];
     struct passwd *passwd;
+    struct winsize ws;
 
     if( pipe( pipefd ) ) {
         return false;
     }
 
-    pid = forkpty(&term->fd, NULL, NULL, NULL);
+    ws.ws_row = term->height;
+    ws.ws_col = term->width;
+    ws.ws_xpixel = term->width;
+    ws.ws_ypixel = term->height;
+    pid = forkpty(&term->fd, NULL, NULL, &ws);
 
     if(pid < 0 ) {
         return false;
