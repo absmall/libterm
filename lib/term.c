@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <signal.h>
 #include "libterm_internal.h"
 
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height))
@@ -169,6 +171,35 @@ void term_scroll( term_t handle, int row )
     }
 
     term->row = row;
+}
+
+int term_resize( term_t handle, int width, int height )
+{
+    int ret;
+    struct winsize ws;
+    term_t_i *term;
+
+    term = TO_S(handle);
+
+    if( width == term->width && height == term->height ) return 0;
+
+    ws.ws_row = height;
+    ws.ws_col = width;
+    ws.ws_xpixel = width;
+    ws.ws_ypixel = height;
+
+    term->width = width;
+    term->height = height;
+
+    term_allocate_grid(term);
+
+    ret = ioctl(term->fd, TIOCSWINSZ, &ws);
+
+    if( ret != -1 ) {
+        ret = kill(term->child, SIGWINCH);
+    }
+
+    return ret;
 }
 
 bool term_process_child(term_t handle)
