@@ -159,6 +159,7 @@ void QTerm::paintEvent(QPaintEvent *event)
         char_width = new_width;
         char_height = new_height;
         char_descent = painter.fontMetrics().descent();
+        term_resize( terminal, contentsRect().width() / char_width, contentsRect().height() / char_height, 0 );
         update( contentsRect() );
         return;
     }
@@ -168,8 +169,8 @@ void QTerm::paintEvent(QPaintEvent *event)
     grid = term_get_grid( terminal );
     attribs = term_get_attribs( terminal );
     colors = term_get_colours( terminal );
-    for( i = 0; i < HEIGHT; i ++ ) {
-        for( j = 0; j < WIDTH; j ++ ) {
+    for( i = 0; i < term_get_height( terminal ); i ++ ) {
+        for( j = 0; j < term_get_width( terminal ); j ++ ) {
             if( cursor_on && j == cursor_x && i == cursor_y ) {
                 painter.drawRect(j * char_width + 1, i * char_height + 1, char_width - 2, char_height - 2);
                 painter.setPen(QColor(0, 0, 0));

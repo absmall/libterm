@@ -182,7 +182,7 @@ int term_resize( term_t handle, int width, int height, int scrollback )
 
     term = TO_S(handle);
 
-    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
+//    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
 
     ws.ws_row = height;
     ws.ws_col = width;
@@ -197,9 +197,17 @@ int term_resize( term_t handle, int width, int height, int scrollback )
         return -1;
     }
 
+    term_copy_grid( &g, &term->grid );
+
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
     if( ret != -1 ) {
+        // I'm not sure why ccol needs to be set, but this seems to be
+        // neceesary before sending SIGWINCH, because bash responds by
+        // re-outputting the current line
+        term->ccol = 0;
+        term->crow += g.history - term->grid.history;
+
         ret = kill(term->child, SIGWINCH);
         term_release_grid( &term->grid );
         memcpy( &term->grid, &g, sizeof( term_grid ) );
@@ -352,4 +360,18 @@ void *term_get_user_data(term_t handle)
     term_t_i *term = TO_S(handle);
 
     return term->user_data;
+}
+
+int term_get_width(term_t handle)
+{
+    term_t_i *term = TO_S(handle);
+
+    return term->grid.width;
+}
+
+int term_get_height(term_t handle)
+{
+    term_t_i *term = TO_S(handle);
+
+    return term->grid.height;
 }
