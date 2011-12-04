@@ -210,6 +210,13 @@ void QTerm::keyPressEvent(QKeyEvent *event)
     }
 }
  
+void QTerm::resizeEvent(QResizeEvent *event)
+{
+    if( char_width != 0 && char_height != 0 ) {
+        term_resize( terminal, event->size().width() / char_width, event->size().height() / char_height, 0 );
+    }
+}
+
 int main(int argc, char *argv[])
 {
     term_t terminal;
