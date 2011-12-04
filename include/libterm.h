@@ -75,6 +75,10 @@ const uint32_t **term_get_grid(term_t handle);
 const uint32_t **term_get_attribs(term_t handle);
 const uint32_t **term_get_colours(term_t handle);
 
+// Retrieve grid propeties
+int term_get_width(term_t handle);
+int term_get_height(term_t handle);
+
 // Convert an attribute and colour pair into RGB888
 uint32_t term_get_fg_color(uint32_t attrib, uint32_t colour);
 uint32_t term_get_bg_color(uint32_t attrib, uint32_t colour);
