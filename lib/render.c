@@ -36,7 +36,7 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                 term->ccol=0;
                 term->crow++;
                 cursor_change = true;
-                if( term->crow >= term->history ) {
+                if( term->crow >= term->grid.history ) {
                     term_shiftrows(term);
                     change = true;
                 }
@@ -46,10 +46,10 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                 term_send_escape( term, buf + i, 1 );
                 break;
             default:
-                if( term->crow < term->history && term->ccol < term->width ) {
-                    term->grid[term->crow][term->ccol] = buf[i];
-                    term->attribs[term->crow][term->ccol] = term->cattr;
-                    term->colours[term->crow][term->ccol] = term->ccolour;
+                if( term->crow < term->grid.history && term->ccol < term->grid.width ) {
+                    term->grid.grid[term->crow][term->ccol] = buf[i];
+                    term->grid.attribs[term->crow][term->ccol] = term->cattr;
+                    term->grid.colours[term->crow][term->ccol] = term->ccolour;
                     change = true;
                 }
                 term->ccol++;
@@ -57,6 +57,6 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
         }
     }
 
-    if( change && term->update != NULL ) term->update(TO_H(term), 0, 0, term->width, term->height);
+    if( change && term->update != NULL ) term->update(TO_H(term), 0, 0, term->grid.width, term->grid.height);
     if( cursor_change && term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow - term->row);
 }

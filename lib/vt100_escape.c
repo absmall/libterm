@@ -60,9 +60,9 @@ void escape_cup(term_t_i *term)
     char *n;
 
     term->crow = strtoul( term->escape_code + 2, &n, 10 ) - 1;
-    if( term->crow >= term->height ) term->crow = term->height - 1;
+    if( term->crow >= term->grid.height ) term->crow = term->grid.height - 1;
     term->ccol = strtoul( n + 1, NULL, 10 ) - 1;
-    if( term->ccol >= term->width ) term->crow = term->width - 1;
+    if( term->ccol >= term->grid.width ) term->crow = term->grid.width - 1;
 }
 
 // Move cursor up #1 lines
@@ -80,8 +80,8 @@ void escape_cuu(term_t_i *term)
 void escape_cud(term_t_i *term)
 {
     int down = atoi( term->escape_code + 2 );
-    if( term->crow + down >= term->history ) {
-        term->crow = term->history - 1;
+    if( term->crow + down >= term->grid.history ) {
+        term->crow = term->grid.history - 1;
     }  else {
         term->crow += down;
     }
@@ -91,8 +91,8 @@ void escape_cud(term_t_i *term)
 void escape_cuf(term_t_i *term)
 {
     int right = atoi( term->escape_code + 2 );
-    if( term->ccol + right >= term->width ) {
-        term->ccol = term->width - 1;
+    if( term->ccol + right >= term->grid.width ) {
+        term->ccol = term->grid.width - 1;
     }  else {
         term->ccol += right;
     }
@@ -127,8 +127,8 @@ void escape_rc(term_t_i *term)
 void escape_el(term_t_i *term)
 {
     int i;
-    for( i = term->ccol; i < term->width; i ++ ) {
-        term->grid[ term->crow ][ i ] = ' ';
+    for( i = term->ccol; i < term->grid.width; i ++ ) {
+        term->grid.grid[ term->crow ][ i ] = ' ';
     }
 }
 
@@ -136,13 +136,13 @@ void escape_el(term_t_i *term)
 void escape_clear(term_t_i *term)
 {
     int i, j;
-    for( i = 0; i < term->height; i ++ ) {
-        for( j = 0; j < term->width; j ++ ) {
-            term->grid[ i ][ j ] = ' ';
-            term->attribs[ i ][ j ] = 0;
+    for( i = 0; i < term->grid.height; i ++ ) {
+        for( j = 0; j < term->grid.width; j ++ ) {
+            term->grid.grid[ i ][ j ] = ' ';
+            term->grid.attribs[ i ][ j ] = 0;
         }
     }
-    term->crow = term->history - term->height;
+    term->crow = term->grid.history - term->grid.height;
     term->ccol = 0;
 }
 
@@ -168,7 +168,7 @@ void escape_csr(term_t_i *term)
 // Home cursor
 void escape_home(term_t_i *term)
 {
-    term->crow = term->history - term->height;
+    term->crow = term->grid.history - term->grid.height;
     term->ccol = 0;
 }
 
@@ -182,10 +182,10 @@ void escape_rmul(term_t_i *term)
 void escape_ed(term_t_i *term)
 {
     int i, j;
-    for( i = term->crow; i < term->height; i ++ ) {
-        for( j = term->ccol; j < term->width; j ++ ) {
-            term->grid[ i ][ j ] = ' ';
-            term->attribs[ i ][ j ] = 0;
+    for( i = term->crow; i < term->grid.height; i ++ ) {
+        for( j = term->ccol; j < term->grid.width; j ++ ) {
+            term->grid.grid[ i ][ j ] = ' ';
+            term->grid.attribs[ i ][ j ] = 0;
         }
     }
 }

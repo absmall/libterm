@@ -49,7 +49,7 @@ const uint32_t **term_get_grid(term_t handle)
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid + term->row;
+    return (const uint32_t **)term->grid.grid + term->row;
 }
 
 const uint32_t **term_get_attribs(term_t handle)
@@ -58,7 +58,7 @@ const uint32_t **term_get_attribs(term_t handle)
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->attribs + term->row;
+    return (const uint32_t **)term->grid.attribs + term->row;
 }
 
 const uint32_t **term_get_colours(term_t handle)
@@ -67,7 +67,7 @@ const uint32_t **term_get_colours(term_t handle)
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->colours + term->row;
+    return (const uint32_t **)term->grid.colours + term->row;
 }
 
 static int term_get_color(uint32_t attrib, uint32_t colour, uint32_t *color)
@@ -166,37 +166,45 @@ void term_scroll( term_t handle, int row )
         row = 0;
     }
 
-    if( row > term->history - term->height ) {
-        row = term->history - term->height;
+    if( row > term->grid.history - term->grid.height ) {
+        row = term->grid.history - term->grid.height;
     }
 
     term->row = row;
 }
 
-int term_resize( term_t handle, int width, int height )
+int term_resize( term_t handle, int width, int height, int scrollback )
 {
     int ret;
     struct winsize ws;
     term_t_i *term;
+    term_grid g;
 
     term = TO_S(handle);
 
-    if( width == term->width && height == term->height ) return 0;
+    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
 
     ws.ws_row = height;
     ws.ws_col = width;
     ws.ws_xpixel = width;
     ws.ws_ypixel = height;
 
-    term->width = width;
-    term->height = height;
+    g.width = width;
+    g.height = height;
+    g.history = height + scrollback;
 
-    term_allocate_grid(term);
+    if( !term_allocate_grid( &g ) ) {
+        return -1;
+    }
 
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
     if( ret != -1 ) {
         ret = kill(term->child, SIGWINCH);
+        term_release_grid( &term->grid );
+        memcpy( &term->grid, &g, sizeof( term_grid ) );
+    } else {
+        term_release_grid( &g );
     }
 
     return ret;
@@ -274,20 +282,22 @@ bool term_begin(term_t handle, int width, int height, int scrollback)
 {
     term_t_i *term = TO_S(handle);
 
-    term->width = width;
-    term->height = height;
-    term->history = height + scrollback;
+    term->grid.width = width;
+    term->grid.height = height;
+    term->grid.history = height + scrollback;
     term->crow = scrollback;
 
-    if( !term_allocate_grid(term) ) {
+    if( !term_allocate_grid(&term->grid) ) {
         errno = ENOMEM;
         return false;
     }
 
     if( !term_fork(term) ) {
-        term_release_grid(term);
+        term_release_grid(&term->grid);
         return false;
     }
+
+    term->allocated = true;
 
     return true;
 }
@@ -297,7 +307,7 @@ void term_free(term_t handle)
     term_t_i *term = TO_S(handle);
 
     term_slay( term );
-    term_release_grid( term );
+    term_release_grid( &term->grid );
     if( term->shell != NULL ) {
         free( term->shell );
     }
