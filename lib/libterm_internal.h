@@ -2,13 +2,22 @@
 #include <sys/types.h>
 #include <libterm.h>
 
-typedef struct term_t_i {
+typedef struct {
     // Width in characters
     int width;
     // Height in characters
     int height;
     // Total height of buffer including offscreen
     int history;
+    // Grid of characters
+    uint32_t **grid;
+    // Grid of attributes
+    uint32_t **attribs;
+    // Color of characters
+    uint32_t **colours;
+} term_grid;
+
+typedef struct term_t_i {
     // Current top row of the buffer
     int row;
     // Cursor row
@@ -24,12 +33,8 @@ typedef struct term_t_i {
     int ccolour;
     // Flag to indicate that memory has been allocated for the grid
     bool allocated;
-    // Grid of characters
-    uint32_t **grid;
-    // Grid of attributes
-    uint32_t **attribs;
-    // Color of characters
-    uint32_t **colours;
+    // Grid of characters and attributes
+    term_grid grid;
     // pid of the child
     pid_t child;
     // pty file descriptor
@@ -54,8 +59,8 @@ typedef struct term_t_i {
     void *user_data;
 } term_t_i;
 
-bool term_allocate_grid(term_t_i *term);
-void term_release_grid(term_t_i *term);
+bool term_allocate_grid(term_grid *grid);
+void term_release_grid(term_grid *grid);
 void term_process_output_data(term_t_i *term, char *buf, int length);
 int term_send_escape(term_t_i *term, char *buf, int length);
 bool term_fork(term_t_i *term);

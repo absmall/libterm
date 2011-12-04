@@ -33,10 +33,10 @@ bool term_fork(term_t_i *term)
         return false;
     }
 
-    ws.ws_row = term->height;
-    ws.ws_col = term->width;
-    ws.ws_xpixel = term->width;
-    ws.ws_ypixel = term->height;
+    ws.ws_row = term->grid.height;
+    ws.ws_col = term->grid.width;
+    ws.ws_xpixel = term->grid.width;
+    ws.ws_ypixel = term->grid.height;
     pid = forkpty(&term->fd, NULL, NULL, &ws);
 
     if(pid < 0 ) {
