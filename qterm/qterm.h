@@ -14,6 +14,7 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *);
+    void resizeEvent(QResizeEvent *);
  
 private:
     void init( );
