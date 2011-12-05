@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <libterm_internal.h>
 
 bool term_fork(term_t_i *term)
