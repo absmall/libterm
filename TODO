@@ -1,4 +1,7 @@
--Support escape codes
+-Support all vt100 escape codes
+-Support all ansi escape codes
+-Support all rxvt escape codes
+-Support all terminfo escape codes
 -Support resize
 -Change font in qt terminal
 -Support attributes (blink, reverse, underline)
@@ -10,5 +13,6 @@
 -Clipboard
 -PB Menu support
 -Support for typing special characters in piekey
--Drop the workaround for Qt character code bugs, this has been fixed.
+-Drop the workaround for Qt character code bugs, once it has been fixed.
 -See if there's a more appropriate sound for "beep". The general notification has a really long duration.
+-Split escape code handling into terminfo implementation/vt100 escape code matching.
