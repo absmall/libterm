@@ -196,6 +196,18 @@ void QTerm::keyPressEvent(QKeyEvent *event)
         case Qt::Key_CapsLock:
         case Qt::Key_Shift:
             break;
+        case Qt::Key_Up:
+            term_send_data( terminal, "\x1b[A", 3);
+            break;
+        case Qt::Key_Down:
+            term_send_data( terminal, "\x1b[B", 3);
+            break;
+        case Qt::Key_Right:
+            term_send_data( terminal, "\x1b[C", 3);
+            break;
+        case Qt::Key_Left:
+            term_send_data( terminal, "\x1b[D", 3);
+            break;
         default:
             term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
             break;

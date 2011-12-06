@@ -196,6 +196,15 @@ void escape_rmkx(term_t_i *term)
     // FIXME
 }
 
+void escape_cuf1(term_t_i *term)
+{
+    if( term->ccol + 1 >= term->grid.width ) {
+        term->ccol = term->grid.width - 1;
+    }  else {
+        term->ccol ++;
+    }
+}
+
 int match_sgm(term_t_i *term, int *length)
 {
     int i;
@@ -356,6 +365,7 @@ struct static_escape_code {
     { "\x1b[m", escape_rmul },
     { "\x1b[J", escape_ed },
     { "\x1b[?1l\x1b>", escape_rmkx },
+    { "\x1b[C", escape_cuf1 }
 };
 
 struct dynamic_escape_code {

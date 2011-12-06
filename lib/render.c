@@ -18,6 +18,7 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 
         if( term->escape_mode ) {
             change = true;
+            cursor_change = true;
             i += term_send_escape( term, buf + i, length  - i );
             if( i == length ) break;
         }
