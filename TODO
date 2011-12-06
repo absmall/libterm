@@ -9,8 +9,6 @@
 -Tab support
 -Clipboard
 -PB Menu support
--Fix bug with descending characters getting clipped on last line
--Support for typing special characters
+-Support for typing special characters in piekey
 -Drop the workaround for Qt character code bugs, this has been fixed.
 -See if there's a more appropriate sound for "beep". The general notification has a really long duration.
--x command in vi isn't properly clearing characters
