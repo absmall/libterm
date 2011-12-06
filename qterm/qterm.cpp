@@ -174,12 +174,12 @@ void QTerm::paintEvent(QPaintEvent *event)
             if( cursor_on && j == cursor_x && i == cursor_y ) {
                 painter.drawRect(j * char_width + 1, i * char_height + 1, char_width - 2, char_height - 2);
                 painter.setPen(QColor(0, 0, 0));
-                painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
+                painter.drawText(j * char_width, (i + 1) * char_height - char_descent, QString( QChar( grid[ i ][ j ] ) ) );
                 painter.setPen(QColor(255, 255, 255));
             } else {
                 color = term_get_fg_color( attribs[ i ][ j ], colors[ i ][ j ] );
                 painter.setPen(QColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF));
-                painter.drawText(j * char_width, (i + 1) * char_height, QString( QChar( grid[ i ][ j ] ) ) );
+                painter.drawText(j * char_width, (i + 1) * char_height - char_descent, QString( QChar( grid[ i ][ j ] ) ) );
             }
         }
     }
