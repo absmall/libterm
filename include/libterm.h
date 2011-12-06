@@ -11,6 +11,13 @@ typedef enum {
     TERM_TYPE_VT100
 } term_type;
 
+typedef enum {
+    TERM_KEY_UP,
+    TERM_KEY_DOWN,
+    TERM_KEY_LEFT,
+    TERM_KEY_RIGHT
+} term_special_key;
+
 // Attributes
 #define TERM_ATTRIB_BOLD        (1<<0)
 #define TERM_ATTRIB_UNDERSCORE  (1<<1)
@@ -88,6 +95,7 @@ bool term_process_child(term_t handle);
 
 // Send input to the shell
 void term_send_data(term_t handle, const char *string, int length);
+void term_send_special(term_t handle, term_special_key key);
 
 // Release all resources associated with a terminal
 void term_free(term_t handle);

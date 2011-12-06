@@ -257,6 +257,29 @@ void term_send_data(term_t handle, const char *string, int length)
     write(term->fd, string, length);
 }
 
+void term_send_special(term_t handle, term_special_key key)
+{
+    term_t_i *term;
+
+    term = TO_S(handle);
+    switch( key ) {
+        case TERM_KEY_UP:
+            write( term->fd, "\x1b[A", 3);
+            break;
+        case TERM_KEY_DOWN:
+            write( term->fd, "\x1b[B", 3);
+            break;
+        case TERM_KEY_RIGHT:
+            write( term->fd, "\x1b[C", 3);
+            break;
+        case TERM_KEY_LEFT:
+            write( term->fd, "\x1b[D", 3);
+            break;
+        default:
+            break;
+    }
+}
+
 bool term_create(term_t *t)
 {
     term_t_i *term = malloc(sizeof(term_t_i));
