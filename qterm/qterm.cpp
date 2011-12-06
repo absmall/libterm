@@ -236,6 +236,7 @@ void QTerm::resizeEvent(QResizeEvent *event)
 int main(int argc, char *argv[])
 {
     term_t terminal;
+    setenv("QT_DEBUG_PLUGINS", "1", 1);
     if( !term_create( &terminal ) ) {
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
