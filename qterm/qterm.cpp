@@ -14,8 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <bbsupport/Keyboard>
-#include <bbsupport/Notification>
+#include <qkbdqnx_qws.h>
 #endif
 
 #define WIDTH    80
@@ -55,7 +54,7 @@ void QTerm::init()
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 #ifdef __QNX__
-    BlackBerry::Keyboard::instance().show();
+    //BlackBerry::Keyboard::instance().show();
 #endif
     cursor_timer->start(BLINK_SPEED);
 }

@@ -1,5 +1,4 @@
 QMAKE_LFLAGS += '-Wl,-rpath,\'./app/native/lib\''
-LIBS += -lbbsupport
 QMAKE_CXXFLAGS = -O0 -g3
 SOURCES += qterm.cpp
 HEADERS += qterm.h
@@ -19,7 +18,6 @@ package.commands = blackberry-nativepackager \
     -e $$[QT_INSTALL_LIBS]/libQtGui.so.4 lib/libQtGui.so.4 \
     -e $$[QT_INSTALL_LIBS]/libQtOpenGL.so.4 lib/libQtOpenGL.so.4 \
     -e $$[QT_INSTALL_LIBS]/libQtNetwork.so.4 lib/libQtNetwork.so.4 \
-    -e $$[QT_INSTALL_LIBS]/libbbsupport.so.4 lib/libbbsupport.so.4 \
     -e $$[QT_INSTALL_PLUGINS]/platforms/libblackberry.so lib/platforms/libblackberry.so
 
 QMAKE_EXTRA_TARGETS += package
