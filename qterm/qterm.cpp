@@ -187,26 +187,21 @@ void QTerm::paintEvent(QPaintEvent *event)
 void QTerm::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key()) {
-        case Qt::Key_Return:
-            term_send_data( terminal, "\n", 1 );
-            break;
-        case Qt::Key_Backspace:
-            term_send_data( terminal, "\b", 1 );
-            break;
+        // FIXME These first two are a workaround for a bug in QT. Remove once it is fixed
         case Qt::Key_CapsLock:
         case Qt::Key_Shift:
             break;
         case Qt::Key_Up:
-            term_send_data( terminal, "\x1b[A", 3);
+            term_send_special( terminal, TERM_KEY_UP );
             break;
         case Qt::Key_Down:
-            term_send_data( terminal, "\x1b[B", 3);
+            term_send_special( terminal, TERM_KEY_DOWN );
             break;
         case Qt::Key_Right:
-            term_send_data( terminal, "\x1b[C", 3);
+            term_send_special( terminal, TERM_KEY_RIGHT );
             break;
         case Qt::Key_Left:
-            term_send_data( terminal, "\x1b[D", 3);
+            term_send_special( terminal, TERM_KEY_LEFT );
             break;
         default:
             term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
