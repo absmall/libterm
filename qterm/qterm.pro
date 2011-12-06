@@ -18,6 +18,6 @@ package.commands = blackberry-nativepackager \
     -e $$[QT_INSTALL_LIBS]/libQtGui.so.4 lib/libQtGui.so.4 \
     -e $$[QT_INSTALL_LIBS]/libQtOpenGL.so.4 lib/libQtOpenGL.so.4 \
     -e $$[QT_INSTALL_LIBS]/libQtNetwork.so.4 lib/libQtNetwork.so.4 \
-    -e $$[QT_INSTALL_PLUGINS]/platforms/libblackberry.so lib/platforms/libblackberry.so
+    -e $$[QT_INSTALL_PLUGINS]/platforms/libblackberry.so lib/libblackberry.so
 
 QMAKE_EXTRA_TARGETS += package
