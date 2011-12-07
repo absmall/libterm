@@ -43,13 +43,13 @@ int term_get_file_descriptor(term_t handle)
     return term->fd;
 }
 
-const uint32_t **term_get_grid(term_t handle)
+const wchar_t **term_get_grid(term_t handle)
 {
     term_t_i *term;
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid.grid + term->row;
+    return (const wchar_t **)term->grid.grid + term->row;
 }
 
 const uint32_t **term_get_attribs(term_t handle)
@@ -68,6 +68,33 @@ const uint32_t **term_get_colours(term_t handle)
     term = TO_S(handle);
 
     return (const uint32_t **)term->grid.colours + term->row;
+}
+
+const char *term_get_line(term_t handle, int row)
+{
+    unsigned int length;
+    term_t_i *term;
+    wchar_t *grid_row;
+
+    term = TO_S(handle);
+
+    grid_row = term->grid.grid[term->row + row];
+    length = wcstombs(NULL, grid_row, 0) + 1;
+    if( length > term->conversion_buffer_size ) {
+        if( term->conversion_buffer != NULL ) {
+            free( term->conversion_buffer );
+        }
+        term->conversion_buffer = malloc( length );
+        if( term->conversion_buffer == NULL ) {
+            errno = ENOMEM;
+            term->conversion_buffer_size = 0;
+            return NULL;
+        }
+        term->conversion_buffer_size = length;
+    }
+    wcstombs(term->conversion_buffer, grid_row, term->conversion_buffer_size);
+
+    return term->conversion_buffer;
 }
 
 static int term_get_color(uint32_t attrib, uint32_t colour, uint32_t *color)
@@ -333,6 +360,9 @@ void term_free(term_t handle)
     term_release_grid( &term->grid );
     if( term->shell != NULL ) {
         free( term->shell );
+    }
+    if( term->conversion_buffer != NULL ) {
+        free( term->conversion_buffer );
     }
     if( term->escape_code != NULL ) {
         free( term->escape_code );

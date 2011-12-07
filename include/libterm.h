@@ -78,9 +78,11 @@ void term_register_bell(term_t handle, void (*bell)(term_t handle));
 int term_get_file_descriptor(term_t handle);
 
 // Retrieve the grid of characters
-const uint32_t **term_get_grid(term_t handle);
+const wchar_t **term_get_grid(term_t handle);
 const uint32_t **term_get_attribs(term_t handle);
 const uint32_t **term_get_colours(term_t handle);
+// Retrieve a UTF-8 version of a particular row
+const char *term_get_line(term_t handle, int row);
 
 // Convert an attribute and colour pair into RGB888
 uint32_t term_get_fg_color(uint32_t attrib, uint32_t colour);
