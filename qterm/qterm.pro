@@ -2,7 +2,7 @@ QMAKE_LFLAGS += '-Wl,-rpath,\'./app/native/lib\''
 QMAKE_CXXFLAGS = -O0 -g3
 SOURCES += qterm.cpp
 HEADERS += qterm.h
-LIBS += -L../lib/ -lterm
+LIBS += -L../lib/ -lterm -lbps
 INCLUDEPATH=../include
 #-devMode -debugToken debugToken.bar
 package.target = $${TARGET}.bar
