@@ -14,7 +14,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <qkbdqnx_qws.h>
+#include <bps/bps.h>
+#include <bps/virtualkeyboard.h>
 #endif
 
 #define WIDTH    80
@@ -53,7 +54,7 @@ void QTerm::init()
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 #ifdef __QNX__
-    //BlackBerry::Keyboard::instance().show();
+    virtualkeyboard_show();
 #endif
     cursor_timer->start(BLINK_SPEED);
 }
@@ -211,6 +212,14 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 int main(int argc, char *argv[])
 {
     term_t terminal;
+
+#ifdef __QNX__
+    if( bps_initialize() != BPS_SUCCESS ) {
+        fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
+        exit(1);
+    }
+#endif
+
     if( !term_create( &terminal ) ) {
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
