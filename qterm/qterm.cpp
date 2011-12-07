@@ -158,14 +158,10 @@ void QTerm::blink_cursor()
     if (fontWorkAround) {
         // The update region may not be quite monospaced.
         int i;
-        char str[WIDTH];
-        const uint32_t **grid;
+        const char *str;
         QFontMetrics metrics(*font);
 
-        grid = term_get_grid( terminal );
-        for (i=0;i < WIDTH; i++) {
-            str[i] = grid[cursor_y][i];
-        }
+        str = term_get_line( terminal, cursor_y );
         coord_x = metrics.width( QString(str),cursor_x );
     } else {
         coord_x = cursor_x * char_width;
@@ -180,11 +176,11 @@ void QTerm::paintEvent(QPaintEvent *event)
     int i, j, color;
     int new_width;
     int new_height;
-    const uint32_t **grid;
+    const wchar_t **grid;
     const uint32_t **attribs;
     const uint32_t **colors;
     QPainter painter(this);
-    char str[WIDTH+1];
+    const char *str;
     int cursor_x_coord;
     QColor fgColor(255,255,255);
     QColor bgColor(0,0,0);
@@ -209,10 +205,7 @@ void QTerm::paintEvent(QPaintEvent *event)
         return;
     }
 #if 1 
-    // Brute force convesion
-    for(j=0;j<WIDTH;j++) {
-        str[j]=grid[cursor_y][j];
-    }
+    str = term_get_line( terminal, cursor_y );
     // Workaround to get the cursor in the right spot.  For some
     // reason, on OSX (again), the monospace font does is not really
     // monospace for skinny characters! 
@@ -239,11 +232,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     painter.setBrush(fgColor);
 
     for (i=0; i<term_get_height( terminal );i++) {
-        // Brute force convesion to 8-bit UTF
-        for( j=0; j< term_get_width( terminal ); j++) {
-            str[j]=grid[i][j];
-        }
-        str[term_get_width( terminal )]=0;
+        str = term_get_line( terminal, i );
         painter.drawText(0, (i) * char_height, 
                         w, char_height,
                         Qt::TextExpandTabs, 
