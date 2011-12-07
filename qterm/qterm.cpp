@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QPaintEvent>
 #include <QFontMetrics>
+#include <QTextStream>
 #include <qterm.h>
 #include <stdio.h>
 #include <QKeyEvent>
@@ -54,6 +55,27 @@ void QTerm::init()
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
+
+    // Setup the initial font
+    font = new QFont();
+    font->setStyleHint(QFont::Courier);//QFont::TypeWriter);
+    font->setPointSize(12);
+    font->setStyleStrategy(QFont::NoAntialias);
+    font->setFamily("Monospace");
+    font->setFixedPitch(true);
+    font->setKerning(false);
+
+    // Workaround for a bug in OSX - Dave reports that maxWidth returns 0,
+    // when width of different characters returns the correct value
+    QFontMetrics metrics(*font);
+    char_width = metrics.maxWidth();
+    if(char_width==0) {
+        fontWorkAround = true;
+        char_width = metrics.width(QChar('X'));
+    }
+
+    char_height = metrics.lineSpacing();
+
 #ifdef __QNX__
     BlackBerry::Keyboard::instance().show();
 #endif
@@ -119,8 +141,24 @@ void QTerm::terminate()
 
 void QTerm::blink_cursor()
 {
+    int coord_x;
     cursor_on ^= 1;
-    update( cursor_x * char_width,
+    if (fontWorkAround) {
+        // The update region may not be quite monospaced.
+        int i;
+        char str[WIDTH];
+        const uint32_t **grid;
+        QFontMetrics metrics(*font);
+
+        grid = term_get_grid( terminal );
+        for (i=0;i < WIDTH; i++) {
+            str[i] = grid[cursor_y][i];
+        }
+        coord_x = metrics.width( QString(str),cursor_x );
+    } else {
+        coord_x = cursor_x * char_width;
+    }
+    update( coord_x,
                   cursor_y * char_height,
                   char_width, char_height );
 }
@@ -134,50 +172,76 @@ void QTerm::paintEvent(QPaintEvent *event)
     const uint32_t **attribs;
     const uint32_t **colors;
     QPainter painter(this);
-    QFont font;
+    char str[WIDTH+1];
+    int cursor_x_coord;
+    QColor fgColor(255,255,255);
+    QColor bgColor(0,0,0);
 
-    font.setStyleHint(QFont::TypeWriter);
-    font.setFamily("Monospace");
-    font.setFixedPitch(true);
-    font.setKerning(false);
+    int maxX=0;
+    
     painter.setBackgroundMode(Qt::TransparentMode);
     painter.setBrush(QColor(8, 0, 0));
-    painter.setFont(font);
+    painter.setFont( *font );
 
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
-    
-    new_width = painter.fontMetrics().maxWidth();
-    // Workaround for a bug in OSX - Dave reports that maxWidth returns 0,
-    // when width of different characters returns the correct value
-    if( new_width == 0 ) {
-        new_width = painter.fontMetrics().width(QChar('X'));
-    }
-    new_height = painter.fontMetrics().lineSpacing();
-    
-    if( char_width != new_width
-     || char_height != new_height ) {
-        char_width = new_width;
-        char_height = new_height;
-        char_descent = painter.fontMetrics().descent();
-#ifdef __QNX__
-        {
-            int kbd_height;
-            kbd_height = BlackBerry::Keyboard::instance().keyboardHeight();
-            term_resize( terminal, contentsRect().width() / char_width, (contentsRect().height() - kbd_height) / char_height, 0 );
-        }
-#else
-        term_resize( terminal, contentsRect().width() / char_width, contentsRect().height() / char_height, 0 );
-#endif
-        update( contentsRect() );
-        return;
-    }
-
-    painter.setPen(QColor(255, 255, 255));
-    painter.setBrush(QColor(255, 255, 255));
+    int x,y,w,h;
+    event->rect().getRect(&x, &y, &w, &h);
+   
+    //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", x,y,w,h);
     grid = term_get_grid( terminal );
     attribs = term_get_attribs( terminal );
     colors = term_get_colours( terminal );
+    
+    if (cursor_x < 0 || cursor_y < 0) {
+        return;
+    }
+#if 1 
+    // Brute force convesion
+    for(j=0;j<WIDTH;j++) {
+        str[j]=grid[cursor_y][j];
+    }
+    // Workaround to get the cursor in the right spot.  For some
+    // reason, on OSX (again), the monospace font does is not really
+    // monospace for skinny characters! 
+    if (fontWorkAround) {
+        cursor_x_coord = painter.fontMetrics().width(QString(str),cursor_x);
+    } else {
+        cursor_x_coord = cursor_x * char_width;
+    }
+    
+    if ( cursor_on ) {
+       painter.setPen(fgColor);
+       painter.setBrush(fgColor);
+       painter.drawRect( cursor_x_coord +1, 
+                         cursor_y * char_height + 1,
+                         char_width-2, char_height-2); 
+    } else {
+       painter.setPen(bgColor);
+       painter.setBrush(bgColor);
+       painter.drawRect( cursor_x_coord +1,
+                         cursor_y * char_height + 1,
+                         char_width-2, char_height-2); 
+    }
+    painter.setPen(fgColor);
+    painter.setBrush(fgColor);
+
+    for (i=0; i<term_get_height( terminal );i++) {
+        // Brute force convesion to 8-bit UTF
+        for( j=0; j< term_get_width( terminal ); j++) {
+            str[j]=grid[i][j];
+        }
+        str[WIDTH]=0;
+        painter.drawText(0, (i) * char_height, 
+                        w, char_height,
+                        Qt::TextExpandTabs, 
+                        str,
+                        NULL
+                        );
+    }
+
+#else
+    painter.setBrush(fgColor);
     for( i = 0; i < term_get_height( terminal ); i ++ ) {
         for( j = 0; j < term_get_width( terminal ); j ++ ) {
             if( cursor_on && j == cursor_x && i == cursor_y ) {
@@ -186,12 +250,14 @@ void QTerm::paintEvent(QPaintEvent *event)
                 painter.drawText(j * char_width, (i + 1) * char_height - char_descent, QString( QChar( grid[ i ][ j ] ) ) );
                 painter.setPen(QColor(255, 255, 255));
             } else {
+
                 color = term_get_fg_color( attribs[ i ][ j ], colors[ i ][ j ] );
                 painter.setPen(QColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF));
                 painter.drawText(j * char_width, (i + 1) * char_height - char_descent, QString( QChar( grid[ i ][ j ] ) ) );
             }
         }
     }
+#endif
 }
 
 void QTerm::keyPressEvent(QKeyEvent *event)
