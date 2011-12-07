@@ -77,9 +77,12 @@ void QTerm::init()
     if(char_width==0) {
         fontWorkAround = true;
         char_width = metrics.width(QChar('X'));
+    } else {
+        fontWorkAround = false;
     }
 
     char_height = metrics.lineSpacing();
+    char_descent = metrics.descent();
 
 #ifdef __QNX__
 #ifdef BPS_VERSION
