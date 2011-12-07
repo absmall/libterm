@@ -13,7 +13,7 @@ typedef struct {
     // Total height of buffer including offscreen
     int history;
     // Grid of characters
-    uint32_t **grid;
+    wchar_t **grid;
     // Grid of attributes
     uint32_t **attribs;
     // Color of characters
@@ -58,6 +58,10 @@ typedef struct term_t_i {
     char *shell;
     // Type of terminal to emulate
     term_type type;
+    // Buffer in which to convert a line being retrieved
+    char *conversion_buffer;
+    // Size of the conversion buffer
+    int conversion_buffer_size;
     // opaque user data
     void *user_data;
 } term_t_i;

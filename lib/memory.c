@@ -7,7 +7,7 @@ bool term_allocate_grid(term_grid *grid)
 {
     int i, j;
 
-    grid->grid = malloc(sizeof(uint32_t *)*grid->history);
+    grid->grid = malloc(sizeof(wchar_t *)*grid->history);
     if( grid->grid == NULL ) {
         errno = ENOMEM;
         return false;
