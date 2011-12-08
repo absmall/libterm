@@ -15,7 +15,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <bps/bps.h>
+#ifdef BPS_VERSION
 #include <bps/virtualkeyboard.h>
+#else
+#include <bbsupport/Keyboard>
+#include <bbsupport/Notification>
+#endif
 #endif
 
 #define WIDTH    80
@@ -55,7 +60,11 @@ void QTerm::init()
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 #ifdef __QNX__
+#ifdef BPS_VERSION
     virtualkeyboard_show();
+#else
+    BlackBerry::Keyboard::instance().show();
+#endif
 #endif
     cursor_timer->start(BLINK_SPEED);
 }
@@ -163,7 +172,11 @@ void QTerm::paintEvent(QPaintEvent *event)
 #ifdef __QNX__
         {
             int kbd_height;
+#ifdef BPS_VERSION
+            virtualkeyboard_get_height( &kbd_height );
+#else
             kbd_height = BlackBerry::Keyboard::instance().keyboardHeight();
+#endif
             term_resize( terminal, contentsRect().width() / char_width, (contentsRect().height() - kbd_height) / char_height, 0 );
         }
 #else
@@ -225,7 +238,11 @@ void QTerm::resizeEvent(QResizeEvent *event)
 #ifdef __QNX__
         {
             int kbd_height;
+#ifdef BPS_VERSION
+            virtualkeyboard_get_height( &kbd_height );
+#else
             kbd_height = BlackBerry::Keyboard::instance().keyboardHeight();
+#endif
             term_resize( terminal, event->size().width() / char_width, (event->size().height() - kbd_height) / char_height, 0 );
         }
 #else
@@ -239,10 +256,12 @@ int main(int argc, char *argv[])
     term_t terminal;
 
 #ifdef __QNX__
+#ifdef BPS_VERSION
     if( bps_initialize() != BPS_SUCCESS ) {
         fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
         exit(1);
     }
+#endif
 #endif
 
     if( !term_create( &terminal ) ) {
