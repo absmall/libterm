@@ -163,7 +163,7 @@ void QTerm::paintEvent(QPaintEvent *event)
 #ifdef __QNX__
         {
             int kbd_height;
-            virtualkeyboard_get_height( &kbd_height );
+            kbd_height = BlackBerry::Keyboard::instance().keyboardHeight();
             term_resize( terminal, contentsRect().width() / char_width, (contentsRect().height() - kbd_height) / char_height, 0 );
         }
 #else
@@ -225,7 +225,7 @@ void QTerm::resizeEvent(QResizeEvent *event)
 #ifdef __QNX__
         {
             int kbd_height;
-            virtualkeyboard_get_height( &kbd_height );
+            kbd_height = BlackBerry::Keyboard::instance().keyboardHeight();
             term_resize( terminal, event->size().width() / char_width, (event->size().height() - kbd_height) / char_height, 0 );
         }
 #else
