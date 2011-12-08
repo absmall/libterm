@@ -206,15 +206,17 @@ void QTerm::paintEvent(QPaintEvent *event)
 {
     int i;
 #if 0
+    int j;
     int color;
     const wchar_t **grid;
     const uint32_t **attribs;
     const uint32_t **colors;
+#else
+    const char *str;
+    int cursor_x_coord;
 #endif
     QPainter painter(this);
     QRect windowRect = painter.window();
-    const char *str;
-    int cursor_x_coord;
     QColor fgColor(255,255,255);
     QColor bgColor(0,0,0);
     int gridWidth, gridHeight;
