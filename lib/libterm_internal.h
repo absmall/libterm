@@ -1,3 +1,6 @@
+#ifndef __LIBTERM_INTERNAL_H__
+#define __LIBTERM_INTERNAL_H__
+
 #include <stdint.h>
 #include <sys/types.h>
 #include <libterm.h>
@@ -70,3 +73,5 @@ void term_shiftrows(term_t_i *term);
 
 #define TO_S(x) ((term_t_i *)x)
 #define TO_H(x) ((term_t)x)
+
+#endif /* __LIBTERM_INTERNAL_H__ */

@@ -1,3 +1,6 @@
+#ifndef __LIBTERM_H__
+#define __LIBTERM_H__
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -103,3 +106,5 @@ void term_free(term_t handle);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* __LIBTERM_H__ */
