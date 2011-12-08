@@ -115,19 +115,52 @@ void QTerm::term_update(term_t handle, int x, int y, int width, int height)
 void QTerm::term_update_cursor(term_t handle, int x, int y)
 {
     QTerm *term = (QTerm *)term_get_user_data( handle );
-
+    int coord_x_min;
+    int coord_x_max;
+    int old_x = term->cursor_x;
+    int old_y = term->cursor_y;
+    int min_x, max_x, min_y, max_y;
     // Update old cursor location
-    term->update( term->cursor_x * term->char_width,
+   /* term->update( term->cursor_x * term->char_width,
                   term->cursor_y * term->char_height,
                   term->char_width, term->char_height );
-
+*/
     term->cursor_x = x;
     term->cursor_y = y;
 
+    if ( old_x <= term->cursor_x ) {
+        min_x = old_x;
+        max_x = term->cursor_x;
+    } else {
+        min_x = term->cursor_x;
+        max_x = old_x;
+    }
+
+    if ( old_y <= term->cursor_y ) {
+        min_y = old_y;
+        max_y = term->cursor_y;
+    } else {
+        min_y = term->cursor_y;
+        max_y = old_y;
+    }
+    if (term->fontWorkAround) {
+        // The update region may not be quite monospaced.
+        const char *str;
+        QFontMetrics metrics(*term->font);
+
+        str = term_get_line( term->terminal, term->cursor_y );
+        coord_x_min = metrics.width( QString(str),min_x );
+        coord_x_max = metrics.width( QString(str),max_x );
+    } else {
+        coord_x_min = min_x * term->char_width;
+        coord_x_max = max_x * term->char_width;
+    }
+
     // Update new cursor location
-    term->update( term->cursor_x * term->char_width,
-                  term->cursor_y * term->char_height,
-                  term->char_width, term->char_height );
+    term->update( coord_x_min,
+                  min_y * term->char_height,
+                  coord_x_max + term->char_width,
+                  (max_y - min_y +1 ) *term->char_height );
 }
 
 void QTerm::terminal_data()
@@ -171,25 +204,29 @@ void QTerm::paintEvent(QPaintEvent *event)
     const uint32_t **colors;
 #endif
     QPainter painter(this);
+    QRect windowRect = painter.window();
     const char *str;
     int cursor_x_coord;
     QColor fgColor(255,255,255);
     QColor bgColor(0,0,0);
+    int gridWidth, gridHeight;
 
     painter.setBackgroundMode(Qt::TransparentMode);
     painter.setBrush(QColor(8, 0, 0));
     painter.setFont( *font );
 
+    // Get grid dimensions
+    term_get_grid_size(terminal, &gridWidth, &gridHeight);
+
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
-    int x,y,w,h;
-    event->rect().getRect(&x, &y, &w, &h);
    
-    //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", x,y,w,h);
+    //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
    
     if (cursor_x < 0 || cursor_y < 0) {
         return;
     }
+
 #if 1 
     str = term_get_line( terminal, cursor_y );
     // Workaround to get the cursor in the right spot.  For some
@@ -217,13 +254,13 @@ void QTerm::paintEvent(QPaintEvent *event)
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
 
-    for (i=0; i<term_get_height( terminal );i++) {
+    for (i=0; i< gridHeight;i++) {
         str = term_get_line( terminal, i );
         painter.drawText(0, (i) * char_height, 
-                        w, char_height,
+                        windowRect.width(),char_height,
                         Qt::TextExpandTabs, 
                         str,
-                        NULL
+                        &windowRect 
                         );
     }
 

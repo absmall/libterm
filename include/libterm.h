@@ -84,6 +84,8 @@ int term_get_file_descriptor(term_t handle);
 const wchar_t **term_get_grid(term_t handle);
 const uint32_t **term_get_attribs(term_t handle);
 const uint32_t **term_get_colours(term_t handle);
+// Get the dimensions of the grid
+void term_get_grid_size(term_t handle, int *w, int *h);
 // Retrieve a UTF-8 version of a particular row
 const char *term_get_line(term_t handle, int row);
 
