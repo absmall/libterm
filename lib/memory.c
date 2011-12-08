@@ -112,19 +112,20 @@ void term_copy_grid(term_grid *dst, term_grid *src)
 
 void term_shiftrows(term_t_i *term)
 {
+    wchar_t *gridrow;
     uint32_t *firstrow;
     int i;
 
     // Just cycle the pointers, and move the first row to the end, but clear it
     // grid
-    firstrow = term->grid.grid[0];
+    gridrow = term->grid.grid[0];
     for( i = 1; i < term->grid.history; i ++ ) {
         term->grid.grid[ i - 1 ] = term->grid.grid[ i ];
     }
-    term->grid.grid[ i - 1 ] = firstrow;
+    term->grid.grid[ i - 1 ] = gridrow;
 
     for( i = 0; i < term->grid.width; i ++ ) {
-        firstrow[ i ] = ' ';
+        gridrow[ i ] = ' ';
     }
 
     // attribs
