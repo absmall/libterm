@@ -182,7 +182,7 @@ int term_resize( term_t handle, int width, int height, int scrollback )
 
     term = TO_S(handle);
 
-//    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
+    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
 
     ws.ws_row = height;
     ws.ws_col = width;
