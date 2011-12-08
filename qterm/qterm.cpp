@@ -112,16 +112,23 @@ void QTerm::term_update(term_t handle, int x, int y, int width, int height)
 
 void QTerm::term_update_cursor(term_t handle, int x, int y)
 {
+    int old_x, old_y;
     QTerm *term = (QTerm *)term_get_user_data( handle );
-    // Update old cursor location
-    term->cursor_on = 0;
-    term->update_grid( term->cursor_x, term->cursor_y, 1, 1);
 
-    // TODO:  Should also reset the blink timer to have consistency.
+    old_x = term->cursor_x;
+    old_y = term->cursor_y;
+
+    // Reset cursor blink
     term->cursor_on = 1;
+    term->cursor_timer->stop();
+    term->cursor_timer->start(BLINK_SPEED);
+
+    // Update position
     term->cursor_x = x;
     term->cursor_y = y;
     
+    // Update old and new cursor location
+    term->update_grid( old_x, old_y, 1, 1);
     term->update_grid( term->cursor_x, term->cursor_y, 1, 1);
 }
 
