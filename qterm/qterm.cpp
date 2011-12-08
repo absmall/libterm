@@ -148,7 +148,6 @@ void QTerm::blink_cursor()
     cursor_on ^= 1;
     if (fontWorkAround) {
         // The update region may not be quite monospaced.
-        int i;
         const char *str;
         QFontMetrics metrics(*font);
 
@@ -164,20 +163,19 @@ void QTerm::blink_cursor()
 
 void QTerm::paintEvent(QPaintEvent *event)
 {
-    int i, j, color;
-    int new_width;
-    int new_height;
+    int i;
+#if 0
+    int color;
     const wchar_t **grid;
     const uint32_t **attribs;
     const uint32_t **colors;
+#endif
     QPainter painter(this);
     const char *str;
     int cursor_x_coord;
     QColor fgColor(255,255,255);
     QColor bgColor(0,0,0);
 
-    int maxX=0;
-    
     painter.setBackgroundMode(Qt::TransparentMode);
     painter.setBrush(QColor(8, 0, 0));
     painter.setFont( *font );
@@ -188,10 +186,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     event->rect().getRect(&x, &y, &w, &h);
    
     //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", x,y,w,h);
-    grid = term_get_grid( terminal );
-    attribs = term_get_attribs( terminal );
-    colors = term_get_colours( terminal );
-    
+   
     if (cursor_x < 0 || cursor_y < 0) {
         return;
     }
@@ -233,6 +228,10 @@ void QTerm::paintEvent(QPaintEvent *event)
     }
 
 #else
+    grid = term_get_grid( terminal );
+    attribs = term_get_attribs( terminal );
+    colors = term_get_colours( terminal );
+
     painter.setBrush(fgColor);
     for( i = 0; i < term_get_height( terminal ); i ++ ) {
         for( j = 0; j < term_get_width( terminal ); j ++ ) {
