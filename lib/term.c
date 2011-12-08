@@ -383,3 +383,10 @@ void *term_get_user_data(term_t handle)
 
     return term->user_data;
 }
+
+void term_get_grid_size(term_t handle, int *w, int *h)
+{
+    term_t_i *term = TO_S(handle);
+    *w = term->grid.width;
+    *h = term->grid.height;
+}
