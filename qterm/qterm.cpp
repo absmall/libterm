@@ -107,59 +107,22 @@ void QTerm::term_update(term_t handle, int x, int y, int width, int height)
 {
     QTerm *term = (QTerm *)term_get_user_data( handle );
 
-    term->update( x * term->char_width, y * term->char_height,
-                  width * term->char_width, height * term->char_height + term->char_descent );
+    term->update_grid(x, y, width, height);
 }
 
 void QTerm::term_update_cursor(term_t handle, int x, int y)
 {
     QTerm *term = (QTerm *)term_get_user_data( handle );
-    int coord_x_min;
-    int coord_x_max;
-    int old_x = term->cursor_x;
-    int old_y = term->cursor_y;
-    int min_x, max_x, min_y, max_y;
     // Update old cursor location
-   /* term->update( term->cursor_x * term->char_width,
-                  term->cursor_y * term->char_height,
-                  term->char_width, term->char_height );
-*/
+    term->cursor_on = 0;
+    term->update_grid( term->cursor_x, term->cursor_y, 1, 1);
+
+    // TODO:  Should also reset the blink timer to have consistency.
+    term->cursor_on = 1;
     term->cursor_x = x;
     term->cursor_y = y;
-
-    if ( old_x <= term->cursor_x ) {
-        min_x = old_x;
-        max_x = term->cursor_x;
-    } else {
-        min_x = term->cursor_x;
-        max_x = old_x;
-    }
-
-    if ( old_y <= term->cursor_y ) {
-        min_y = old_y;
-        max_y = term->cursor_y;
-    } else {
-        min_y = term->cursor_y;
-        max_y = old_y;
-    }
-    if (term->fontWorkAround) {
-        // The update region may not be quite monospaced.
-        const char *str;
-        QFontMetrics metrics(*term->font);
-
-        str = term_get_line( term->terminal, term->cursor_y );
-        coord_x_min = metrics.width( QString(str),min_x );
-        coord_x_max = metrics.width( QString(str),max_x );
-    } else {
-        coord_x_min = min_x * term->char_width;
-        coord_x_max = max_x * term->char_width;
-    }
-
-    // Update new cursor location
-    term->update( coord_x_min,
-                  min_y * term->char_height,
-                  coord_x_max + term->char_width,
-                  (max_y - min_y +1 ) *term->char_height );
+    
+    term->update_grid( term->cursor_x, term->cursor_y, 1, 1);
 }
 
 void QTerm::terminal_data()
@@ -176,23 +139,61 @@ void QTerm::terminate()
 
 void QTerm::blink_cursor()
 {
-    int coord_x;
+    //int coord_x;
     cursor_on ^= 1;
-    if (fontWorkAround) {
-        // The update region may not be quite monospaced.
-        const char *str;
-        QFontMetrics metrics(*font);
-
-        str = term_get_line( terminal, cursor_y );
-        coord_x = metrics.width( QString(str),cursor_x );
-    } else {
-        coord_x = cursor_x * char_width;
-    }
-    update( coord_x,
-                  cursor_y * char_height,
-                  char_width, char_height );
+    update_grid( cursor_x, cursor_y, 1, 1);
 }
 
+// Called to update the grid.
+// Region is based on grid coordinates.
+void QTerm::update_grid(int grid_x_min,
+                        int grid_y_min,
+                        int grid_width,
+                        int grid_height)
+{
+    int coords_x_min, coords_y_min;
+    int coords_x_max, coords_y_max;
+
+//    fprintf(stderr,"Updating Grid: (%d,%d) %d x %d\n", grid_x_min, grid_y_min, grid_width, grid_height);
+    
+    if (grid_x_min < 0 || grid_y_min < 0) {
+        return;
+    }
+    if ( fontWorkAround ) {
+        // If fontWorkAround is set, we cannot trust the characters to 
+        // be monospaced.  So we need to calculate the coordinates based
+        // on the string lengths of the strings in the grid.
+        QFontMetrics metrics(*font);
+
+        const char *str;
+        int i;
+
+        coords_x_min = 9999;    // Replace with some window property.
+        coords_x_max = 0;
+        for (i= grid_y_min; i < (grid_y_min + grid_height); i++) {
+            int tmp;
+            str = term_get_line( terminal, i );
+                
+            // X limits
+            tmp = metrics.width(QString(str),grid_x_min);
+            if (tmp < coords_x_min) {
+                coords_x_min = tmp;
+            }
+            tmp = metrics.width(QString(str),grid_x_min + grid_width);
+            if (tmp > coords_x_max) {
+                coords_x_max = tmp;
+            }
+        }
+        
+    } else {
+        coords_x_min = grid_x_min * char_width;
+        coords_x_max = grid_width * char_width;
+    }
+    coords_y_min = grid_y_min * char_height;
+    coords_y_max = grid_height * char_height;
+    QWidget::update(coords_x_min, coords_y_min,
+                    coords_x_max, coords_y_max);
+}
 void QTerm::paintEvent(QPaintEvent *event)
 {
     int i;
@@ -220,7 +221,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
    
-    //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
+//    fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
    
     if (cursor_x < 0 || cursor_y < 0) {
         return;
@@ -236,7 +237,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     } else {
         cursor_x_coord = cursor_x * char_width;
     }
-    
+
     if ( cursor_on ) {
        painter.setPen(fgColor);
        painter.setBrush(fgColor);
