@@ -15,6 +15,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *);
     void resizeEvent(QResizeEvent *);
+    void update_grid(int, int, int, int);
  
 private:
     void init( );
