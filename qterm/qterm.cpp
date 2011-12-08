@@ -43,6 +43,7 @@ void QTerm::init()
     cursor_y = -1;
     cursor_on = 1;
 
+    resize(1024, 600);
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
     term_register_cursor( terminal, term_update_cursor );
@@ -159,7 +160,15 @@ void QTerm::paintEvent(QPaintEvent *event)
         char_width = new_width;
         char_height = new_height;
         char_descent = painter.fontMetrics().descent();
+#ifdef __QNX__
+        {
+            int kbd_height;
+            virtualkeyboard_get_height( &kbd_height );
+            term_resize( terminal, contentsRect().width() / char_width, (contentsRect().height() - kbd_height) / char_height, 0 );
+        }
+#else
         term_resize( terminal, contentsRect().width() / char_width, contentsRect().height() / char_height, 0 );
+#endif
         update( contentsRect() );
         return;
     }
@@ -213,7 +222,15 @@ void QTerm::keyPressEvent(QKeyEvent *event)
 void QTerm::resizeEvent(QResizeEvent *event)
 {
     if( char_width != 0 && char_height != 0 ) {
+#ifdef __QNX__
+        {
+            int kbd_height;
+            virtualkeyboard_get_height( &kbd_height );
+            term_resize( terminal, event->size().width() / char_width, (event->size().height() - kbd_height) / char_height, 0 );
+        }
+#else
         term_resize( terminal, event->size().width() / char_width, event->size().height() / char_height, 0 );
+#endif
     }
 }
 

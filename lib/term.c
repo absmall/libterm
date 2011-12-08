@@ -182,7 +182,7 @@ int term_resize( term_t handle, int width, int height, int scrollback )
 
     term = TO_S(handle);
 
-//    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
+    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
 
     ws.ws_row = height;
     ws.ws_col = width;
@@ -202,10 +202,13 @@ int term_resize( term_t handle, int width, int height, int scrollback )
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
     if( ret != -1 ) {
-        // I'm not sure why ccol needs to be set, but this seems to be
-        // neceesary before sending SIGWINCH, because bash responds by
-        // re-outputting the current line
+#ifndef __QNX__
+        // I'm not sure why ccol needs to be set on linux, but thisseems to be
+        // necessary before sending SIGWINCH, because bash responds by
+        // re-outputting the current line. The qnx shell does not do the same
+        // thing
         term->ccol = 0;
+#endif
         term->crow += g.history - term->grid.history;
 
         ret = kill(term->child, SIGWINCH);
