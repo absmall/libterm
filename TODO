@@ -14,6 +14,4 @@
 -Support for typing special characters in piekey
 -Drop the workaround for Qt character code bugs, once it has been fixed.
 -See if there's a more appropriate sound for "beep". The general notification has a really long duration.
--Split escape code handling into terminfo implementation/vt100 escape code matching.
 -Support mulitple data stage formats (UCS-32 grid and array of UTF-8 strings)
--Give an accessor function to retrieve a UTF-8 string at a particular row, instead of the UCS-32 grid
