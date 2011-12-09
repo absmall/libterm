@@ -9,9 +9,6 @@ Building for linux:
 
 Building for playbook:
 ----------------------
-1) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=ntoarm.cmake .; make'. This will build lib/libterm.so
-2) In the libterm/qterm directory, run the qmake application that comes as part
-of the Qt for playbook build as '/path/to/qt/qmake'.
-3) In the same directory, run 'make qterm.bar'. This will build qterm.bar in
-the libterm/qterm directory, which can be loaded to playbook.
+1) set the QTDIR environment variable to be the location in which qmake is installed (the qmake executable should be present in $QTDIR/bin/qmake)
+2) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=ntoarm.cmake .; make'. This will build libterm.so, qterm and qterm.bar
 Note: cterm is not supported on playbook
