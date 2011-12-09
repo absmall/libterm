@@ -15,5 +15,5 @@
 -Drop the workaround for Qt character code bugs, once it has been fixed.
 -See if there's a more appropriate sound for "beep". The general notification has a really long duration.
 -Support mulitple data stage formats (UCS-32 grid and array of UTF-8 strings)
--Get cmake working for qterm on playbook
+-Clean up cmake for qterm on playbook
 -Remove hardcoded resizing, qterm should be automatically fullscreen
