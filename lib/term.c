@@ -173,31 +173,73 @@ void term_scroll( term_t handle, int row )
     term->row = row;
 }
 
-int term_resize( term_t handle, int width, int height, int scrollback )
+int term_resize( term_t handle, int new_width, int new_height, int new_scrollback )
 {
     int ret;
     struct winsize ws;
     term_t_i *term;
     term_grid g;
+    int width, height, offset_y_src, offset_y_dst, new_history;
 
     term = TO_S(handle);
 
-    if( width == term->grid.width && height == term->grid.height && scrollback + height == term->grid.history) return 0;
+    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + height == term->grid.history) return 0;
 
-    ws.ws_row = height;
-    ws.ws_col = width;
-    ws.ws_xpixel = width;
-    ws.ws_ypixel = height;
+    // Copy the narrower of the two
+    if( term->grid.width < new_width ) {
+        width = term->grid.width;
+    } else {
+        width = new_width;
+    }
 
-    g.width = width;
-    g.height = height;
-    g.history = height + scrollback;
+    // Convenience variable
+    new_history = new_height + new_scrollback;
+
+    // We want to copy such that the first lines after the scrollback are in
+    // the same position, unless that would push the cursor off the screen
+    if( term->crow >= new_height ) {
+        // Put the cursor at the end
+        if( term->crow < new_history ) {
+            offset_y_src = 0;
+            offset_y_dst = new_history - term->crow;
+        } else {
+            offset_y_src = term->crow - new_history;
+            offset_y_dst = 0;
+        }
+        term->crow = new_height - 1;
+    } else {
+        // Match up the first lines
+        if( term->grid.history - term->grid.height < new_scrollback ) {
+            offset_y_src = 0;
+            offset_y_dst = new_scrollback - (term->grid.history - term->grid.height);
+        } else {
+            offset_y_src = (term->grid.history - term->grid.height) - new_scrollback;
+            offset_y_dst = 0;
+        }
+        term->crow += (term->grid.history - term->grid.height) - new_scrollback;
+    }
+
+    // Figure out the height based on the later start to the earlier end
+    if( term->grid.history - offset_y_src < new_history - offset_y_dst ) {
+        height = term->grid.history - offset_y_src;
+    } else {
+        height = new_history - offset_y_dst;
+    }
+
+    ws.ws_row = new_height;
+    ws.ws_col = new_width;
+    ws.ws_xpixel = new_width;
+    ws.ws_ypixel = new_height;
+
+    g.width = new_width;
+    g.height = new_height;
+    g.history = new_history;
 
     if( !term_allocate_grid( &g ) ) {
         return -1;
     }
 
-    term_copy_grid( &g, &term->grid );
+    term_copy_grid( &g, &term->grid, offset_y_src, offset_y_dst, width, height );
 
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
@@ -209,8 +251,6 @@ int term_resize( term_t handle, int width, int height, int scrollback )
         // thing
         term->ccol = 0;
 #endif
-        term->crow += g.history - term->grid.history;
-
         ret = kill(term->child, SIGWINCH);
         term_release_grid( &term->grid );
         memcpy( &term->grid, &g, sizeof( term_grid ) );

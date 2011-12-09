@@ -63,7 +63,7 @@ typedef struct term_t_i {
 } term_t_i;
 
 bool term_allocate_grid(term_grid *grid);
-void term_copy_grid(term_grid *dst, term_grid *src);
+void term_copy_grid(term_grid *dst, term_grid *src, int offset_y_src, int offset_y_dst, int width, int height);
 void term_release_grid(term_grid *grid);
 void term_process_output_data(term_t_i *term, char *buf, int length);
 int term_send_escape(term_t_i *term, char *buf, int length);

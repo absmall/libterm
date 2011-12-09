@@ -80,26 +80,9 @@ bool term_allocate_grid(term_grid *grid)
     return true;
 }
 
-void term_copy_grid(term_grid *dst, term_grid *src)
+void term_copy_grid(term_grid *dst, term_grid *src, int offset_y_src, int offset_y_dst, int width, int height)
 {
-    // We want to copy such that the last lines are in the same position
-    int i, j, width, height, offset_y_src, offset_y_dst;
-
-    if( src->width < dst->width ) {
-        width = src->width;
-    } else {
-        width = dst->width;
-    }
-
-    if( src->history < dst->history ) {
-        height = src->history;
-        offset_y_src = 0;
-        offset_y_dst = dst->history - src->history;
-    } else {
-        height = dst->history;
-        offset_y_src = src->history - dst->history;
-        offset_y_dst = 0;
-    }
+    int i, j;
 
     for( i = 0; i < height; i ++ ) {
         for( j = 0; j < width; j ++ ) {

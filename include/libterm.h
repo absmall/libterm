@@ -65,7 +65,7 @@ void *term_get_user_data(term_t handle);
 void term_scroll( term_t handle, int row );
 
 // Resize the terminal
-int term_resize( term_t handle, int width, int height, int scrollback );
+int term_resize( term_t handle, int new_width, int new_height, int new_scrollback );
 
 // Callback functions for when the screen state changes
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height));
