@@ -5,10 +5,14 @@ This package includes three components:
 
 Building for linux:
 -------------------
-1) In the libterm directory, run 'cmake .; make'. This will build libterm.so, cterm and qterm.
+1) mkdir obj
+2) cd obj
+3) In the libterm directory, run 'cmake ..; make'. This will build libterm.so, cterm and qterm.
 
 Building for playbook:
 ----------------------
-1) set the QTDIR environment variable to be the location in which qmake is installed (the qmake executable should be present in $QTDIR/bin/qmake)
-2) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=ntoarm.cmake .; make'. This will build libterm.so, qterm and qterm.bar
+1) mkdir obj.playbook
+2) cd obj.playbook
+3) set the QTDIR environment variable to be the location in which qmake is installed (the qmake executable should be present in $QTDIR/bin/qmake)
+4) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=../ntoarm.cmake ..; make'. This will build libterm.so, qterm and qterm.bar
 Note: cterm is not supported on playbook

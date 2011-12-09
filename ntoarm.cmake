@@ -16,8 +16,6 @@ SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
 
-# search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
-# for libraries and headers in the target directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
