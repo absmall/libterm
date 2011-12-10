@@ -48,7 +48,9 @@ void QTerm::init()
     cursor_y = -1;
     cursor_on = 1;
 
+#ifdef __QNX__
     resize(1024, 600);
+#endif
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
     term_register_cursor( terminal, term_update_cursor );
