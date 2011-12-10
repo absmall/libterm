@@ -210,7 +210,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 
     term = TO_S(handle);
 
-    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + height == term->grid.history) return 0;
+    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + new_height == term->grid.history) return 0;
 
     // Copy the narrower of the two
     if( term->grid.width < new_width ) {
