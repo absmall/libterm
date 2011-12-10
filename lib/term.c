@@ -448,3 +448,10 @@ int term_get_height(term_t handle)
 
     return term->grid.height;
 }
+
+void term_get_grid_size(term_t handle, int *w, int *h)
+{
+    term_t_i *term = TO_S(handle);
+    *w = term->grid.width;
+    *h = term->grid.height;
+}
