@@ -26,7 +26,7 @@ bool term_allocate_grid(term_grid *grid)
         return false;
     }
     for( i = 0; i < grid->history; i ++ ) {
-        grid->grid[i] = malloc(sizeof(uint32_t)*grid->width);
+        grid->grid[i] = malloc(sizeof(uint32_t)*(grid->width+1));
         if( grid->grid[i] == NULL ) {
             for(i--; i>=0; i--) {
                 free(grid->grid[i]);
@@ -73,6 +73,7 @@ bool term_allocate_grid(term_grid *grid)
         for( j = 0; j < grid->width; j ++ ) {
             grid->grid[ i ][ j ] = ' ';
         }
+        grid->grid[ i ][ j ] = 0;
         memset(grid->attribs[i], 0, sizeof(uint32_t)*grid->width);
         memset(grid->colours[i], 0, sizeof(uint32_t)*grid->width);
     }
