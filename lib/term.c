@@ -78,6 +78,11 @@ const char *term_get_line(term_t handle, int row)
 
     term = TO_S(handle);
 
+    if( row < term->row || row >= term->grid.history - term->row ) {
+        errno = EINVAL;
+        return NULL;
+    }
+
     grid_row = term->grid.grid[term->row + row];
     length = wcstombs(NULL, grid_row, 0) + 1;
     if( length > term->conversion_buffer_size ) {
@@ -230,7 +235,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
             offset_y_src = 0;
             offset_y_dst = new_history - term->crow;
         } else {
-            offset_y_src = term->crow - new_history;
+            offset_y_src = term->crow - new_history + 1;
             offset_y_dst = 0;
         }
         term->crow = new_height - 1;
@@ -280,6 +285,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 #endif
         ret = kill(term->child, SIGWINCH);
         term_release_grid( &term->grid );
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow - term->row);
         memcpy( &term->grid, &g, sizeof( term_grid ) );
     } else {
         term_release_grid( &g );
