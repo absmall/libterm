@@ -32,6 +32,7 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                 cursor_change = true;
                 break;
             case '\r':
+                term->ccol=0;
                 break;
             case '\n':
                 term->ccol=0;
