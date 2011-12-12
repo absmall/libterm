@@ -68,12 +68,14 @@ void QTerm::init()
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 #ifdef __QNX__
-//    BlackBerry::Keyboard::instance().show();
+#ifdef BPS_VERSION
+    virtualkeyboard_show();
+#else
+    BlackBerry::Keyboard::instance().show();
 #endif
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
-    resize(1024,600);
 }
 
 QTerm::~QTerm()

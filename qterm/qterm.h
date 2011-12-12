@@ -2,8 +2,6 @@
 #include <QSocketNotifier>
 #include <libterm.h>
 #include <QTimer>
-#include <QVBoxLayout>
-#include <QPushButton>
 #include <qpiekeyboard.h>
 
 class QTerm : public QWidget
