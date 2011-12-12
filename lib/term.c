@@ -285,8 +285,8 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 #endif
         ret = kill(term->child, SIGWINCH);
         term_release_grid( &term->grid );
-        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow - term->row);
         memcpy( &term->grid, &g, sizeof( term_grid ) );
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow - term->row);
     } else {
         term_release_grid( &g );
     }
