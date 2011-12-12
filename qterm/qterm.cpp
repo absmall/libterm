@@ -45,8 +45,6 @@ void QTerm::init()
 {
     char_width = 0;
     char_height = 0;
-    cursor_x = -1;
-    cursor_y = -1;
     cursor_on = 1;
 
 #ifdef __QNX__
@@ -122,26 +120,18 @@ void QTerm::term_update(term_t handle, int x, int y, int width, int height)
     term->update_grid(x, y, width, height);
 }
 
-void QTerm::term_update_cursor(term_t handle, int x, int y)
+void QTerm::term_update_cursor(term_t handle, int old_x, int old_y, int new_x, int new_y)
 {
-    int old_x, old_y;
     QTerm *term = (QTerm *)term_get_user_data( handle );
-
-    old_x = term->cursor_x;
-    old_y = term->cursor_y;
 
     // Reset cursor blink
     term->cursor_on = 1;
     term->cursor_timer->stop();
     term->cursor_timer->start(BLINK_SPEED);
 
-    // Update position
-    term->cursor_x = x;
-    term->cursor_y = y;
-    
     // Update old and new cursor location
     term->update_grid( old_x, old_y, 1, 1);
-    term->update_grid( term->cursor_x, term->cursor_y, 1, 1);
+    term->update_grid( new_x, new_y, 1, 1);
 }
 
 void QTerm::terminal_data()
@@ -158,8 +148,10 @@ void QTerm::terminate()
 
 void QTerm::blink_cursor()
 {
-    //int coord_x;
+    int cursor_x, cursor_y;
+
     cursor_on ^= 1;
+    term_get_cursor_pos( terminal, &cursor_x, &cursor_y );
     update_grid( cursor_x, cursor_y, 1, 1);
 }
 
@@ -231,6 +223,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     QColor fgColor(255,255,255);
     QColor bgColor(0,0,0);
     int gridWidth, gridHeight;
+    int cursor_x, cursor_y;
 
     painter.setBackgroundMode(Qt::TransparentMode);
     painter.setBrush(QColor(8, 0, 0));
@@ -244,11 +237,9 @@ void QTerm::paintEvent(QPaintEvent *event)
    
 //    fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
    
-    if (cursor_x < 0 || cursor_y < 0) {
-        return;
-    }
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
+    term_get_cursor_pos( terminal, &cursor_x, &cursor_y );
 
 #if 1 
     str = term_get_line( terminal, cursor_y );

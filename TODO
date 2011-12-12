@@ -17,3 +17,4 @@
 -Support mulitple data stage formats (UCS-32 grid and array of UTF-8 strings)
 -Clean up cmake for qterm on playbook
 -Remove hardcoded resizing, qterm should be automatically fullscreen
+-Think about how to make libterm thread-safe

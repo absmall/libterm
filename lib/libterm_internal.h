@@ -45,7 +45,7 @@ typedef struct term_t_i {
     // render callback
     void (*update)(term_t handle, int x, int y, int width, int height);
     // cursor callback
-    void (*cursor_update)(term_t handle, int x, int y);
+    void (*cursor_update)(term_t handle, int old_x, int old_y, int new_x, int new_y);
     // bell callback
     void (*bell)(term_t handle);
     // Whether we're in the midst of processing an escape code

@@ -6,6 +6,10 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
     bool change = false;
     bool cursor_change = false;
     int i;
+    int old_ccol, old_crow;
+
+    old_ccol = term->ccol;
+    old_crow = term->crow;
 
     for( i = 0; i < length; i ++ ) {
 #if 0
@@ -59,5 +63,5 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
     }
 
     if( change && term->update != NULL ) term->update(TO_H(term), 0, 0, term->grid.width, term->grid.height);
-    if( cursor_change && term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow - term->row);
+    if( cursor_change && term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_ccol, old_crow - term->row, term->ccol, term->crow - term->row);
 }

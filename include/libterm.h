@@ -71,7 +71,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height));
 
 // Callback functions for when the cursor moves
-void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y));
+void term_register_cursor(term_t handle, void (*update)(term_t handle, int old_x, int old_y, int new_x, int new_y));
 
 // Callback functions for when the cursor moves
 void term_register_bell(term_t handle, void (*bell)(term_t handle));
@@ -85,7 +85,9 @@ const wchar_t **term_get_grid(term_t handle);
 const uint32_t **term_get_attribs(term_t handle);
 const uint32_t **term_get_colours(term_t handle);
 // Get the dimensions of the grid
-void term_get_grid_size(term_t handle, int *w, int *h);
+int term_get_grid_size(term_t handle, int *w, int *h);
+// Get the cursor position on the grid
+int term_get_cursor_pos(term_t handle, int *x, int *y);
 // Retrieve a UTF-8 version of a particular row
 const char *term_get_line(term_t handle, int row);
 

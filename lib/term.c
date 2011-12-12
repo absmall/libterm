@@ -16,7 +16,7 @@ void term_register_update(term_t handle, void (*update)(term_t handle, int x, in
     term->update = update;
 }
 
-void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y))
+void term_register_cursor(term_t handle, void (*update)(term_t handle, int old_x, int old_y, int new_x, int new_y))
 {
     term_t_i *term;
 
@@ -211,6 +211,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     struct winsize ws;
     term_t_i *term;
     term_grid g;
+    int old_crow, old_ccol;
     int width, height, offset_y_src, offset_y_dst, new_history;
 
     term = TO_S(handle);
@@ -226,6 +227,10 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 
     // Convenience variable
     new_history = new_height + new_scrollback;
+
+    // Remember the previous cursor position
+    old_crow = term->crow;
+    old_ccol = term->ccol;
 
     // We want to copy such that the first lines after the scrollback are in
     // the same position, unless that would push the cursor off the screen
@@ -283,10 +288,12 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
         // thing
         term->ccol = 0;
 #endif
-        ret = kill(term->child, SIGWINCH);
         term_release_grid( &term->grid );
         memcpy( &term->grid, &g, sizeof( term_grid ) );
-        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), term->ccol, term->crow - term->row);
+
+        // Now our internals are up-to-date, notify the application
+        ret = kill(term->child, SIGWINCH);
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow - term->row);
     } else {
         term_release_grid( &g );
     }
@@ -455,9 +462,21 @@ int term_get_height(term_t handle)
     return term->grid.height;
 }
 
-void term_get_grid_size(term_t handle, int *w, int *h)
+int term_get_grid_size(term_t handle, int *w, int *h)
 {
     term_t_i *term = TO_S(handle);
     *w = term->grid.width;
     *h = term->grid.height;
+
+    return 0;
+}
+
+int term_get_cursor_pos(term_t handle, int *x, int *y)
+{
+    term_t_i *term = TO_S(handle);
+
+    *x = term->ccol;
+    *y = term->crow - term->row;
+
+    return 0;
 }

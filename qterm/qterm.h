@@ -22,8 +22,6 @@ private:
     int char_width;
     int char_height;
     int char_descent;
-    int cursor_x;
-    int cursor_y;
     int cursor_on;
     term_t terminal;
 
@@ -31,7 +29,7 @@ private:
     bool  fontWorkAround;
     static void term_bell(term_t handle);
     static void term_update(term_t handle, int x, int y, int width, int height);
-    static void term_update_cursor(term_t handle, int x, int y);
+    static void term_update_cursor(term_t handle, int old_x, int old_y, int new_x, int new_y);
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
     QTimer *cursor_timer;
