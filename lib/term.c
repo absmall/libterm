@@ -411,3 +411,17 @@ int term_get_height(term_t handle)
 
     return term->grid.height;
 }
+
+int term_set_emulation(term_t handle, term_type type)
+{
+    term_t_i *term = TO_S(handle);
+
+    if( type < 0 || type > TERM_TYPE_MAX ) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    term->type = type;
+
+    return 0;
+}
