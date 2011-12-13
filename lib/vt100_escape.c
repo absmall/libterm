@@ -86,7 +86,9 @@ int match_sgm(term_t_i *term, int *length)
 struct static_escape_code {
     char *code;
     void (*apply_escape_code)(term_t_i *term);
-} static_escape_codes [] = {
+};
+
+struct static_escape_code escape_vt100 [] = {
     { "\x1b[%d;%dH", escape_cup },
     { "\x1b[%d;%df", escape_cup },
     { "\x1b[%dA", escape_cuu },
@@ -105,6 +107,14 @@ struct static_escape_code {
     { "\x1b[C", escape_cuf1 }
 };
 
+struct static_escape_code escape_xterm_color [] = {
+    { "\x1b[%d;%dH", escape_cup },
+};
+
+struct static_escape_code escape_ansi [] = {
+    { "\x1b[%d;%dH", escape_cup },
+};
+
 struct dynamic_escape_code {
     int (*code_match)(term_t_i *term, int *length);
     void (*apply_escape_code)(term_t_i *term);
@@ -117,6 +127,8 @@ int term_send_escape(term_t_i *term, char *buf, int length)
     bool isprefix = false;
     int previous_length;
     int i;
+    int num_escapes;
+    struct static_escape_code *table;
 
     // See if we need to reallocate
     if( term->escape_max_bytes < term->escape_bytes + length ) {
@@ -130,13 +142,30 @@ int term_send_escape(term_t_i *term, char *buf, int length)
     memcpy( term->escape_code + term->escape_bytes, buf, length ); 
     previous_length = term->escape_bytes;
     term->escape_bytes += length;
+
+    switch( term->type ) {
+        case TERM_TYPE_VT100:
+            table = escape_vt100;
+            num_escapes = sizeof(escape_vt100)/sizeof(struct static_escape_code);
+            break;
+        case TERM_TYPE_XTERM_COLOR:
+            table = escape_xterm_color;
+            num_escapes = sizeof(escape_xterm_color)/sizeof(struct static_escape_code);
+            break;
+        case TERM_TYPE_ANSI:
+            table = escape_ansi;
+            num_escapes = sizeof(escape_ansi)/sizeof(struct static_escape_code);
+            break;
+        default:
+            num_escapes = 0;
+    }
     
     // See if this is a prefix, or is equal to any static escape_code
-    for( i = 0; i < sizeof(static_escape_codes)/sizeof(struct static_escape_code); i ++ ) {
+    for( i = 0; i < num_escapes; i ++ ) {
         int codelen;
-        int ret = escape_compare( static_escape_codes[ i ].code, term->escape_code, term->escape_bytes, &codelen );
+        int ret = escape_compare( table[ i ].code, term->escape_code, term->escape_bytes, &codelen );
         if( ret == 2 ) {
-            static_escape_codes[ i ].apply_escape_code( term );
+            table[ i ].apply_escape_code( term );
             term->escape_bytes = 0;
             term->escape_mode = 0;
             return codelen - previous_length;

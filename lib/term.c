@@ -281,10 +281,6 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
     if( ret != -1 ) {
-<<<<<<< HEAD
-=======
-        ret = kill(term->child, SIGWINCH);
->>>>>>> master
         term_release_grid( &term->grid );
         memcpy( &term->grid, &g, sizeof( term_grid ) );
 
