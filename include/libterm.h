@@ -11,7 +11,10 @@ extern "C" {
 #endif
 
 typedef enum {
-    TERM_TYPE_VT100
+    TERM_TYPE_VT100,
+    TERM_TYPE_XTERM_COLOR,
+    TERM_TYPE_ANSI,
+    TERM_TYPE_MAX
 } term_type;
 
 typedef enum {
@@ -49,7 +52,7 @@ typedef enum {
 bool term_create(term_t *handle);
 
 // Specify what type of terminal to emulate
-bool term_set_emulation(term_t handle, term_type type);
+int term_set_emulation(term_t handle, term_type type);
 
 // Set the shell to use
 bool term_set_shell(term_t handle, char *shell);
