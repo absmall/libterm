@@ -363,6 +363,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
     }
+    //term_set_emulation( terminal, TERM_TYPE_ANSI );
     if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
         fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );
         exit(1);
