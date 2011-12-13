@@ -55,10 +55,15 @@ void QTerm::init()
     term_register_cursor( terminal, term_update_cursor );
     term_register_bell( terminal, term_bell );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
+
+#ifndef __MACH__
+    // Not supported on OSX
     exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
+    QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
+#endif
+
     cursor_timer = new QTimer( this );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
-    QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 
     // Setup the initial font
@@ -98,6 +103,7 @@ QTerm::~QTerm()
 {
     delete notifier;
     delete exit_notifier;
+    delete font;
     term_free( terminal );
 }
 
@@ -210,10 +216,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     int i;
 #if 0
     int j;
-    int color;
     const wchar_t **grid;
-    const uint32_t **attribs;
-    const uint32_t **colors;
 #else
     const char *str;
     int cursor_x_coord;
@@ -224,6 +227,8 @@ void QTerm::paintEvent(QPaintEvent *event)
     QColor bgColor(0,0,0);
     int gridWidth, gridHeight;
     int cursor_x, cursor_y;
+    const uint32_t **colors;
+    const uint32_t **attribs;
 
     painter.setBackgroundMode(Qt::TransparentMode);
     painter.setBrush(QColor(8, 0, 0));
@@ -242,6 +247,9 @@ void QTerm::paintEvent(QPaintEvent *event)
     term_get_cursor_pos( terminal, &cursor_x, &cursor_y );
 
 #if 1 
+    attribs = term_get_attribs( terminal );
+    colors = term_get_colours( terminal );
+
     str = term_get_line( terminal, cursor_y );
     // Workaround to get the cursor in the right spot.  For some
     // reason, on OSX (again), the monospace font does is not really
@@ -268,14 +276,60 @@ void QTerm::paintEvent(QPaintEvent *event)
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
 
+        
     for (i=0; i< gridHeight;i++) {
+        unsigned int currentAttrib; 
+        unsigned int currentColor;
+        int color;
+        int chunkStart=0;
+        int chunkPos=1;
+        int last_x_pos = 0;
+        int stringWidth;
+        QString qString;
+        QStringRef subString;
+       
+        currentAttrib = attribs[i][chunkStart];
+        currentColor = colors[i][chunkStart];
+        color = term_get_fg_color(currentAttrib, currentColor);
         str = term_get_line( terminal, i );
-        painter.drawText(0, (i) * char_height, 
-                        windowRect.width(),char_height,
-                        Qt::TextExpandTabs, 
-                        str,
-                        &windowRect 
-                        );
+        qString = qString.append(str);
+
+        /* Chunk each string whenever we need to change rendering params */
+        for(; chunkPos< gridWidth; chunkPos++) {
+            if ( attribs[i][chunkPos] != currentAttrib     ||
+                 colors[i][chunkPos] != currentColor) {
+                subString = qString.midRef( chunkStart, chunkPos-chunkStart );
+                // Render everything up to this point.
+                color = term_get_fg_color(currentAttrib, currentColor);
+                painter.setPen( QColor( (color >> 16) & 0xFF,
+                                        (color >> 8 ) & 0xFF,
+                                        (color & 0xFF) ) );
+
+                stringWidth = painter.fontMetrics().width(subString.toString());
+                painter.drawText( last_x_pos, (i) * char_height,
+                                  stringWidth, char_height,
+                                  Qt::TextExpandTabs,
+                                  subString.toString());
+                
+                // Update the local variables
+                last_x_pos += painter.fontMetrics().width( subString.toString() );
+                currentColor = colors[i][chunkPos];
+                currentAttrib = attribs[i][chunkPos];
+                chunkStart=chunkPos;
+            }
+        }
+        // draw whatever remains.
+        color = term_get_fg_color(currentAttrib, currentColor);
+        painter.setPen( QColor( (color >> 16) & 0xFF,
+                                (color >> 8 ) & 0xFF,
+                                (color & 0xFF) ) );
+        subString = qString.midRef( chunkStart, chunkPos - chunkStart);
+        
+        stringWidth= painter.fontMetrics().width(subString.toString());
+        painter.drawText( last_x_pos, (i) * char_height,
+                          stringWidth, char_height,
+                          Qt::TextExpandTabs,
+                          subString.toString() );
     }
 
 #else
