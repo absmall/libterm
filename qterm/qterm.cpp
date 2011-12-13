@@ -67,6 +67,7 @@ void QTerm::init()
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
     QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
+    QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
 #ifdef BPS_VERSION
     virtualkeyboard_show();
@@ -285,6 +286,8 @@ bool QTerm::event(QEvent *event)
 
             switch(event->type()) {
                 case QEvent::TouchBegin:
+                    return true;
+                case QEvent::TouchUpdate:
                     return true;
                 case QEvent::TouchUpdate:
                     if( touchPoints.length() >= 2 ) {
