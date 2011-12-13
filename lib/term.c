@@ -281,6 +281,10 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
     if( ret != -1 ) {
+<<<<<<< HEAD
+=======
+        ret = kill(term->child, SIGWINCH);
+>>>>>>> master
         term_release_grid( &term->grid );
         memcpy( &term->grid, &g, sizeof( term_grid ) );
 
@@ -470,6 +474,20 @@ int term_get_cursor_pos(term_t handle, int *x, int *y)
 
     *x = term->ccol;
     *y = term->crow - term->row;
+
+    return 0;
+}
+
+int term_set_emulation(term_t handle, term_type type)
+{
+    term_t_i *term = TO_S(handle);
+
+    if( type < 0 || type > TERM_TYPE_MAX ) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    term->type = type;
 
     return 0;
 }
