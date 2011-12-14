@@ -211,6 +211,32 @@ void QTerm::update_grid(int grid_x_min,
     QWidget::update(coords_x_min, coords_y_min,
                     coords_x_max, coords_y_max);
 }
+
+// Returns bool if the string, located at grid location X,Y, will be within
+// the updateRect.
+void QTerm::getRenderedStringRect( const QString string,
+                                   int attrib,
+                                   QFont *pFont,
+                                   QRect *pUpdateRect) 
+{
+    QFontMetrics *pFontMetrics = NULL;
+    QFont *pTmpFont;
+    
+    if (pFont == NULL) {
+        pTmpFont = font;
+    } else {
+        pTmpFont = pFont;
+    }
+
+    pTmpFont->setUnderline( attrib & TERM_ATTRIB_UNDERSCORE );
+    pFontMetrics = new QFontMetrics( *pTmpFont );
+
+    pUpdateRect->setWidth( pFontMetrics->width(  string ));
+    pUpdateRect->setHeight( char_height );
+    
+    delete pFontMetrics;
+
+}
 void QTerm::paintEvent(QPaintEvent *event)
 {
     int i;
@@ -240,7 +266,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
    
-//    fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
+    //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
    
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
@@ -280,13 +306,15 @@ void QTerm::paintEvent(QPaintEvent *event)
     for (i=0; i< gridHeight;i++) {
         unsigned int currentAttrib; 
         unsigned int currentColor;
-        int color;
+        int color=0x00ffffff;
         int chunkStart=0;
         int chunkPos=1;
         int last_x_pos = 0;
-        int stringWidth;
+        bool recalcSubString = false;
         QString qString;
         QStringRef subString;
+        QRect stringRect;
+        QRect intersectedRect;
        
         currentAttrib = attribs[i][chunkStart];
         currentColor = colors[i][chunkStart];
@@ -294,10 +322,24 @@ void QTerm::paintEvent(QPaintEvent *event)
         str = term_get_line( terminal, i );
         qString = qString.append(str);
 
+        stringRect.setX( 0 );
+        stringRect.setY( i * char_height );
+        getRenderedStringRect( qString, currentAttrib, NULL, &stringRect);
+
+        intersectedRect = stringRect.intersected( event->rect() );
+
+        if (intersectedRect.height() == 0) { 
+            // Don't render this string as it is not in the event's height
+            continue;
+        }
+
         /* Chunk each string whenever we need to change rendering params */
         for(; chunkPos< gridWidth; chunkPos++) {
             if ( attribs[i][chunkPos] != currentAttrib     ||
                  colors[i][chunkPos] != currentColor) {
+                // flag to tell outer loop to recalc the substring
+                recalcSubString = true;
+
                 subString = qString.midRef( chunkStart, chunkPos-chunkStart );
                 // Render everything up to this point.
                 color = term_get_fg_color(currentAttrib, currentColor);
@@ -305,14 +347,25 @@ void QTerm::paintEvent(QPaintEvent *event)
                                         (color >> 8 ) & 0xFF,
                                         (color & 0xFF) ) );
 
-                stringWidth = painter.fontMetrics().width(subString.toString());
-                painter.drawText( last_x_pos, (i) * char_height,
-                                  stringWidth, char_height,
+                // Update the intersected rect with the substring
+                getRenderedStringRect( subString.toString(), 
+                                      currentAttrib, 
+                                      NULL,
+                                      &intersectedRect);
+
+                painter.setFont( *font );
+
+                // need to manually add xpos until we have x-cliping.
+                painter.drawText( last_x_pos,
+                                 intersectedRect.y(),
+                                 intersectedRect.width(),
+                                 intersectedRect.height(),
                                   Qt::TextExpandTabs,
-                                  subString.toString());
+                                  subString.toString() );
                 
                 // Update the local variables
-                last_x_pos += painter.fontMetrics().width( subString.toString() );
+                last_x_pos += intersectedRect.width();
+                intersectedRect.translate( intersectedRect.width(), 0 );
                 currentColor = colors[i][chunkPos];
                 currentAttrib = attribs[i][chunkPos];
                 chunkStart=chunkPos;
@@ -324,12 +377,18 @@ void QTerm::paintEvent(QPaintEvent *event)
                                 (color >> 8 ) & 0xFF,
                                 (color & 0xFF) ) );
         subString = qString.midRef( chunkStart, chunkPos - chunkStart);
-        
-        stringWidth= painter.fontMetrics().width(subString.toString());
-        painter.drawText( last_x_pos, (i) * char_height,
-                          stringWidth, char_height,
+        if (recalcSubString) {
+            getRenderedStringRect( subString.toString(),
+                                   currentAttrib,
+                                   NULL,
+                                   &intersectedRect );
+        }
+        painter.setFont( *font );
+        painter.drawText( last_x_pos, intersectedRect.y(),
+                          intersectedRect.width(), intersectedRect.height(),
                           Qt::TextExpandTabs,
-                          subString.toString() );
+                          subString.toString(),
+                          &intersectedRect );
     }
 
 #else
