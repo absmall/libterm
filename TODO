@@ -1,4 +1,3 @@
--Support all vt100 escape codes
 -Support all ansi escape codes
 -Support all rxvt escape codes
 -Support all terminfo escape codes
@@ -18,3 +17,5 @@
 -Clean up cmake for qterm on playbook
 -Remove hardcoded resizing, qterm should be automatically fullscreen
 -Think about how to make libterm thread-safe
+-Build a trie for escape codes
+-Use escape codes for the arrows and for the non-escape codes (like bel and backspace)
