@@ -2,21 +2,25 @@
 #include <stdlib.h>
 #include "terminfo_commands.h"
 
+// graphics charset pairs, based on vt100
 void escape_acsc(term_t_i *term)
 {
     fprintf(stderr, "escape_acsc unsupported!\n");
 }
 
+// audible signal (bell)
 void escape_bel(term_t_i *term)
 {
     if( term->bell != NULL ) term->bell(TO_H(term));
 }
 
+// turn on blinking
 void escape_blink(term_t_i *term)
 {
     term->cattr |= TERM_ATTRIB_BLINK;
 }
 
+// turn on bold (extra bright) mode
 void escape_bold(term_t_i *term)
 {
     term->cattr |= TERM_ATTRIB_BOLD;
@@ -36,6 +40,7 @@ void escape_clear(term_t_i *term)
     term->ccol = 0;
 }
 
+// carriage return
 void escape_cr(term_t_i *term)
 {
     fprintf(stderr, "escape_cr unsupported!\n");
@@ -58,6 +63,7 @@ void escape_cub(term_t_i *term)
     }
 }
 
+// move left one space
 void escape_cub1(term_t_i *term)
 {
     if( term->ccol > 0 ) {
@@ -76,9 +82,12 @@ void escape_cud(term_t_i *term)
     }
 }
 
+// down one line
 void escape_cud1(term_t_i *term)
 {
-    fprintf(stderr, "escape_cud1 unsupported!\n");
+    if( term->crow < term->grid.history - 1 ) {
+        term->crow ++;
+    }
 }
 
 // Move right #1 spaces
@@ -92,6 +101,7 @@ void escape_cuf(term_t_i *term)
     }
 }
 
+// move right one space
 void escape_cuf1(term_t_i *term)
 {
     if( term->ccol + 1 >= term->grid.width ) {
@@ -123,6 +133,7 @@ void escape_cuu(term_t_i *term)
     }
 }
 
+// up one line
 void escape_cuu1(term_t_i *term)
 {
     if( term->crow > 0 ) {
@@ -151,12 +162,13 @@ void escape_el(term_t_i *term)
     }
 }
 
+// Clear to beginning of line
 void escape_el1(term_t_i *term)
 {
     fprintf(stderr, "escape_el1 unsupported!\n");
 }
 
-
+// enable alternate char set
 void escape_enacs(term_t_i *term)
 {
     fprintf(stderr, "escape_enacs unsupported!\n");
@@ -169,161 +181,193 @@ void escape_home(term_t_i *term)
     term->ccol = 0;
 }
 
+// tab to next 8-space hardware tab stop
 void escape_ht(term_t_i *term)
 {
     fprintf(stderr, "escape_ht unsupported!\n");
 }
 
+// set a tab in every row, current columns
 void escape_hts(term_t_i *term)
 {
     fprintf(stderr, "escape_hts unsupported!\n");
 }
 
+// scroll text up
 void escape_ind(term_t_i *term)
 {
     fprintf(stderr, "escape_ind unsupported!\n");
 }
 
+// upper left of keypad
 void escape_ka1(term_t_i *term)
 {
     fprintf(stderr, "escape_ka1 unsupported!\n");
 }
 
+// upper right of keypad
 void escape_ka3(term_t_i *term)
 {
     fprintf(stderr, "escape_ka3 unsupported!\n");
 }
 
+// center of keypad
 void escape_kb2(term_t_i *term)
 {
     fprintf(stderr, "escape_kb2 unsupported!\n");
 }
 
+// backspace key
 void escape_kbs(term_t_i *term)
 {
     fprintf(stderr, "escape_kbs unsupported!\n");
 }
 
+// lower left of keypad
 void escape_kc1(term_t_i *term)
 {
     fprintf(stderr, "escape_kc1 unsupported!\n");
 }
 
+// lower right of keypad
 void escape_kc3(term_t_i *term)
 {
     fprintf(stderr, "escape_kc3 unsupported!\n");
 }
 
+// left-arrow key
 void escape_kcub1(term_t_i *term)
 {
     fprintf(stderr, "escape_kcub1 unsupported!\n");
 }
 
+// down-arrow key
 void escape_kcud1(term_t_i *term)
 {
     fprintf(stderr, "escape_kcud1 unsupported!\n");
 }
 
+// right-arrow key
 void escape_kcuf1(term_t_i *term)
 {
     fprintf(stderr, "escape_kcuf1 unsupported!\n");
 }
 
+// up-arrow key
 void escape_kcuu1(term_t_i *term)
 {
     fprintf(stderr, "escape_kcuu1 unsupported!\n");
 }
 
+// enter/send key
 void escape_kent(term_t_i *term)
 {
     fprintf(stderr, "escape_kent unsupported!\n");
 }
 
+// F0 function key
 void escape_kf0(term_t_i *term)
 {
     fprintf(stderr, "escape_kf0 unsupported!\n");
 }
 
+// F1 function key
 void escape_kf1(term_t_i *term)
 {
     fprintf(stderr, "escape_kf1 unsupported!\n");
 }
 
+// F10 function key
 void escape_kf10(term_t_i *term)
 {
     fprintf(stderr, "escape_kf10 unsupported!\n");
 }
 
+// F2 function key
 void escape_kf2(term_t_i *term)
 {
     fprintf(stderr, "escape_kf2 unsupported!\n");
 }
 
+// F3 function key
 void escape_kf3(term_t_i *term)
 {
     fprintf(stderr, "escape_kf3 unsupported!\n");
 }
 
+// F4 function key
 void escape_kf4(term_t_i *term)
 {
     fprintf(stderr, "escape_kf4 unsupported!\n");
 }
 
+// F5 function key
 void escape_kf5(term_t_i *term)
 {
     fprintf(stderr, "escape_kf5 unsupported!\n");
 }
 
+// F6 function key
 void escape_kf6(term_t_i *term)
 {
     fprintf(stderr, "escape_kf6 unsupported!\n");
 }
 
+// F7 function key
 void escape_kf7(term_t_i *term)
 {
     fprintf(stderr, "escape_kf7 unsupported!\n");
 }
 
+// F8 function key
 void escape_kf8(term_t_i *term)
 {
     fprintf(stderr, "escape_kf8 unsupported!\n");
 }
 
+// F9 function key
 void escape_kf9(term_t_i *term)
 {
     fprintf(stderr, "escape_kf9 unsupported!\n");
 }
 
+// label on function key f1 if not f1
 void escape_lf1(term_t_i *term)
 {
     fprintf(stderr, "escape_lf1 unsupported!\n");
 }
 
+// label on function key f2 if not f2
 void escape_lf2(term_t_i *term)
 {
     fprintf(stderr, "escape_lf2 unsupported!\n");
 }
 
+// label on function key f3 if not f3
 void escape_lf3(term_t_i *term)
 {
     fprintf(stderr, "escape_lf3 unsupported!\n");
 }
 
+// label on function key f4 if not f4
 void escape_lf4(term_t_i *term)
 {
     fprintf(stderr, "escape_lf4 unsupported!\n");
 }
 
+// print contents of screen
 void escape_mc0(term_t_i *term)
 {
     fprintf(stderr, "escape_mc0 unsupported!\n");
 }
 
+// turn off printer
 void escape_mc4(term_t_i *term)
 {
     fprintf(stderr, "escape_mc4 unsupported!\n");
 }
 
+// turn on printer
 void escape_mc5(term_t_i *term)
 {
     fprintf(stderr, "escape_mc5 unsupported!\n");
@@ -336,21 +380,25 @@ void escape_rc(term_t_i *term)
     term->ccol = term->csavedcol;
 }
 
+// turn on reverse video mode
 void escape_rev(term_t_i *term)
 {
-    fprintf(stderr, "escape_rev unsupported!\n");
+    term->cattr |= TERM_ATTRIB_REVERSE;
 }
 
+// scroll text down
 void escape_ri(term_t_i *term)
 {
     fprintf(stderr, "escape_ri unsupported!\n");
 }
 
+// end alternate character set
 void escape_rmacs(term_t_i *term)
 {
     fprintf(stderr, "escape_rmacs unsupported!\n");
 }
 
+// turn off automatic margins
 void escape_rmam(term_t_i *term)
 {
     fprintf(stderr, "escape_rmam unsupported!\n");
@@ -362,6 +410,7 @@ void escape_rmkx(term_t_i *term)
     fprintf(stderr, "escape_rmkx unsupported!\n");
 }
 
+// exit standout mode
 void escape_rmso(term_t_i *term)
 {
     fprintf(stderr, "escape_rmso unsupported!\n");
@@ -373,6 +422,7 @@ void escape_rmul(term_t_i *term)
     term->cattr &= ~TERM_ATTRIB_UNDERSCORE;
 }
 
+// reset string
 void escape_rs2(term_t_i *term)
 {
     fprintf(stderr, "escape_rs2 unsupported!\n");
@@ -385,6 +435,7 @@ void escape_sc(term_t_i *term)
     term->csavedcol = term->ccol;
 }
 
+// define video attributes #1-#9
 void escape_sgr(term_t_i *term)
 {
     fprintf(stderr, "escape_sgr unsupported!\n");
@@ -397,11 +448,13 @@ void escape_sgr0(term_t_i *term)
     term->ccolour = 0;
 }
 
+// start alternate character set
 void escape_smacs(term_t_i *term)
 {
     fprintf(stderr, "escape_smacs unsupported!\n");
 }
 
+// turn on automatic margins
 void escape_smam(term_t_i *term)
 {
     fprintf(stderr, "escape_smam unsupported!\n");
@@ -413,16 +466,19 @@ void escape_smkx(term_t_i *term)
     fprintf(stderr, "escape_smkx unsupported!\n");
 }
 
+// begin standout mode
 void escape_smso(term_t_i *term)
 {
     fprintf(stderr, "escape_smso unsupported!\n");
 }
 
+// begin underline mode
 void escape_smul(term_t_i *term)
 {
-    fprintf(stderr, "escape_smul unsupported!\n");
+    term->cattr |= TERM_ATTRIB_UNDERSCORE;
 }
 
+// clear all tab stops
 void escape_tbc(term_t_i *term)
 {
     fprintf(stderr, "escape_tbc unsupported!\n");

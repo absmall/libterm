@@ -222,7 +222,6 @@ void QTerm::paintEvent(QPaintEvent *event)
     int cursor_x_coord;
 #endif
     QPainter painter(this);
-    QRect windowRect = painter.window();
     QColor fgColor(255,255,255);
     QColor bgColor(0,0,0);
     int gridWidth, gridHeight;

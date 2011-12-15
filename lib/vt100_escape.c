@@ -89,22 +89,76 @@ struct static_escape_code {
 };
 
 struct static_escape_code escape_vt100 [] = {
-    { "\x1b[%d;%dH", escape_cup },
-    { "\x1b[%d;%df", escape_cup },
-    { "\x1b[%dA", escape_cuu },
-    { "\x1b[%dB", escape_cud },
-    { "\x1b[%dC", escape_cuf },
-    { "\x1b[%dD", escape_cub },
+    // bel
+    //{ "\x1b5m", escape_blink },
+    //{ "\x1b1m", escape_bold },
     { "\x1b[2J", escape_clear },
-    { "\x1b[K", escape_el },
-    { "\x1b[0m", escape_sgr0 },
-    { "\x1b[?1h\x1b", escape_smkx },
+    // cr
     { "\x1b[%d;%dr", escape_csr },
-    { "\x1b[H", escape_home },
-    { "\x1b[m", escape_rmul },
+    { "\x1b[%dD", escape_cub },
+    // cub1
+    { "\x1b[%dB", escape_cud },
+    // cud1
+    { "\x1b[%dC", escape_cuf },
+    { "\x1b[C", escape_cuf1 },
+    { "\x1b[%d;%dH", escape_cup },
+    { "\x1b[%dA", escape_cuu },
+    { "\x1b[A", escape_cuu1 },
     { "\x1b[J", escape_ed },
+    { "\x1b[K", escape_el },
+    { "\x1b[1K", escape_el1 },
+    //{ "\x1b(B\x1b)0", escape_enacs },
+    { "\x1b[H", escape_home },
+    // ht
+    { "\x1bH", escape_hts },
+    // ind
+    { "\x1bOq", escape_ka1 },
+    { "\x1bOs", escape_ka3 },
+    { "\x1bOr", escape_kb2 },
+    // kbs
+    { "\x1bOp", escape_kc1 },
+    { "\x1bOn", escape_kc3 },
+    { "\x1bOD", escape_kcub1 },
+    { "\x1bOB", escape_kcud1 },
+    { "\x1bOC", escape_kcuf1 },
+    { "\x1bOA", escape_kcuu1 },
+    { "\x1bOM", escape_kent },
+    { "\x1bOy", escape_kf0 },
+    { "\x1bOP", escape_kf1 },
+    { "\x1bOx", escape_kf10 },
+    { "\x1bOQ", escape_kf2 },
+    { "\x1bOR", escape_kf3 },
+    { "\x1bOS", escape_kf4 },
+    { "\x1bOt", escape_kf5 },
+    { "\x1bOu", escape_kf6 },
+    { "\x1bOv", escape_kf7 },
+    { "\x1bOl", escape_kf8 },
+    { "\x1bOw", escape_kf9 },
+    // lf1
+    // lf2
+    // lf3
+    // lf4
+    { "\x1b[0i", escape_mc0 },
+    { "\x1b[4i", escape_mc4 },
+    { "\x1b[5i", escape_mc5 },
+    //{ "\x1b8", escape_rc },
+    { "\x1b[7m", escape_rev },
+    { "\x1bM", escape_ri },
+    // rmacs
+    { "\x1b[?7l", escape_rmam },
     { "\x1b[?1l\x1b>", escape_rmkx },
-    { "\x1b[C", escape_cuf1 }
+    { "\x1b[m", escape_rmso },
+    { "\x1b[m", escape_rmul },
+    // rs2
+    //{ "\x1b7", escape_sc },
+    // sgr
+    { "\x1b[0m", escape_sgr0 },
+    // smacs
+    { "\x1b[?7h", escape_smam },
+    { "\x1b[?1h\x1b", escape_smkx },
+    //{ "\x1b7m", escape_smso },
+    { "\x1b[4m", escape_smul },
+    { "\x1b[3g", escape_tbc },
 };
 
 struct static_escape_code escape_xterm_color [] = {
