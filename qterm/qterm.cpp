@@ -28,6 +28,8 @@
 #define HEIGHT    17
 #define BLINK_SPEED 1000
 
+#define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
+
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
     term_create( &terminal );
@@ -185,7 +187,7 @@ void QTerm::update_grid(int grid_x_min,
         const char *str;
         int i;
 
-        coords_x_min = 9999;    // Replace with some window property.
+        coords_x_min = width();
         coords_x_max = 0;
         for (i= grid_y_min; i < (grid_y_min + grid_height); i++) {
             int tmp;
@@ -262,15 +264,9 @@ void QTerm::paintEvent(QPaintEvent *event)
     if ( cursor_on ) {
        painter.setPen(fgColor);
        painter.setBrush(fgColor);
-       painter.drawRect( cursor_x_coord +1, 
+       painter.drawRect( cursor_x_coord + 1, 
                          cursor_y * char_height + 1,
-                         char_width-2, char_height-2); 
-    } else {
-       painter.setPen(bgColor);
-       painter.setBrush(bgColor);
-       painter.drawRect( cursor_x_coord +1,
-                         cursor_y * char_height + 1,
-                         char_width-2, char_height-2); 
+                         char_width - 2, char_height - 2); 
     }
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
@@ -279,9 +275,10 @@ void QTerm::paintEvent(QPaintEvent *event)
     for (i=0; i< gridHeight;i++) {
         unsigned int currentAttrib; 
         unsigned int currentColor;
+        bool currentOnCursor;
         int color;
         int chunkStart=0;
-        int chunkPos=1;
+        int chunkPos;
         int last_x_pos = 0;
         int stringWidth;
         QString qString;
@@ -289,23 +286,45 @@ void QTerm::paintEvent(QPaintEvent *event)
        
         currentAttrib = attribs[i][chunkStart];
         currentColor = colors[i][chunkStart];
+        currentOnCursor = ON_CURSOR(0, i);
         color = term_get_fg_color(currentAttrib, currentColor);
         str = term_get_line( terminal, i );
         qString = qString.append(str);
+        painter.setPen( QColor( (color >> 16) & 0xFF,
+                                (color >> 8 ) & 0xFF,
+                                (color & 0xFF) ) );
 
         /* Chunk each string whenever we need to change rendering params */
-        for(; chunkPos< gridWidth; chunkPos++) {
-            if ( attribs[i][chunkPos] != currentAttrib     ||
-                 colors[i][chunkPos] != currentColor) {
-                subString = qString.midRef( chunkStart, chunkPos-chunkStart );
-                // Render everything up to this point.
-                color = term_get_fg_color(currentAttrib, currentColor);
-                painter.setPen( QColor( (color >> 16) & 0xFF,
-                                        (color >> 8 ) & 0xFF,
-                                        (color & 0xFF) ) );
+        for(chunkPos=0; chunkPos< gridWidth; chunkPos++) {
+            if ( attribs[i][chunkPos] != currentAttrib ||
+                 colors[i][chunkPos] != currentColor ||
+                 ON_CURSOR(chunkPos, i) != currentOnCursor) {
 
+                subString = qString.midRef( chunkStart, chunkPos-chunkStart );
                 stringWidth = painter.fontMetrics().width(subString.toString());
-                painter.drawText( last_x_pos, (i) * char_height,
+
+                // Render everything up to this point.
+                if( currentOnCursor ) {
+                    painter.setPen( bgColor );
+                } else if( currentAttrib & TERM_ATTRIB_REVERSE ) {
+                    color = term_get_fg_color(currentAttrib, currentColor);
+                    painter.setPen( QColor( (color >> 16) & 0xFF,
+                                            (color >> 8 ) & 0xFF,
+                                            (color & 0xFF) ) );
+                    painter.drawRect( last_x_pos, i * char_height,
+                                      stringWidth, char_height );
+                    color = term_get_bg_color(currentAttrib, currentColor);
+                    painter.setPen( QColor( (color >> 16) & 0xFF,
+                                            (color >> 8 ) & 0xFF,
+                                            (color & 0xFF) ) );
+                } else {
+                    color = term_get_fg_color(currentAttrib, currentColor);
+                    painter.setPen( QColor( (color >> 16) & 0xFF,
+                                            (color >> 8 ) & 0xFF,
+                                            (color & 0xFF) ) );
+                }
+
+                painter.drawText( last_x_pos, i * char_height,
                                   stringWidth, char_height,
                                   Qt::TextExpandTabs,
                                   subString.toString());
@@ -314,6 +333,7 @@ void QTerm::paintEvent(QPaintEvent *event)
                 last_x_pos += painter.fontMetrics().width( subString.toString() );
                 currentColor = colors[i][chunkPos];
                 currentAttrib = attribs[i][chunkPos];
+                currentOnCursor = ON_CURSOR(chunkPos, i);
                 chunkStart=chunkPos;
             }
         }
