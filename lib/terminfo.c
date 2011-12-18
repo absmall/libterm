@@ -38,6 +38,8 @@ void escape_clear(term_t_i *term)
     }
     term->crow = term->grid.history - term->grid.height;
     term->ccol = 0;
+    term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
+    term->dirty_cursor.exists = true;
 }
 
 // carriage return
@@ -61,6 +63,7 @@ void escape_cub(term_t_i *term)
     }  else {
         term->ccol -= left;
     }
+    term->dirty_cursor.exists = 1;
 }
 
 // move left one space
@@ -68,6 +71,7 @@ void escape_cub1(term_t_i *term)
 {
     if( term->ccol > 0 ) {
         term->ccol --;
+        term->dirty_cursor.exists = true;
     }
 }
 
@@ -80,6 +84,7 @@ void escape_cud(term_t_i *term)
     }  else {
         term->crow += down;
     }
+    term->dirty_cursor.exists = true;
 }
 
 // down one line
@@ -87,6 +92,7 @@ void escape_cud1(term_t_i *term)
 {
     if( term->crow < term->grid.history - 1 ) {
         term->crow ++;
+        term->dirty_cursor.exists = true;
     }
 }
 
@@ -99,6 +105,7 @@ void escape_cuf(term_t_i *term)
     }  else {
         term->ccol += right;
     }
+    term->dirty_cursor.exists = true;
 }
 
 // move right one space
@@ -109,6 +116,7 @@ void escape_cuf1(term_t_i *term)
     }  else {
         term->ccol ++;
     }
+    term->dirty_cursor.exists = true;
 }
 
 // Move to row #1 col #2
@@ -120,6 +128,7 @@ void escape_cup(term_t_i *term)
     if( term->crow >= term->grid.height ) term->crow = term->grid.height - 1;
     term->ccol = strtoul( n + 1, NULL, 10 ) - 1;
     if( term->ccol >= term->grid.width ) term->crow = term->grid.width - 1;
+    term->dirty_cursor.exists = true;
 }
 
 // Move cursor up #1 lines
@@ -131,6 +140,7 @@ void escape_cuu(term_t_i *term)
     }  else {
         term->crow -= up;
     }
+    term->dirty_cursor.exists = true;
 }
 
 // up one line
@@ -138,6 +148,7 @@ void escape_cuu1(term_t_i *term)
 {
     if( term->crow > 0 ) {
         term->crow --;
+        term->dirty_cursor.exists = true;
     }
 }
 
@@ -151,6 +162,7 @@ void escape_ed(term_t_i *term)
             term->grid.attribs[ i ][ j ] = 0;
         }
     }
+    term_add_dirty_rect( term, term->crow, term->ccol, term->grid.width - term->crow, term->grid.height - term->ccol );
 }
 
 // Clear to end of line
@@ -160,6 +172,7 @@ void escape_el(term_t_i *term)
     for( i = term->ccol; i < term->grid.width; i ++ ) {
         term->grid.grid[ term->crow ][ i ] = ' ';
     }
+    term_add_dirty_rect( term, term->crow, term->ccol, term->grid.width - term->crow, 1 );
 }
 
 // Clear to beginning of line
@@ -179,6 +192,7 @@ void escape_home(term_t_i *term)
 {
     term->crow = term->grid.history - term->grid.height;
     term->ccol = 0;
+    term->dirty_cursor.exists = true;
 }
 
 // tab to next 8-space hardware tab stop
@@ -378,6 +392,7 @@ void escape_rc(term_t_i *term)
 {
     term->crow = term->csavedrow;
     term->ccol = term->csavedcol;
+    term->dirty_cursor.exists = true;
 }
 
 // turn on reverse video mode

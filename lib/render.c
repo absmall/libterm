@@ -15,8 +15,6 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 #endif
 
         if( term->escape_mode ) {
-            term->dirty.exists = true;
-            term->dirty_cursor.exists = true;
             i += term_send_escape( term, buf + i, length  - i );
             if( i == length ) break;
         }
@@ -38,7 +36,7 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                 term->dirty_cursor.exists = true;
                 if( term->crow >= term->grid.history ) {
                     term_shiftrows(term);
-                    term->dirty.exists = true;
+                    term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
                 }
                 break;
             case 27:
