@@ -22,6 +22,7 @@ void escape_cuu1(term_t_i *term);
 void escape_ed(term_t_i *term);
 void escape_el(term_t_i *term);
 void escape_el1(term_t_i *term);
+void escape_enacs(term_t_i *term);
 void escape_home(term_t_i *term);
 void escape_ht(term_t_i *term);
 void escape_hts(term_t_i *term);

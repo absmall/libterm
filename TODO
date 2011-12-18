@@ -2,7 +2,7 @@
 -Support all rxvt escape codes
 -Support all terminfo escape codes
 -Change font in qt terminal
--Support attributes (blink, reverse, underline)
+-Support attributes (blink, underline)
 -Control default background and foreground color of qt terminal
 -Support cursor selection in QT
 -Find out why terminal crashes somewhere in the Qt library when you swipe it up to close

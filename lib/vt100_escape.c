@@ -90,8 +90,8 @@ struct static_escape_code {
 
 struct static_escape_code escape_vt100 [] = {
     // bel
-    //{ "\x1b5m", escape_blink },
-    //{ "\x1b1m", escape_bold },
+    { "\x1b""5m", escape_blink },
+    { "\x1b""1m", escape_bold },
     { "\x1b[2J", escape_clear },
     // cr
     { "\x1b[%d;%dr", escape_csr },
@@ -107,7 +107,7 @@ struct static_escape_code escape_vt100 [] = {
     { "\x1b[J", escape_ed },
     { "\x1b[K", escape_el },
     { "\x1b[1K", escape_el1 },
-    //{ "\x1b(B\x1b)0", escape_enacs },
+    { "\x1b(B\x1b)0", escape_enacs },
     { "\x1b[H", escape_home },
     // ht
     { "\x1bH", escape_hts },
@@ -141,7 +141,7 @@ struct static_escape_code escape_vt100 [] = {
     { "\x1b[0i", escape_mc0 },
     { "\x1b[4i", escape_mc4 },
     { "\x1b[5i", escape_mc5 },
-    //{ "\x1b8", escape_rc },
+    { "\x1b""8", escape_rc },
     { "\x1b[7m", escape_rev },
     { "\x1bM", escape_ri },
     // rmacs
@@ -150,13 +150,13 @@ struct static_escape_code escape_vt100 [] = {
     { "\x1b[m", escape_rmso },
     { "\x1b[m", escape_rmul },
     // rs2
-    //{ "\x1b7", escape_sc },
+    { "\x1b""7", escape_sc },
     // sgr
     { "\x1b[0m", escape_sgr0 },
     // smacs
     { "\x1b[?7h", escape_smam },
     { "\x1b[?1h\x1b", escape_smkx },
-    //{ "\x1b7m", escape_smso },
+    { "\x1b""7m", escape_smso },
     { "\x1b[4m", escape_smul },
     { "\x1b[3g", escape_tbc },
 };
