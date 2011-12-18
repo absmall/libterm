@@ -3,13 +3,7 @@
 
 void term_process_output_data(term_t_i *term, char *buf, int length)
 {
-    bool change = false;
-    bool cursor_change = false;
     int i;
-    int old_ccol, old_crow;
-
-    old_ccol = term->ccol;
-    old_crow = term->crow;
 
     for( i = 0; i < length; i ++ ) {
 #if 0
@@ -21,8 +15,8 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
 #endif
 
         if( term->escape_mode ) {
-            change = true;
-            cursor_change = true;
+            term->dirty.exists = true;
+            term->dirty_cursor.exists = true;
             i += term_send_escape( term, buf + i, length  - i );
             if( i == length ) break;
         }
@@ -33,7 +27,7 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                 break;
             case '\b':
                 term->ccol--;
-                cursor_change = true;
+                term->dirty_cursor.exists = true;
                 break;
             case '\r':
                 term->ccol=0;
@@ -41,10 +35,10 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
             case '\n':
                 term->ccol=0;
                 term->crow++;
-                cursor_change = true;
+                term->dirty_cursor.exists = true;
                 if( term->crow >= term->grid.history ) {
                     term_shiftrows(term);
-                    change = true;
+                    term->dirty.exists = true;
                 }
                 break;
             case 27:
@@ -56,13 +50,13 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                     term->grid.grid[term->crow][term->ccol] = buf[i];
                     term->grid.attribs[term->crow][term->ccol] = term->cattr;
                     term->grid.colours[term->crow][term->ccol] = term->ccolour;
-                    change = true;
+                    term->dirty.exists = true;
                 }
                 term->ccol++;
-                cursor_change = true;
+                term->dirty_cursor.exists = true;
         }
     }
 
-    if( change && term->update != NULL ) term->update(TO_H(term), 0, 0, term->grid.width, term->grid.height);
-    if( cursor_change && term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_ccol, old_crow - term->row, term->ccol, term->crow - term->row);
+    term_update( term );
+    term_cursor_update( term );
 }

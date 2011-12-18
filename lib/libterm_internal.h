@@ -1,6 +1,7 @@
 #ifndef __LIBTERM_INTERNAL_H__
 #define __LIBTERM_INTERNAL_H__
 
+#include <stddef.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <libterm.h>
@@ -20,6 +21,20 @@ typedef struct {
     uint32_t **colours;
 } term_grid;
 
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+    bool exists;
+} term_dirty_rect;
+
+typedef struct {
+    int old_ccol;
+    int old_crow;
+    bool exists;
+} term_dirty_cursor;
+
 typedef struct term_t_i {
     // Current top row of the buffer
     int row;
@@ -38,6 +53,10 @@ typedef struct term_t_i {
     bool allocated;
     // Grid of characters and attributes
     term_grid grid;
+    // Dirty region of the grid
+    term_dirty_rect dirty;
+    // Whether the cursor has moved
+    term_dirty_cursor dirty_cursor;
     // pid of the child
     pid_t child;
     // pty file descriptor
@@ -74,6 +93,8 @@ int term_send_escape(term_t_i *term, char *buf, int length);
 bool term_fork(term_t_i *term);
 void term_slay(term_t_i *term);
 void term_shiftrows(term_t_i *term);
+void term_update(term_t_i *term);
+void term_cursor_update(term_t_i *term);
 
 #define TO_S(x) ((term_t_i *)x)
 #define TO_H(x) ((term_t)x)
