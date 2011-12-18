@@ -3,7 +3,7 @@
 void term_update(term_t_i *term)
 {
     if( term->dirty.exists && term->update != NULL ) {
-        term->update(TO_H(term), 0, 0, term->grid.width, term->grid.height);
+        term->update(TO_H(term), term->dirty.x, term->dirty.y, term->dirty.width, term->dirty.height);
         term->dirty.exists = false;
     }
 }

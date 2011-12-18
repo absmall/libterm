@@ -14,7 +14,7 @@ void term_add_dirty_rect(term_t_i *term, int x, int y, int width, int height)
         new_y2 = y + height;
 
         term->dirty.x = MIN( term->dirty.x, x );
-        term->dirty.y = MIN( term->dirty.x, y );
+        term->dirty.y = MIN( term->dirty.y, y );
         term->dirty.width = MAX( old_x2, new_x2 ) - term->dirty.x;
         term->dirty.height = MAX( old_y2, new_y2 ) - term->dirty.y;
     } else {

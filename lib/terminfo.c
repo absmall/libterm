@@ -162,7 +162,7 @@ void escape_ed(term_t_i *term)
             term->grid.attribs[ i ][ j ] = 0;
         }
     }
-    term_add_dirty_rect( term, term->crow, term->ccol, term->grid.width - term->crow, term->grid.height - term->ccol );
+    term_add_dirty_rect( term, term->ccol, term->crow, term->grid.width - term->ccol, term->grid.height - term->crow );
 }
 
 // Clear to end of line
@@ -172,7 +172,7 @@ void escape_el(term_t_i *term)
     for( i = term->ccol; i < term->grid.width; i ++ ) {
         term->grid.grid[ term->crow ][ i ] = ' ';
     }
-    term_add_dirty_rect( term, term->crow, term->ccol, term->grid.width - term->crow, 1 );
+    term_add_dirty_rect( term, term->ccol, term->crow, term->grid.width - term->ccol, 1 );
 }
 
 // Clear to beginning of line
