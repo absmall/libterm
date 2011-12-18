@@ -50,7 +50,7 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
                     term->grid.grid[term->crow][term->ccol] = buf[i];
                     term->grid.attribs[term->crow][term->ccol] = term->cattr;
                     term->grid.colours[term->crow][term->ccol] = term->ccolour;
-                    term->dirty.exists = true;
+                    term_add_dirty_rect( term, term->crow, term->ccol, 1, 1 );
                 }
                 term->ccol++;
                 term->dirty_cursor.exists = true;
