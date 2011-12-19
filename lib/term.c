@@ -421,8 +421,8 @@ void term_free(term_t handle)
     if( term->conversion_buffer != NULL ) {
         free( term->conversion_buffer );
     }
-    if( term->escape_code != NULL ) {
-        free( term->escape_code );
+    if( term->output_bytes != NULL ) {
+        free( term->output_bytes );
     }
     free( term );
 }

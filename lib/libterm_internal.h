@@ -67,12 +67,10 @@ typedef struct term_t_i {
     void (*cursor_update)(term_t handle, int old_x, int old_y, int new_x, int new_y);
     // bell callback
     void (*bell)(term_t handle);
-    // Whether we're in the midst of processing an escape code
-    bool escape_mode;
-    // Bytes that have been received so far for an escape code
-    char *escape_code;
-    int escape_bytes;
-    int escape_max_bytes;
+    // Bytes that have been received so far but not send to the terminal
+    char *output_bytes;
+    int output_byte_count;
+    int output_max_bytes;
     // Name of the shell to use
     char *shell;
     // Type of terminal to emulate

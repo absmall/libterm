@@ -45,7 +45,7 @@ void escape_clear(term_t_i *term)
 // carriage return
 void escape_cr(term_t_i *term)
 {
-    fprintf(stderr, "escape_cr unsupported!\n");
+    term->ccol = 0;
 }
 
 // Change scrolling region
@@ -57,7 +57,7 @@ void escape_csr(term_t_i *term)
 // Move cursor left #1 spaces
 void escape_cub(term_t_i *term)
 {
-    int left = atoi( term->escape_code + 2 );
+    int left = atoi( term->output_bytes + 2 );
     if( term->ccol < left ) {
         term->ccol = 0;
     }  else {
@@ -78,7 +78,7 @@ void escape_cub1(term_t_i *term)
 // Move down #1 lines
 void escape_cud(term_t_i *term)
 {
-    int down = atoi( term->escape_code + 2 );
+    int down = atoi( term->output_bytes + 2 );
     if( term->crow + down >= term->grid.history ) {
         term->crow = term->grid.history - 1;
     }  else {
@@ -90,16 +90,19 @@ void escape_cud(term_t_i *term)
 // down one line
 void escape_cud1(term_t_i *term)
 {
-    if( term->crow < term->grid.history - 1 ) {
-        term->crow ++;
-        term->dirty_cursor.exists = true;
+    term->ccol=0;
+    term->crow++;
+    term->dirty_cursor.exists = true;
+    if( term->crow >= term->grid.history ) {
+        term_shiftrows(term);
+        term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
     }
 }
 
 // Move right #1 spaces
 void escape_cuf(term_t_i *term)
 {
-    int right = atoi( term->escape_code + 2 );
+    int right = atoi( term->output_bytes + 2 );
     if( term->ccol + right >= term->grid.width ) {
         term->ccol = term->grid.width - 1;
     }  else {
@@ -124,7 +127,7 @@ void escape_cup(term_t_i *term)
 {
     char *n;
 
-    term->crow = strtoul( term->escape_code + 2, &n, 10 ) - 1;
+    term->crow = strtoul( term->output_bytes + 2, &n, 10 ) - 1;
     if( term->crow >= term->grid.height ) term->crow = term->grid.height - 1;
     term->ccol = strtoul( n + 1, NULL, 10 ) - 1;
     if( term->ccol >= term->grid.width ) term->crow = term->grid.width - 1;
@@ -134,7 +137,7 @@ void escape_cup(term_t_i *term)
 // Move cursor up #1 lines
 void escape_cuu(term_t_i *term)
 {
-    int up = atoi( term->escape_code + 2 );
+    int up = atoi( term->output_bytes + 2 );
     if( term->crow < up ) {
         term->crow = 0;
     }  else {
@@ -506,7 +509,7 @@ void escape_sgm(term_t_i *term)
     char *nptr;
 
     while( true ) {
-        val = strtoul( term->escape_code + i, &nptr, 10 );
+        val = strtoul( term->output_bytes + i, &nptr, 10 );
         switch( val ) {
             case 0:
                 term->cattr = 0;
@@ -608,6 +611,6 @@ void escape_sgm(term_t_i *term)
                 break;
         }
         if( (*nptr) == 'm' ) break;
-        i = nptr - term->escape_code + 1;
+        i = nptr - term->output_bytes + 1;
     }
 }

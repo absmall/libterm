@@ -60,23 +60,23 @@ int match_sgm(term_t_i *term, int *length)
     int i;
     int state = 0;
 
-    for( i = 0; i < term->escape_bytes; i ++ ) {
+    for( i = 0; i < term->output_byte_count; i ++ ) {
         if( i == 0 ) {
-            if( term->escape_code[ i ] != 27 ) return 0;
+            if( term->output_bytes[ i ] != 27 ) return 0;
         } else if( i == 1 ) {
-            if( term->escape_code[ i ] != '[' ) {
+            if( term->output_bytes[ i ] != '[' ) {
                 return 0;
             } else {
                 state ++;
             }
         } else if( state == 1 ) {
-            if( term->escape_code[ i ] == 'm'
-             && isdigit( term->escape_code[ i - 1 ] ) ) {
+            if( term->output_bytes[ i ] == 'm'
+             && isdigit( term->output_bytes[ i - 1 ] ) ) {
                 *length = i + 1;
                 return 2;
             }
-            else if( !isdigit( term->escape_code[ i ] )
-             && term->escape_code[ i ] != ';' ) return 0;
+            else if( !isdigit( term->output_bytes[ i ] )
+             && term->output_bytes[ i ] != ';' ) return 0;
         }
     }
 
@@ -179,23 +179,9 @@ struct dynamic_escape_code {
 int term_send_escape(term_t_i *term, char *buf, int length)
 {
     bool isprefix = false;
-    int previous_length;
     int i;
     int num_escapes;
     struct static_escape_code *table;
-
-    // See if we need to reallocate
-    if( term->escape_max_bytes < term->escape_bytes + length ) {
-        term->escape_max_bytes = term->escape_bytes + length;
-        if( term->escape_code != NULL ) {
-            term->escape_code = realloc( term->escape_code, term->escape_max_bytes );
-        } else {
-            term->escape_code = malloc( term->escape_max_bytes );
-        }
-    }
-    memcpy( term->escape_code + term->escape_bytes, buf, length ); 
-    previous_length = term->escape_bytes;
-    term->escape_bytes += length;
 
     switch( term->type ) {
         case TERM_TYPE_VT100:
@@ -217,12 +203,10 @@ int term_send_escape(term_t_i *term, char *buf, int length)
     // See if this is a prefix, or is equal to any static escape_code
     for( i = 0; i < num_escapes; i ++ ) {
         int codelen;
-        int ret = escape_compare( table[ i ].code, term->escape_code, term->escape_bytes, &codelen );
+        int ret = escape_compare( table[ i ].code, buf, length, &codelen );
         if( ret == 2 ) {
             table[ i ].apply_escape_code( term );
-            term->escape_bytes = 0;
-            term->escape_mode = 0;
-            return codelen - previous_length;
+            return codelen;
         } else if( ret == 1 ) {
             isprefix = true;
         }
@@ -235,31 +219,17 @@ int term_send_escape(term_t_i *term, char *buf, int length)
         ret = dynamic_escape_codes[ i ].code_match( term, &codelen );
         if( ret == 2 ) {
             dynamic_escape_codes[ i ].apply_escape_code( term );
-            term->escape_bytes = 0;
-            term->escape_mode = 0;
-            return codelen - previous_length;
+            return codelen;
         } else if( ret == 1 ) {
             isprefix = true;
         }
     }
 
     if( isprefix ) {
-        // We ate everything
-        return length;
+        // Still a prefix, keep looking
+        return 0;
     } else {
-        // It's a false escape code - consume a byte so that we won't try to
-        // process this again, and discard whatever we have accumulated
-        printf( "Unknown escape code:" );
-        for(i = 0; i < term->escape_bytes; i ++ ) {
-            if( isprint(term->escape_code[ i ] ) ) {
-                printf( " %c", term->escape_code[ i ] );
-            } else {
-                printf( " 0x%02X", term->escape_code[ i ] );
-            }
-        }
-        printf( "\n" );
-        term->escape_bytes = 0;
-        term->escape_mode = 0;
-        return 1;
+        // Not an escape code
+        return -1;
     }
 }
