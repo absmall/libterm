@@ -425,13 +425,13 @@ void escape_rmam(term_t_i *term)
 // Out of "keypad-transmit" mode
 void escape_rmkx(term_t_i *term)
 {
-    fprintf(stderr, "escape_rmkx unsupported!\n");
+    // Do nothing here, assume always transmit since we don't have a numeric keypad on VKB
 }
 
 // exit standout mode
 void escape_rmso(term_t_i *term)
 {
-    fprintf(stderr, "escape_rmso unsupported!\n");
+    term->cattr &= ~TERM_ATTRIB_BOLD;
 }
 
 // End underscore mode
@@ -481,7 +481,7 @@ void escape_smam(term_t_i *term)
 // Begin keypad transmit mode.
 void escape_smkx(term_t_i *term)
 {
-    fprintf(stderr, "escape_smkx unsupported!\n");
+    // Do nothing here, assume always transmit since we don't have a numeric keypad on VKB
 }
 
 // begin standout mode
