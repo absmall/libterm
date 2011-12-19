@@ -30,6 +30,7 @@ typedef enum {
 #define TERM_ATTRIB_BLINK       (1<<2)
 #define TERM_ATTRIB_REVERSE     (1<<3)
 #define TERM_ATTRIB_CONCEALED   (1<<4)
+#define TERM_ATTRIB_STANDOUT    (1<<5)
 
 #define TERM_COLOR_BLACK        1
 #define TERM_COLOR_RED          2

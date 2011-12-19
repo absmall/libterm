@@ -431,7 +431,7 @@ void escape_rmkx(term_t_i *term)
 // exit standout mode
 void escape_rmso(term_t_i *term)
 {
-    term->cattr &= ~TERM_ATTRIB_BOLD;
+    term->cattr &= ~TERM_ATTRIB_STANDOUT;
 }
 
 // End underscore mode
@@ -487,7 +487,7 @@ void escape_smkx(term_t_i *term)
 // begin standout mode
 void escape_smso(term_t_i *term)
 {
-    fprintf(stderr, "escape_smso unsupported!\n");
+    term->cattr |= TERM_ATTRIB_STANDOUT;
 }
 
 // begin underline mode
