@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 #include <signal.h>
 #include "libterm_internal.h"
+#include "terminfo_commands.h"
 
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height))
 {
@@ -335,24 +336,29 @@ void term_send_data(term_t handle, const char *string, int length)
 
 void term_send_special(term_t handle, term_special_key key)
 {
+    char *sequence;
     term_t_i *term;
 
     term = TO_S(handle);
     switch( key ) {
         case TERM_KEY_UP:
-            write( term->fd, "\x1b[A", 3);
+            sequence = term_find_escape( term, escape_kcuu1 );
             break;
         case TERM_KEY_DOWN:
-            write( term->fd, "\x1b[B", 3);
+            sequence = term_find_escape( term, escape_kcud1 );
             break;
         case TERM_KEY_RIGHT:
-            write( term->fd, "\x1b[C", 3);
+            sequence = term_find_escape( term, escape_kcuf1 );
             break;
         case TERM_KEY_LEFT:
-            write( term->fd, "\x1b[D", 3);
+            sequence = term_find_escape( term, escape_kcub1 );
             break;
         default:
             break;
+    }
+
+    if( sequence != NULL ) {
+        write( term->fd, sequence, strlen(sequence) );
     }
 }
 

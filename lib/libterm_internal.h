@@ -94,6 +94,7 @@ void term_shiftrows(term_t_i *term);
 void term_update(term_t_i *term);
 void term_cursor_update(term_t_i *term);
 void term_add_dirty_rect(term_t_i *term, int x, int y, int width, int height);
+char *term_find_escape(term_t_i *term, void (*function)(term_t_i *term));
 
 #define TO_S(x) ((term_t_i *)x)
 #define TO_H(x) ((term_t)x)

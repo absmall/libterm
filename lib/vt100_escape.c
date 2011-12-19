@@ -176,6 +176,39 @@ struct dynamic_escape_code {
     { match_sgm, escape_sgm }
 };
 
+char *term_find_escape(term_t_i *term, void (*function)(term_t_i *term))
+{
+    int i;
+    int num_escapes;
+    struct static_escape_code *table;
+
+    switch( term->type ) {
+        case TERM_TYPE_VT100:
+            table = escape_vt100;
+            num_escapes = sizeof(escape_vt100)/sizeof(struct static_escape_code);
+            break;
+        case TERM_TYPE_XTERM_COLOR:
+            table = escape_xterm_color;
+            num_escapes = sizeof(escape_xterm_color)/sizeof(struct static_escape_code);
+            break;
+        case TERM_TYPE_ANSI:
+            table = escape_ansi;
+            num_escapes = sizeof(escape_ansi)/sizeof(struct static_escape_code);
+            break;
+        default:
+            num_escapes = 0;
+    }
+    
+    // See if this is a prefix, or is equal to any static escape_code
+    for( i = 0; i < num_escapes; i ++ ) {
+        if( table[ i ].apply_escape_code == function ) {
+            return table[ i ].code;
+        }
+    }
+    
+    return NULL;
+}
+
 int term_send_escape(term_t_i *term, char *buf, int length)
 {
     bool isprefix = false;
