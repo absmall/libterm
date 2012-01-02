@@ -51,6 +51,8 @@ typedef struct term_t_i {
     int ccolour;
     // Flag to indicate that memory has been allocated for the grid
     bool allocated;
+    // Whether a shell or a special application is being forked
+    bool isShell;
     // Grid of characters and attributes
     term_grid grid;
     // Dirty region of the grid
@@ -67,6 +69,8 @@ typedef struct term_t_i {
     void (*cursor_update)(term_t handle, int old_x, int old_y, int new_x, int new_y);
     // bell callback
     void (*bell)(term_t handle);
+    // fork callback
+    int (*fork)(term_t handle, int argc, char **argv);
     // Bytes that have been received so far but not send to the terminal
     char *output_bytes;
     int output_byte_count;

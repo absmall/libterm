@@ -56,20 +56,22 @@ bool term_fork(term_t_i *term)
             }
         }
 
-        switch( term->type ) {
-            case TERM_TYPE_VT100:
-                setenv("TERM", "vt100", 1);
-                break;
-            case TERM_TYPE_ANSI:
-                setenv("TERM", "ansi", 1);
-                break;
-            case TERM_TYPE_XTERM_COLOR:
-                setenv("TERM", "xterm-color", 1);
-                break;
-            default:
-                // Unknown terminal type, default to VT100
-                setenv("TERM", "vt100", 1);
-                break;
+        if( term->fork == NULL ) {
+            switch( term->type ) {
+                case TERM_TYPE_VT100:
+                    setenv("TERM", "vt100", 1);
+                    break;
+                case TERM_TYPE_ANSI:
+                    setenv("TERM", "ansi", 1);
+                    break;
+                case TERM_TYPE_XTERM_COLOR:
+                    setenv("TERM", "xterm-color", 1);
+                    break;
+                default:
+                    // Unknown terminal type, default to VT100
+                    setenv("TERM", "vt100", 1);
+                    break;
+            }
         }
 
         close( pipefd[ 0 ] );
@@ -105,11 +107,18 @@ bool term_fork(term_t_i *term)
         }
 
         // And a terminator
-        args[ count++ ] = "-l";
+        if( term->isShell ) {
+            args[ count++ ] = "-l";
+        }
         args[ count ] = NULL;
-        execvp( args[ 0 ], args );
-        status = errno;
-        write( pipefd[ 1 ], &status, 1 );
+        if( term->fork == NULL ) {
+            execvp( args[ 0 ], args );
+            status = errno;
+            write( pipefd[ 1 ], &status, 1 );
+        } else {
+            close( pipefd[ 1 ] );
+            status = term->fork( TO_H(term), count, args );
+        }
         exit( status );
     } else {
         close( pipefd[ 1 ] );
