@@ -36,6 +36,8 @@ typedef struct term_t_i {
     int ccolour;
     // Flag to indicate that memory has been allocated for the grid
     bool allocated;
+    // Whether to exec a separate process
+    bool loginShell;
     // Grid of characters and attributes
     term_grid grid;
     // pid of the child
@@ -48,6 +50,8 @@ typedef struct term_t_i {
     void (*cursor_update)(term_t handle, int x, int y);
     // bell callback
     void (*bell)(term_t handle);
+    // fork callback
+    int (*fork)(term_t handle, int argc, char **argv);
     // Whether we're in the midst of processing an escape code
     bool escape_mode;
     // Bytes that have been received so far for an escape code

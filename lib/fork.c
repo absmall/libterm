@@ -56,16 +56,18 @@ bool term_fork(term_t_i *term)
             }
         }
 
-        switch( term->type ) {
-            case TERM_TYPE_VT100:
-                setenv("TERM", "vt100", 1);
-                break;
-            case TERM_TYPE_ANSI:
-                setenv("TERM", "ansi", 1);
-                break;
-            case TERM_TYPE_XTERM_COLOR:
-                setenv("TERM", "xterm-color", 1);
-                break;
+        if( term->fork == NULL ) {
+            switch( term->type ) {
+                case TERM_TYPE_VT100:
+                    setenv("TERM", "vt100", 1);
+                    break;
+                case TERM_TYPE_ANSI:
+                    setenv("TERM", "ansi", 1);
+                    break;
+                case TERM_TYPE_XTERM_COLOR:
+                    setenv("TERM", "xterm-color", 1);
+                    break;
+            }
         }
 
         close( pipefd[ 0 ] );
@@ -100,11 +102,18 @@ bool term_fork(term_t_i *term)
             inspace = (*ptr == ' ');
         }
 
+        if( term->loginShell ) {
+            args[ count++ ] = "-l";
+        }
         // And a terminator
-        args[ count++ ] = "-l";
         args[ count ] = NULL;
-        execvp( args[ 0 ], args );
-        status = errno;
+        if( term->fork == NULL ) {
+            execvp( args[ 0 ], args );
+            status = errno;
+        } else {
+            close( pipefd[ 1 ] );
+            status = term->fork( TO_H(term), count, args );
+        }
         write( pipefd[ 1 ], &status, 1 );
         exit( status );
     } else {

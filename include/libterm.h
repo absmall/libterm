@@ -56,6 +56,10 @@ int term_set_emulation(term_t handle, term_type type);
 
 // Set the shell to use
 bool term_set_shell(term_t handle, char *shell);
+// Set the program to use instead of a login shell
+bool term_set_program(term_t handle, char *program);
+// Set the callback to use after forking instead starting a new process
+bool term_set_fork_callback(term_t handle, int (*callback)(term_t handle, int argc, char **argv));
 
 // Begin a terminal session. Set up all parameters before calling this function
 bool term_begin( term_t handle, int width, int height, int scrollback );

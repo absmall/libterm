@@ -336,13 +336,42 @@ bool term_set_shell(term_t handle, char *shell)
 {
     term_t_i *term = TO_S( handle );
 
+    free( term->shell );
     term->shell = strdup( shell );
+    term->loginShell = true;
+    term->fork = NULL;
 
     if( term->shell == NULL ) {
         errno = ENOMEM;
     }
 
     return term->shell != NULL;
+}
+
+bool term_set_program(term_t handle, char *program)
+{
+    term_t_i *term = TO_S( handle );
+
+    free( term->shell );
+    term->shell = strdup( program );
+    term->loginShell = false;
+    term->fork = NULL;
+
+    if( term->shell == NULL ) {
+        errno = ENOMEM;
+    }
+
+    return term->shell != NULL;
+}
+
+bool term_set_fork_callback(term_t handle, int (*callback)(term_t handle, int argc, char **argv))
+{
+    term_t_i *term = TO_S( handle );
+
+    term->fork = callback;
+    term->loginShell = false;
+
+    return true;
 }
 
 bool term_begin(term_t handle, int width, int height, int scrollback)

@@ -228,6 +228,12 @@ void QTerm::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Left:
             term_send_special( terminal, TERM_KEY_LEFT );
             break;
+		case Qt::Key_Return:
+			term_send_data( terminal, "\n", 1 );
+			break;
+		case Qt::Key_Backspace:
+			term_send_data( terminal, "\b", 1 );
+			break;
         default:
             term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
             break;
@@ -253,6 +259,15 @@ void QTerm::resizeEvent(QResizeEvent *event)
     }
 }
 
+#ifdef FAKE_MAIN
+extern "C" int _main(int argc, char **argv);
+
+int fake_main(term_t handle, int argc, char **argv)
+{
+    return _main(argc, argv);
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     term_t terminal;
@@ -270,6 +285,16 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
     }
+#ifdef FAKE_MAIN
+    if( !term_set_program( terminal, argv[0] ) ) {
+        fprintf(stderr, "Failed to set program args (%s)\n", strerror( errno ) );
+        exit(1);
+    }
+    if( !term_set_fork_callback( terminal, fake_main ) ) {
+        fprintf(stderr, "Failed to set fork callback (%s)\n", strerror( errno ) );
+        exit(1);
+    }
+#endif
     if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
         fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );
         exit(1);
