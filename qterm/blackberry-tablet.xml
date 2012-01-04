@@ -3,7 +3,7 @@
     <id>org.demo.qterm</id>
     <filename>qterm</filename>
     <name>Terminal</name>
-    <versionNumber>1.0.0</versionNumber>
+    <versionNumber>1.0.4</versionNumber>
     <description>Playbook terminal</description>
     <copyright>2011</copyright>
 
@@ -16,6 +16,7 @@
 
     <publisher>demo.org</publisher>
     <permission system="true">run_native</permission>
+    <permission>access_shared</permission>
     <category>core.games</category>
     <icon><image>res/icon.png</image></icon>
     <splashscreen>res/splashscreen.png</splashscreen>
