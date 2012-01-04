@@ -272,15 +272,6 @@ int main(int argc, char *argv[])
 {
     term_t terminal;
 
-#ifdef __QNX__
-#ifdef BPS_VERSION
-    if( bps_initialize() != BPS_SUCCESS ) {
-        fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
-        exit(1);
-    }
-#endif
-#endif
-
     if( !term_create( &terminal ) ) {
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
@@ -300,6 +291,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
     {
+#ifdef __QNX__
+#ifdef BPS_VERSION
+        if( bps_initialize() != BPS_SUCCESS ) {
+            fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
+            exit(1);
+        }
+#endif
+#endif
+
         QCoreApplication::addLibraryPath("app/native/lib");
         QApplication app(argc, argv);
      
