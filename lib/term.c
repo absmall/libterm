@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 #include <signal.h>
 #include "libterm_internal.h"
+#include "terminfo_commands.h"
 
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height))
 {
@@ -16,7 +17,7 @@ void term_register_update(term_t handle, void (*update)(term_t handle, int x, in
     term->update = update;
 }
 
-void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y))
+void term_register_cursor(term_t handle, void (*update)(term_t handle, int old_x, int old_y, int new_x, int new_y))
 {
     term_t_i *term;
 
@@ -43,13 +44,13 @@ int term_get_file_descriptor(term_t handle)
     return term->fd;
 }
 
-const uint32_t **term_get_grid(term_t handle)
+const wchar_t **term_get_grid(term_t handle)
 {
     term_t_i *term;
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid.grid + term->row;
+    return (const wchar_t **)term->grid.grid + term->row;
 }
 
 const uint32_t **term_get_attribs(term_t handle)
@@ -68,6 +69,38 @@ const uint32_t **term_get_colours(term_t handle)
     term = TO_S(handle);
 
     return (const uint32_t **)term->grid.colours + term->row;
+}
+
+const char *term_get_line(term_t handle, int row)
+{
+    unsigned int length;
+    term_t_i *term;
+    wchar_t *grid_row;
+
+    term = TO_S(handle);
+
+    if( row < term->row || row >= term->grid.history - term->row ) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    grid_row = term->grid.grid[term->row + row];
+    length = wcstombs(NULL, grid_row, 0) + 1;
+    if( length > term->conversion_buffer_size ) {
+        if( term->conversion_buffer != NULL ) {
+            free( term->conversion_buffer );
+        }
+        term->conversion_buffer = malloc( length );
+        if( term->conversion_buffer == NULL ) {
+            errno = ENOMEM;
+            term->conversion_buffer_size = 0;
+            return NULL;
+        }
+        term->conversion_buffer_size = length;
+    }
+    wcstombs(term->conversion_buffer, grid_row, term->conversion_buffer_size);
+
+    return term->conversion_buffer;
 }
 
 static int term_get_color(uint32_t attrib, uint32_t colour, uint32_t *color)
@@ -179,11 +212,12 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     struct winsize ws;
     term_t_i *term;
     term_grid g;
+    int old_crow, old_ccol;
     int width, height, offset_y_src, offset_y_dst, new_history;
 
     term = TO_S(handle);
 
-    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + height == term->grid.history) return 0;
+    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + new_height == term->grid.history) return 0;
 
     // Copy the narrower of the two
     if( term->grid.width < new_width ) {
@@ -195,6 +229,10 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     // Convenience variable
     new_history = new_height + new_scrollback;
 
+    // Remember the previous cursor position
+    old_crow = term->crow;
+    old_ccol = term->ccol;
+
     // We want to copy such that the first lines after the scrollback are in
     // the same position, unless that would push the cursor off the screen
     if( term->crow >= new_height ) {
@@ -203,7 +241,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
             offset_y_src = 0;
             offset_y_dst = new_history - term->crow;
         } else {
-            offset_y_src = term->crow - new_history;
+            offset_y_src = term->crow - new_history + 1;
             offset_y_dst = 0;
         }
         term->crow = new_height - 1;
@@ -244,9 +282,12 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     ret = ioctl(term->fd, TIOCSWINSZ, &ws);
 
     if( ret != -1 ) {
-        ret = kill(term->child, SIGWINCH);
         term_release_grid( &term->grid );
         memcpy( &term->grid, &g, sizeof( term_grid ) );
+
+        // Now our internals are up-to-date, notify the application
+        ret = kill(term->child, SIGWINCH);
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow - term->row);
     } else {
         term_release_grid( &g );
     }
@@ -295,24 +336,29 @@ void term_send_data(term_t handle, const char *string, int length)
 
 void term_send_special(term_t handle, term_special_key key)
 {
+    char *sequence;
     term_t_i *term;
 
     term = TO_S(handle);
     switch( key ) {
         case TERM_KEY_UP:
-            write( term->fd, "\x1b[A", 3);
+            sequence = term_find_escape( term, escape_kcuu1 );
             break;
         case TERM_KEY_DOWN:
-            write( term->fd, "\x1b[B", 3);
+            sequence = term_find_escape( term, escape_kcud1 );
             break;
         case TERM_KEY_RIGHT:
-            write( term->fd, "\x1b[C", 3);
+            sequence = term_find_escape( term, escape_kcuf1 );
             break;
         case TERM_KEY_LEFT:
-            write( term->fd, "\x1b[D", 3);
+            sequence = term_find_escape( term, escape_kcub1 );
             break;
         default:
             break;
+    }
+
+    if( sequence != NULL ) {
+        write( term->fd, sequence, strlen(sequence) );
     }
 }
 
@@ -407,8 +453,11 @@ void term_free(term_t handle)
     if( term->shell != NULL ) {
         free( term->shell );
     }
-    if( term->escape_code != NULL ) {
-        free( term->escape_code );
+    if( term->conversion_buffer != NULL ) {
+        free( term->conversion_buffer );
+    }
+    if( term->output_bytes != NULL ) {
+        free( term->output_bytes );
     }
     free( term );
 }
@@ -439,6 +488,25 @@ int term_get_height(term_t handle)
     term_t_i *term = TO_S(handle);
 
     return term->grid.height;
+}
+
+int term_get_grid_size(term_t handle, int *w, int *h)
+{
+    term_t_i *term = TO_S(handle);
+    *w = term->grid.width;
+    *h = term->grid.height;
+
+    return 0;
+}
+
+int term_get_cursor_pos(term_t handle, int *x, int *y)
+{
+    term_t_i *term = TO_S(handle);
+
+    *x = term->ccol;
+    *y = term->crow - term->row;
+
+    return 0;
 }
 
 int term_set_emulation(term_t handle, term_type type)

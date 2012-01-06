@@ -17,7 +17,7 @@ int cursor_y = -1;
 void update(term_t handle, int x, int y, int width, int height)
 {
     int i, j;
-    const uint32_t **grid = term_get_grid(handle);
+    const wchar_t **grid = term_get_grid(handle);
 
 
     wattroff( wnd, A_REVERSE );
@@ -37,12 +37,13 @@ void update(term_t handle, int x, int y, int width, int height)
     wrefresh(wnd);
 }
 
-void cursor(term_t handle, int x, int y)
+void cursor(term_t handle, int old_x, int old_y, int new_x, int new_y)
 {
-    cursor_x = x;
-    cursor_y = y;
+    cursor_x = new_x;
+    cursor_y = new_y;
 
-    update( handle, x, y, 1, 1 );
+    update( handle, old_x, old_y, 1, 1 );
+    update( handle, new_x, new_y, 1, 1 );
 }
 
 int main(int argc, char *argv[])

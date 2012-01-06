@@ -1,6 +1,6 @@
 INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(../include)
-ADD_LIBRARY(term SHARED fork.c memory.c render.c term.c vt100_escape.c terminfo.c)
+ADD_LIBRARY(term SHARED fork.c memory.c render.c term.c escape.c terminfo.c callbacks.c rect.c)
 IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "qnx")
 TARGET_LINK_LIBRARIES(term util)
 ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "qnx")

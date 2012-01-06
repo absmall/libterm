@@ -1,6 +1,7 @@
 #ifndef __LIBTERM_INTERNAL_H__
 #define __LIBTERM_INTERNAL_H__
 
+#include <stddef.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <libterm.h>
@@ -13,12 +14,26 @@ typedef struct {
     // Total height of buffer including offscreen
     int history;
     // Grid of characters
-    uint32_t **grid;
+    wchar_t **grid;
     // Grid of attributes
     uint32_t **attribs;
     // Color of characters
     uint32_t **colours;
 } term_grid;
+
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+    bool exists;
+} term_dirty_rect;
+
+typedef struct {
+    int old_ccol;
+    int old_crow;
+    bool exists;
+} term_dirty_cursor;
 
 typedef struct term_t_i {
     // Current top row of the buffer
@@ -40,6 +55,10 @@ typedef struct term_t_i {
     bool loginShell;
     // Grid of characters and attributes
     term_grid grid;
+    // Dirty region of the grid
+    term_dirty_rect dirty;
+    // Whether the cursor has moved
+    term_dirty_cursor dirty_cursor;
     // pid of the child
     pid_t child;
     // pty file descriptor
@@ -47,21 +66,23 @@ typedef struct term_t_i {
     // render callback
     void (*update)(term_t handle, int x, int y, int width, int height);
     // cursor callback
-    void (*cursor_update)(term_t handle, int x, int y);
+    void (*cursor_update)(term_t handle, int old_x, int old_y, int new_x, int new_y);
     // bell callback
     void (*bell)(term_t handle);
     // fork callback
     int (*fork)(term_t handle, int argc, char **argv);
-    // Whether we're in the midst of processing an escape code
-    bool escape_mode;
-    // Bytes that have been received so far for an escape code
-    char *escape_code;
-    int escape_bytes;
-    int escape_max_bytes;
+    // Bytes that have been received so far but not send to the terminal
+    char *output_bytes;
+    int output_byte_count;
+    int output_max_bytes;
     // Name of the shell to use
     char *shell;
     // Type of terminal to emulate
     term_type type;
+    // Buffer in which to convert a line being retrieved
+    char *conversion_buffer;
+    // Size of the conversion buffer
+    int conversion_buffer_size;
     // opaque user data
     void *user_data;
 } term_t_i;
@@ -74,6 +95,10 @@ int term_send_escape(term_t_i *term, char *buf, int length);
 bool term_fork(term_t_i *term);
 void term_slay(term_t_i *term);
 void term_shiftrows(term_t_i *term);
+void term_update(term_t_i *term);
+void term_cursor_update(term_t_i *term);
+void term_add_dirty_rect(term_t_i *term, int x, int y, int width, int height);
+char *term_find_escape(term_t_i *term, void (*function)(term_t_i *term));
 
 #define TO_S(x) ((term_t_i *)x)
 #define TO_H(x) ((term_t)x)

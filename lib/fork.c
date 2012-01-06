@@ -67,6 +67,10 @@ bool term_fork(term_t_i *term)
                 case TERM_TYPE_XTERM_COLOR:
                     setenv("TERM", "xterm-color", 1);
                     break;
+                default:
+                    // Unknown terminal type, default to VT100
+                    setenv("TERM", "vt100", 1);
+                    break;
             }
         }
 

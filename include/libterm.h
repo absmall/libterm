@@ -30,6 +30,7 @@ typedef enum {
 #define TERM_ATTRIB_BLINK       (1<<2)
 #define TERM_ATTRIB_REVERSE     (1<<3)
 #define TERM_ATTRIB_CONCEALED   (1<<4)
+#define TERM_ATTRIB_STANDOUT    (1<<5)
 
 #define TERM_COLOR_BLACK        1
 #define TERM_COLOR_RED          2
@@ -78,7 +79,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height));
 
 // Callback functions for when the cursor moves
-void term_register_cursor(term_t handle, void (*update)(term_t handle, int x, int y));
+void term_register_cursor(term_t handle, void (*update)(term_t handle, int old_x, int old_y, int new_x, int new_y));
 
 // Callback functions for when the cursor moves
 void term_register_bell(term_t handle, void (*bell)(term_t handle));
@@ -88,9 +89,15 @@ void term_register_bell(term_t handle, void (*bell)(term_t handle));
 int term_get_file_descriptor(term_t handle);
 
 // Retrieve the grid of characters
-const uint32_t **term_get_grid(term_t handle);
+const wchar_t **term_get_grid(term_t handle);
 const uint32_t **term_get_attribs(term_t handle);
 const uint32_t **term_get_colours(term_t handle);
+// Get the dimensions of the grid
+int term_get_grid_size(term_t handle, int *w, int *h);
+// Get the cursor position on the grid
+int term_get_cursor_pos(term_t handle, int *x, int *y);
+// Retrieve a UTF-8 version of a particular row
+const char *term_get_line(term_t handle, int row);
 
 // Retrieve grid propeties
 int term_get_width(term_t handle);

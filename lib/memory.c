@@ -7,7 +7,7 @@ bool term_allocate_grid(term_grid *grid)
 {
     int i, j;
 
-    grid->grid = malloc(sizeof(uint32_t *)*grid->history);
+    grid->grid = malloc(sizeof(wchar_t *)*grid->history);
     if( grid->grid == NULL ) {
         errno = ENOMEM;
         return false;
@@ -26,7 +26,7 @@ bool term_allocate_grid(term_grid *grid)
         return false;
     }
     for( i = 0; i < grid->history; i ++ ) {
-        grid->grid[i] = malloc(sizeof(uint32_t)*grid->width);
+        grid->grid[i] = malloc(sizeof(uint32_t)*(grid->width+1));
         if( grid->grid[i] == NULL ) {
             for(i--; i>=0; i--) {
                 free(grid->grid[i]);
@@ -73,6 +73,7 @@ bool term_allocate_grid(term_grid *grid)
         for( j = 0; j < grid->width; j ++ ) {
             grid->grid[ i ][ j ] = ' ';
         }
+        grid->grid[ i ][ j ] = 0;
         memset(grid->attribs[i], 0, sizeof(uint32_t)*grid->width);
         memset(grid->colours[i], 0, sizeof(uint32_t)*grid->width);
     }
@@ -95,19 +96,20 @@ void term_copy_grid(term_grid *dst, term_grid *src, int offset_y_src, int offset
 
 void term_shiftrows(term_t_i *term)
 {
+    wchar_t *gridrow;
     uint32_t *firstrow;
     int i;
 
     // Just cycle the pointers, and move the first row to the end, but clear it
     // grid
-    firstrow = term->grid.grid[0];
+    gridrow = term->grid.grid[0];
     for( i = 1; i < term->grid.history; i ++ ) {
         term->grid.grid[ i - 1 ] = term->grid.grid[ i ];
     }
-    term->grid.grid[ i - 1 ] = firstrow;
+    term->grid.grid[ i - 1 ] = gridrow;
 
     for( i = 0; i < term->grid.width; i ++ ) {
-        firstrow[ i ] = ' ';
+        gridrow[ i ] = ' ';
     }
 
     // attribs
