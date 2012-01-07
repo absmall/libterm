@@ -90,7 +90,6 @@ void escape_cud(term_t_i *term)
 // down one line
 void escape_cud1(term_t_i *term)
 {
-    term->ccol=0;
     term->crow++;
     term->dirty_cursor.exists = true;
     if( term->crow >= term->grid.history ) {
@@ -196,6 +195,12 @@ void escape_home(term_t_i *term)
     term->crow = term->grid.history - term->grid.height;
     term->ccol = 0;
     term->dirty_cursor.exists = true;
+}
+
+// turn on blank mode (characters invisible)
+void escape_invis(term_t_i *term)
+{
+	fprintf(stderr, "escape_invis unsupported!\n");
 }
 
 // tab to next 8-space hardware tab stop
@@ -390,6 +395,17 @@ void escape_mc5(term_t_i *term)
     fprintf(stderr, "escape_mc5 unsupported!\n");
 }
 
+void escape_nel(term_t_i *term)
+{
+    term->ccol=0;
+    term->crow++;
+    term->dirty_cursor.exists = true;
+    if( term->crow >= term->grid.history ) {
+        term_shiftrows(term);
+        term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
+    }
+}
+
 // Restore cursor to position of last sc
 void escape_rc(term_t_i *term)
 {
@@ -500,6 +516,18 @@ void escape_smul(term_t_i *term)
 void escape_tbc(term_t_i *term)
 {
     fprintf(stderr, "escape_tbc unsupported!\n");
+}
+
+// vertical position #1 absolute
+void escape_vpa(term_t_i *term)
+{
+    int vpos = atoi( term->output_bytes + 2 );
+    if( vpos >= term->grid.history ) {
+        term->crow = term->grid.history - 1;
+    }  else {
+        term->crow = vpos;
+    }
+    term->dirty_cursor.exists = true;
 }
 
 void escape_sgm(term_t_i *term)
