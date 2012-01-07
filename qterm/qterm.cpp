@@ -22,6 +22,7 @@
 #include <bbsupport/Notification>
 #endif
 #endif
+#include <dlfcn.h>
 
 #define WIDTH    80
 #define HEIGHT    17
@@ -288,8 +289,6 @@ bool QTerm::event(QEvent *event)
                 case QEvent::TouchBegin:
                     return true;
                 case QEvent::TouchUpdate:
-                    return true;
-                case QEvent::TouchUpdate:
                     if( touchPoints.length() >= 2 ) {
                         if( !piekey_active ) {
                             piekey_active = 1;
@@ -324,24 +323,30 @@ int main(int argc, char *argv[])
 {
     term_t terminal;
 
-#ifdef __QNX__
-#ifdef BPS_VERSION
-    if( bps_initialize() != BPS_SUCCESS ) {
-        fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
-        exit(1);
-    }
-#endif
-#endif
-
     if( !term_create( &terminal ) ) {
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
     }
+#ifdef FAKE_MAIN
+    if( !term_set_program( terminal, argv[0] ) ) {
+        fprintf(stderr, "Failed to set program args (%s)\n", strerror( errno ) );
+        exit(1);
+    }
+#endif
+
     if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
         fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );
         exit(1);
     }
     {
+#ifdef __QNX__
+#ifdef BPS_VERSION
+        if( bps_initialize() != BPS_SUCCESS ) {
+            fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
+            exit(1);
+        }
+#endif
+#endif
         QCoreApplication::addLibraryPath("app/native/lib");
         QApplication app(argc, argv);
      
