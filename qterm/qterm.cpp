@@ -23,6 +23,7 @@
 #include <bbsupport/Notification>
 #endif
 #endif
+#include <dlfcn.h>
 
 #define WIDTH    80
 #define HEIGHT    17
@@ -48,6 +49,12 @@ void QTerm::init()
     char_width = 0;
     char_height = 0;
     cursor_on = 1;
+    piekey_active = 0;
+    piekeyboard = new QPieKeyboard(this);
+    piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+#ifndef __QNX__
+    piekeyboard->testMode(3);
+#endif
 
 #ifdef __QNX__
     resize(1024, 600);
@@ -91,6 +98,7 @@ void QTerm::init()
     char_height = metrics.lineSpacing();
     char_descent = metrics.descent();
 
+    QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
 #ifdef BPS_VERSION
     virtualkeyboard_show();
@@ -99,6 +107,7 @@ void QTerm::init()
 #endif
 #endif
     cursor_timer->start(BLINK_SPEED);
+    setAttribute(Qt::WA_AcceptTouchEvents);
 }
 
 QTerm::~QTerm()
@@ -106,6 +115,7 @@ QTerm::~QTerm()
     delete notifier;
     delete exit_notifier;
     delete font;
+    delete piekeyboard;
     term_free( terminal );
 }
 
@@ -140,6 +150,11 @@ void QTerm::term_update_cursor(term_t handle, int old_x, int old_y, int new_x, i
     // Update old and new cursor location
     term->update_grid( old_x, old_y, 1, 1);
     term->update_grid( new_x, new_y, 1, 1);
+}
+
+void QTerm::piekeypress(char key)
+{
+    term_send_data( terminal, &key, 1 );
 }
 
 void QTerm::terminal_data()
@@ -433,7 +448,14 @@ void QTerm::keyPressEvent(QKeyEvent *event)
             break;
     }
 }
- 
+
+void QTerm::mousePressEvent(QMouseEvent *event)
+{
+#ifndef __QNX__
+    piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
+#endif
+}
+
 void QTerm::resizeEvent(QResizeEvent *event)
 {
     if( char_width != 0 && char_height != 0 ) {
@@ -461,6 +483,50 @@ int fake_main(term_t handle, int argc, char *argv[])
     return _main(argc, argv);
 }
 #endif
+
+bool QTerm::event(QEvent *event)
+{
+    QList<QTouchEvent::TouchPoint> touchPoints;
+
+    switch(event->type()) {
+        case QEvent::TouchBegin:
+        case QEvent::TouchUpdate:
+        case QEvent::TouchEnd:
+            touchPoints = static_cast<QTouchEvent *>(event)->touchPoints();
+
+            switch(event->type()) {
+                case QEvent::TouchBegin:
+                    return true;
+                case QEvent::TouchUpdate:
+                    if( touchPoints.length() >= 2 ) {
+                        if( !piekey_active ) {
+                            piekey_active = 1;
+                            piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
+                                                  touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                        }
+                        piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
+                        piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                    } else {
+                        if( piekey_active ) {
+                            piekeyboard->release();
+                            piekey_active = 0;
+                        }
+                    }
+                    return true;
+                case QEvent::TouchEnd:
+                    piekeyboard->release();
+                    piekey_active = 0;
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        default:
+            return QWidget::event(event);
+    }
+
+    return false;
+}
 
 int main(int argc, char *argv[])
 {
@@ -498,7 +564,6 @@ int main(int argc, char *argv[])
         }
 #endif
 #endif
-
         QCoreApplication::addLibraryPath("app/native/lib");
         QApplication app(argc, argv);
      

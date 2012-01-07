@@ -2,6 +2,7 @@
 #include <QSocketNotifier>
 #include <libterm.h>
 #include <QTimer>
+#include <qpiekeyboard.h>
 
 class QTerm : public QWidget
 {
@@ -16,6 +17,8 @@ protected:
     void keyPressEvent(QKeyEvent *);
     void resizeEvent(QResizeEvent *);
     void update_grid(int, int, int, int);
+    void mousePressEvent(QMouseEvent *event);
+    bool event(QEvent *event);
  
 private:
     void init( );
@@ -23,6 +26,7 @@ private:
     int char_height;
     int char_descent;
     int cursor_on;
+    int piekey_active;
     term_t terminal;
 
     QFont *font;
@@ -35,8 +39,11 @@ private:
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
     QTimer *cursor_timer;
+    QPieKeyboard *piekeyboard;
+
 private slots:
     void terminal_data();
     void terminate();
     void blink_cursor();
+    void piekeypress(char key);
 };
