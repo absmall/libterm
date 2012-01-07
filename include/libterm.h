@@ -55,11 +55,13 @@ bool term_create(term_t *handle);
 // Specify what type of terminal to emulate
 int term_set_emulation(term_t handle, term_type type);
 
-// Set the shell to use
+// Set a shell to use after forking
 bool term_set_shell(term_t handle, char *shell);
 // Set the program to use instead of a login shell
 bool term_set_program(term_t handle, char *program);
-// Set the callback to use after forking instead starting a new process
+// Set an arbitary callback to use after forking. The signature is the same as
+// main. It's a good idea to call term_set_program or term_set_shell before
+// this to specify arguments to pass
 bool term_set_fork_callback(term_t handle, int (*callback)(term_t handle, int argc, char **argv));
 
 // Begin a terminal session. Set up all parameters before calling this function

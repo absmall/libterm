@@ -110,6 +110,9 @@ bool term_fork(term_t_i *term)
             args[ count++ ] = "-l";
         }
         // And a terminator
+        if( term->loginShell ) {
+            args[ count++ ] = "-l";
+        }
         args[ count ] = NULL;
         if( term->fork == NULL ) {
             execvp( args[ 0 ], args );

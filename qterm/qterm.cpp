@@ -454,9 +454,9 @@ void QTerm::resizeEvent(QResizeEvent *event)
 }
 
 #ifdef FAKE_MAIN
-extern "C" int _main(int argc, char **argv);
+extern "C" int _main(int argc, char *argv[]);
 
-int fake_main(term_t handle, int argc, char **argv)
+int fake_main(term_t handle, int argc, char *argv[])
 {
     return _main(argc, argv);
 }
@@ -470,16 +470,20 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
         exit(1);
     }
+
+    // This allows qterm to be used as a library. This is a workaround until
+    // the infrastructure for having applications communicate is finished
 #ifdef FAKE_MAIN
-    if( !term_set_program( terminal, argv[0] ) ) {
-        fprintf(stderr, "Failed to set program args (%s)\n", strerror( errno ) );
+    if( !term_set_program( terminal, argv[0]) ) {
+        fprintf(stderr, "Couldn't set argv[0] (%s)\n", strerror( errno ) );
         exit(1);
     }
     if( !term_set_fork_callback( terminal, fake_main ) ) {
-        fprintf(stderr, "Failed to set fork callback (%s)\n", strerror( errno ) );
+        fprintf(stderr, "Couldn't set fake main (%s)\n", strerror( errno ) );
         exit(1);
     }
 #endif
+
     //term_set_emulation( terminal, TERM_TYPE_ANSI );
     if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
         fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );

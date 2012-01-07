@@ -51,7 +51,7 @@ typedef struct term_t_i {
     int ccolour;
     // Flag to indicate that memory has been allocated for the grid
     bool allocated;
-    // Whether to exec a separate process
+    // Whether a shell or a special application is being forked
     bool loginShell;
     // Grid of characters and attributes
     term_grid grid;
