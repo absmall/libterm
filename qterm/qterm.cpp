@@ -421,9 +421,15 @@ void QTerm::paintEvent(QPaintEvent *event)
 void QTerm::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key()) {
-        // FIXME These first two are a workaround for a bug in QT. Remove once it is fixed
+        // FIXME These first four are workarounds for bugs in QT. Remove once it is fixed
         case Qt::Key_CapsLock:
         case Qt::Key_Shift:
+            break;
+        case Qt::Key_Return:
+            term_send_data( terminal, "\n", 1 );
+            break;
+        case Qt::Key_Backspace:
+            term_send_data( terminal, "\b", 1 );
             break;
         case Qt::Key_Up:
             term_send_special( terminal, TERM_KEY_UP );
@@ -437,12 +443,6 @@ void QTerm::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Left:
             term_send_special( terminal, TERM_KEY_LEFT );
             break;
-		case Qt::Key_Return:
-			term_send_data( terminal, "\n", 1 );
-			break;
-		case Qt::Key_Backspace:
-			term_send_data( terminal, "\b", 1 );
-			break;
         default:
             term_send_data( terminal, event->text().toUtf8().constData(), event->text().count() );
             break;
@@ -528,7 +528,7 @@ bool QTerm::event(QEvent *event)
     return false;
 }
 
-int main(int argc, char *argv[])
+term_t init_term(int argc, char *argv[])
 {
     term_t terminal;
 
@@ -555,21 +555,37 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );
         exit(1);
     }
-    {
+
+	return terminal;
+}
+
+int init_ui(term_t terminal, int argc, char *argv[])
+{
+// This #ifdef is only needed until support for NDK1 is dropped. I need to
+// figure out if NDK2 can be used with a software version 1 device.
 #ifdef __QNX__
 #ifdef BPS_VERSION
-        if( bps_initialize() != BPS_SUCCESS ) {
-            fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
-            exit(1);
-        }
+	if( bps_initialize() != BPS_SUCCESS ) {
+		fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
+		exit(1);
+	}
 #endif
 #endif
-        QCoreApplication::addLibraryPath("app/native/lib");
-        QApplication app(argc, argv);
-     
-        QTerm term(NULL, terminal);
-        term.show();
+	QCoreApplication::addLibraryPath("app/native/lib");
+	QApplication app(argc, argv);
  
-        return app.exec();
-    }
+	QTerm term(NULL, terminal);
+	term.show();
+
+	return app.exec();
+}
+
+int main(int argc, char *argv[])
+{
+	term_t terminal;
+
+	// The initialization is split in two steps to work around the multithreaded
+	// fork bug in qnx
+	terminal = init_term( argc, argv );
+	return init_ui( terminal, argc, argv );
 }
