@@ -96,7 +96,7 @@ void QPieKey::moveTouch(int x, int y)
             // We're losing our selection, send the signal now
             for(int i = 0; i < sections; i ++ ) {
                 size_t s;
-                if( (s = selection.find( charlist[highlighted_section][i] )) != -1 ) {
+                if( (s = selection.find( charlist[highlighted_section][i] )) != std::string::npos ) {
                     emit(keypress(selection[s]));
                 }
             }

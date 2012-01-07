@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <qpiekeyboard.h>
 
+#define SWAP(a,b) {typeof(a) temp; temp=a; a=b; b=temp;}
+
 QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), left(parent), right(parent), testTimer(this)
 {
     testDelay = 0;
@@ -50,8 +52,8 @@ void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
     leftSelection = NULL;
     rightSelection = NULL;
     if( x1 < x2 ) {
-        x1 ^= x2 ^= x1 ^= x2;
-        y1 ^= y2 ^= y1 ^= y2;
+		SWAP(x1, x2);
+		SWAP(y1, y2);
         swapped = true;
     } else {
         swapped = false;
