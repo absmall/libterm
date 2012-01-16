@@ -21,4 +21,5 @@
     <category>core.games</category>
     <icon><image>res/icon.png</image></icon>
     <splashscreen>res/splashscreen.png</splashscreen>
+    <env var="LD_LIBRARY_PATH" value="app/native/lib"/>
 </qnx>
