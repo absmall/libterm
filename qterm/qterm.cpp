@@ -571,7 +571,6 @@ int init_ui(term_t terminal, int argc, char *argv[])
 	}
 #endif
 #endif
-	QCoreApplication::addLibraryPath("app/native/lib");
 	QApplication app(argc, argv);
  
 	QTerm term(NULL, terminal);
