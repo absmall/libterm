@@ -1,5 +1,6 @@
 #include <QPainter>
 #include <QAbstractEventDispatcher>
+#include <QDesktopWidget>
 #include <QApplication>
 #include <QPaintEvent>
 #include <QFontMetrics>
@@ -56,19 +57,16 @@ void QTerm::init()
     piekeyboard->testMode(3);
 #endif
 
-#ifdef __QNX__
-    resize(1024, 600);
-#endif
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
     term_register_cursor( terminal, term_update_cursor );
     term_register_bell( terminal, term_bell );
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
 
-#ifndef __MACH__
+#if !defined(__MACH__) && !defined(__QNX__)
     // Not supported on OSX
-    //exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
-    //QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
+    exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
+    QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
 #endif
 
     cursor_timer = new QTimer( this );
@@ -76,9 +74,14 @@ void QTerm::init()
     QObject::connect(cursor_timer, SIGNAL(timeout()), this, SLOT(blink_cursor()));
 
     // Setup the initial font
+
     font = new QFont();
     font->setStyleHint(QFont::Courier);//QFont::TypeWriter);
-    font->setPointSize(12);
+    if( QApplication::desktop()->screenGeometry().width() < 1000 ) {
+        font->setPointSize(6);
+    } else {
+        font->setPointSize(12);
+    }
     font->setStyleStrategy(QFont::NoAntialias);
     font->setFamily("Monospace");
     font->setFixedPitch(true);
@@ -188,8 +191,6 @@ void QTerm::update_grid(int grid_x_min,
     int coords_x_min, coords_y_min;
     int coords_x_max, coords_y_max;
 
-//    fprintf(stderr,"Updating Grid: (%d,%d) %d x %d\n", grid_x_min, grid_y_min, grid_width, grid_height);
-    
     if (grid_x_min < 0 || grid_y_min < 0) {
         return;
     }
