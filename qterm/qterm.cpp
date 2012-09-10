@@ -67,8 +67,8 @@ void QTerm::init()
 
 #ifndef __MACH__
     // Not supported on OSX
-    exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
-    QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
+    //exit_notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Exception );
+    //QObject::connect(exit_notifier, SIGNAL(activated(int)), this, SLOT(terminate()));
 #endif
 
     cursor_timer = new QTimer( this );
