@@ -93,7 +93,7 @@ void escape_cud1(term_t_i *term)
     term->crow++;
     term->dirty_cursor.exists = true;
     if( term->crow >= term->grid.history ) {
-        term_shiftrows(term);
+        term_shiftrows_up(term);
         term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
     }
 }
@@ -401,7 +401,7 @@ void escape_nel(term_t_i *term)
     term->crow++;
     term->dirty_cursor.exists = true;
     if( term->crow >= term->grid.history ) {
-        term_shiftrows(term);
+        term_shiftrows_up(term);
         term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
     }
 }
@@ -423,7 +423,8 @@ void escape_rev(term_t_i *term)
 // scroll text down
 void escape_ri(term_t_i *term)
 {
-    fprintf(stderr, "escape_ri unsupported!\n");
+    term_shiftrows_down(term);
+    term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
 }
 
 // end alternate character set

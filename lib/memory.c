@@ -94,13 +94,13 @@ void term_copy_grid(term_grid *dst, term_grid *src, int offset_y_src, int offset
     }
 }
 
-void term_shiftrows(term_t_i *term)
+void term_shiftrows_up(term_t_i *term)
 {
     wchar_t *gridrow;
     uint32_t *firstrow;
     int i;
 
-    // Just cycle the pointers, and move the first row to the end, but clear it
+    // Just cycle the pointers, and move the first row to the end, but clear its
     // grid
     gridrow = term->grid.grid[0];
     for( i = 1; i < term->grid.history; i ++ ) {
@@ -135,6 +135,47 @@ void term_shiftrows(term_t_i *term)
     }
 
     term->crow --;
+}
+
+void term_shiftrows_down(term_t_i *term)
+{
+    wchar_t *gridrow;
+    uint32_t *firstrow;
+    int i;
+
+    // Just cycle the pointers, and move the first row to the end, but clear its
+    // grid
+    gridrow = term->grid.grid[term->grid.history-1];
+    for( i = term->grid.history-1; i >= term->grid.history - term->grid.height; i -- ) {
+        term->grid.grid[ i ] = term->grid.grid[ i - 1 ];
+    }
+    term->grid.grid[ i + 1 ] = gridrow;
+
+    for( i = 0; i < term->grid.width; i ++ ) {
+        gridrow[ i ] = ' ';
+    }
+
+    // attribs
+    firstrow = term->grid.attribs[term->grid.history-1];
+    for( i = term->grid.history-1; i >= term->grid.history - term->grid.height; i -- ) {
+        term->grid.attribs[ i ] = term->grid.attribs[ i - 1 ];
+    }
+    term->grid.attribs[ i + 1 ] = firstrow;
+
+    for( i = 0; i < term->grid.width; i ++ ) {
+        firstrow[ i ] = 0;
+    }
+
+    // colours
+    firstrow = term->grid.colours[term->grid.history-1];
+    for( i = term->grid.history-1; i >= term->grid.history - term->grid.height; i -- ) {
+        term->grid.colours[ i ] = term->grid.colours[ i - 1 ];
+    }
+    term->grid.colours[ i + 1 ] = firstrow;
+
+    for( i = 0; i < term->grid.width; i ++ ) {
+        firstrow[ i ] = 0;
+    }
 }
 
 void term_release_grid(term_grid *grid)
