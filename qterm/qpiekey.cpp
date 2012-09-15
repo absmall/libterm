@@ -160,7 +160,7 @@ void QPieKey::select(const char *selection)
 void QPieKey::size_ring()
 {
     // TODO Figure out how big the largest section has to be so letters don't overlap
-    size = 100;
+    size = 200;
 
     // Update the mask of the widget appropriately
     bitmap = new QBitmap(size*2,size*2);

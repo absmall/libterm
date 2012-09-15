@@ -10,6 +10,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <sys/select.h>
+#include <pthread.h>
 #include <errno.h>
 #ifdef __QNX__
 #include <sys/types.h>
@@ -52,7 +53,7 @@ void QTerm::init()
     cursor_on = 1;
     piekey_active = 0;
     piekeyboard = new QPieKeyboard(this);
-    piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz0123456789" );
+    piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz|\n        " );
 #ifndef __QNX__
     piekeyboard->testMode(3);
 #endif
@@ -103,11 +104,10 @@ void QTerm::init()
 
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
-#ifdef BPS_VERSION
-    virtualkeyboard_show();
-#else
-    BlackBerry::Keyboard::instance().show();
-#endif
+    pipe(bps_pipe);
+    bps_notifier = new QSocketNotifier( bps_pipe[0], QSocketNotifier::Read );
+    QObject::connect(bps_notifier, SIGNAL(activated(int)), this, SLOT(bps_event()));
+    pthread_create(&bps_thread, NULL, bps_handler, this);
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
@@ -121,6 +121,20 @@ QTerm::~QTerm()
     delete piekeyboard;
     term_free( terminal );
 }
+
+#ifdef __QNX__
+void QTerm::resize_term()
+{
+    int kbd_height;
+    sleep(1);
+    if( keyboardVisible ) {
+        virtualkeyboard_get_height( &kbd_height );
+    } else {
+        kbd_height = 0;
+    }
+    term_resize( terminal, size().width() / char_width, (size().height() - kbd_height) / char_height, 0 );
+}
+#endif
 
 void QTerm::term_bell(term_t handle)
 {
@@ -158,6 +172,15 @@ void QTerm::term_update_cursor(term_t handle, int old_x, int old_y, int new_x, i
 void QTerm::piekeypress(char key)
 {
     term_send_data( terminal, &key, 1 );
+}
+
+void QTerm::bps_event()
+{
+    char buf;
+    read(bps_pipe[0], &buf, 1);
+    resize_term();
+    QWidget::update(0, 0,
+                    size().width(), size().height());
 }
 
 void QTerm::terminal_data()
@@ -255,6 +278,37 @@ void QTerm::getRenderedStringRect( const QString string,
     delete pFontMetrics;
 
 }
+
+#ifdef __QNX__
+void *QTerm::bps_handler(void *instance)
+{
+    bps_event_t *event;
+    QTerm *thisClass = (QTerm *)instance;
+
+	if( bps_initialize() != BPS_SUCCESS ) {
+		fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
+		exit(1);
+	}
+    thisClass->keyboardVisible = false;
+    virtualkeyboard_show();
+    virtualkeyboard_request_events(0);
+
+    while(1) {
+        // get an event
+        bps_get_event(&event, -1); // blocking
+        switch(bps_event_get_code(event)) {
+            case VIRTUALKEYBOARD_EVENT_VISIBLE:
+                thisClass->keyboardVisible = true;
+                break;
+            case VIRTUALKEYBOARD_EVENT_HIDDEN:
+                thisClass->keyboardVisible = false;
+                break;
+        }
+        write(thisClass->bps_pipe[1], "1", 1);
+    }
+}
+#endif
+
 void QTerm::paintEvent(QPaintEvent *event)
 {
     int i;
@@ -461,19 +515,13 @@ void QTerm::resizeEvent(QResizeEvent *event)
 {
     if( char_width != 0 && char_height != 0 ) {
 #ifdef __QNX__
-        {
-            int kbd_height;
-#ifdef BPS_VERSION
-            virtualkeyboard_get_height( &kbd_height );
-#else
-            kbd_height = BlackBerry::Keyboard::instance().keyboardHeight();
-#endif
-            term_resize( terminal, event->size().width() / char_width, (event->size().height() - kbd_height) / char_height, 0 );
-        }
+        resize_term();
 #else
         term_resize( terminal, event->size().width() / char_width, event->size().height() / char_height, 0 );
 #endif
     }
+    QWidget::update(0, 0,
+                    size().width(), size().height());
 }
 
 #ifdef FAKE_MAIN
@@ -562,16 +610,6 @@ term_t init_term(int argc, char *argv[])
 
 int init_ui(term_t terminal, int argc, char *argv[])
 {
-// This #ifdef is only needed until support for NDK1 is dropped. I need to
-// figure out if NDK2 can be used with a software version 1 device.
-#ifdef __QNX__
-#ifdef BPS_VERSION
-	if( bps_initialize() != BPS_SUCCESS ) {
-		fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
-		exit(1);
-	}
-#endif
-#endif
 	QApplication app(argc, argv);
  
 	QTerm term(NULL, terminal);
