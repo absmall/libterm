@@ -105,6 +105,16 @@ void QTerm::init()
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
     pipe(bps_pipe);
+
+    buffer_config.buffer_set_name = "qterm";
+    buffer_config.num_buffers = 1;
+    buffer_config.verbosity_level = SLOG2_INFO;
+    buffer_config.buffer_config[0].buffer_name = "qterm debug";
+    buffer_config.buffer_config[0].num_pages = 2;
+    
+    // Register the Buffer Set
+    slog2_register( &buffer_config, &buffer_handle, 0 );
+    
     bps_notifier = new QSocketNotifier( bps_pipe[0], QSocketNotifier::Read );
     QObject::connect(bps_notifier, SIGNAL(activated(int)), this, SLOT(bps_event()));
     pthread_create(&bps_thread, NULL, bps_handler, this);
@@ -174,14 +184,17 @@ void QTerm::piekeypress(char key)
     term_send_data( terminal, &key, 1 );
 }
 
+#ifdef __QNX__
 void QTerm::bps_event()
 {
     char buf;
     read(bps_pipe[0], &buf, 1);
+    //slog2fa(buffer_handle, 0, SLOG2_INFO, "bps_event!");
     resize_term();
     QWidget::update(0, 0,
                     size().width(), size().height());
 }
+#endif
 
 void QTerm::terminal_data()
 {
@@ -513,6 +526,7 @@ void QTerm::mousePressEvent(QMouseEvent *event)
 
 void QTerm::resizeEvent(QResizeEvent *event)
 {
+    slog2fa(buffer_handle, 0, SLOG2_INFO, "resize_event!");
     if( char_width != 0 && char_height != 0 ) {
 #ifdef __QNX__
         resize_term();

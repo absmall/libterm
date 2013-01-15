@@ -3,6 +3,9 @@
 #include <libterm.h>
 #include <QTimer>
 #include <qpiekeyboard.h>
+#ifdef __QNX__
+#include <sys/slog2.h>
+#endif
 
 class QTerm : public QWidget
 {
@@ -30,6 +33,10 @@ private:
     term_t terminal;
     int bps_pipe[2];
     pthread_t bps_thread;
+#ifdef __QNX__
+    slog2_buffer_set_config_t buffer_config;
+    slog2_buffer_t buffer_handle;
+#endif
 
     QFont *font;
     bool keyboardVisible;
@@ -48,7 +55,9 @@ private:
     QPieKeyboard *piekeyboard;
 
 private slots:
+#ifdef __QNX__
     void bps_event();
+#endif
     void terminal_data();
     void terminate();
     void blink_cursor();
