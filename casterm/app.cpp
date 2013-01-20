@@ -6,7 +6,7 @@
 
 using namespace bb::cascades;
 
-App::App(int argc, char **argv) : Application(argc, argv)
+App::App(term_t handle, int argc, char **argv) : Application(argc, argv)
 {
     QmlDocument *qml = QmlDocument::create("app/native/assets/main.qml");
     qml->setContextProperty("cs", this);
@@ -15,7 +15,7 @@ App::App(int argc, char **argv) : Application(argc, argv)
     setScene(root);
 
 
-    mTerminalScreen = new TerminalScreen(root);
+    mTerminalScreen = new TerminalScreen(handle, argc, argv, root);
 }
 
 App::~App()

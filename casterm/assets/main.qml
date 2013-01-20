@@ -9,7 +9,6 @@ Page {
                 ListItemComponent {
                     StandardListItem {
                         title: ListItemData.line
-                        description: ListItemData.line
                     }
                 }
             ]
