@@ -8,7 +8,7 @@ Page {
             listItemComponents: [
                 ListItemComponent {
                     StandardListItem {
-                        title: ListItemData.line
+                        title: ListItemData
                     }
                 }
             ]

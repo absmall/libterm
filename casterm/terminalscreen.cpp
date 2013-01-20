@@ -10,12 +10,12 @@ TerminalScreen::TerminalScreen( term_t handle, int argc, char *argv[], AbstractP
 
     term_get_grid_size( handle, &width, &height );
     slog2f(buffer_handle, 0, SLOG2_INFO, "TerminalScreen start %dx%d", width, height);
-    mRecordingDeviceListModel = new QVariantListDataModel;
+    mStringListModel = new QStringListDataModel;
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
     pObj = pane->findChild<QObject *>("terminalLines");
-    mRecordingDeviceList = (ListView *) pObj;
-    mRecordingDeviceList->setDataModel( mRecordingDeviceListModel );
+    mStringList = (ListView *) pObj;
+    mStringList->setDataModel( mStringListModel );
 
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
@@ -28,13 +28,10 @@ TerminalScreen::~TerminalScreen()
 
 void TerminalScreen::term_update( term_t term, int x, int y, int width, int height )
 {
-    QVariantMap map;
-
     TerminalScreen *ts = (TerminalScreen *)term_get_user_data( term );
     slog2c(buffer_handle, 0, SLOG2_INFO, "terminal update");
     for( int i = 0; i < height; i ++ ) {
-        map["line"] = QString(term_get_line(ts->terminal, i));
-        *ts->mRecordingDeviceListModel << map;
+        *ts->mStringListModel << QString(term_get_line(ts->terminal, i));
     }
 }
 

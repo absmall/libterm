@@ -19,8 +19,8 @@ private:
     int height;
     term_t terminal;
     QSocketNotifier *notifier;
-	bb::cascades::ListView *mRecordingDeviceList;
-	bb::cascades::QVariantListDataModel *mRecordingDeviceListModel;
+	bb::cascades::ListView *mStringList;
+	bb::cascades::QStringListDataModel *mStringListModel;
 private slots:
     void terminal_data();
 };
