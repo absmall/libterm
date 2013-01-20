@@ -17,6 +17,10 @@ TerminalScreen::TerminalScreen( term_t handle, int argc, char *argv[], AbstractP
     mStringList = (ListView *) pObj;
     mStringList->setDataModel( mStringListModel );
 
+    for( int i = 0; i < height; i ++ ) {
+        *mStringListModel << QString(term_get_line(terminal, i));
+    }
+
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
 }
@@ -31,7 +35,7 @@ void TerminalScreen::term_update( term_t term, int x, int y, int width, int heig
     TerminalScreen *ts = (TerminalScreen *)term_get_user_data( term );
     slog2c(buffer_handle, 0, SLOG2_INFO, "terminal update");
     for( int i = 0; i < height; i ++ ) {
-        *ts->mStringListModel << QString(term_get_line(ts->terminal, i));
+        ts->mStringListModel->replace(i, QString(term_get_line(ts->terminal, i)));
     }
 }
 
