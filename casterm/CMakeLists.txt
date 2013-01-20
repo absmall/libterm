@@ -1,6 +1,6 @@
 FIND_PACKAGE(Qt4 REQUIRED)
 SET(SOURCES app.cpp main.cpp logging.c terminalscreen.cpp)
-SET(HEADERS app.hpp)
+SET(HEADERS app.hpp terminalscreen.hpp)
 QT4_WRAP_CPP(HEADERS_MOC ${HEADERS})
 ADD_EXECUTABLE(casterm ${SOURCES} ${HEADERS_MOC})
 ADD_DEFINITIONS(-I$ENV{QNX_TARGET}/usr/include/qt4 -I$ENV{QNX_TARGET}/usr/include/qt4/QtCore -I${CMAKE_CURRENT_SOURCE_DIR}/../include)
