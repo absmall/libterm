@@ -3,7 +3,7 @@ SET(SOURCES app.cpp main.cpp logging.c terminalscreen.cpp)
 SET(HEADERS app.hpp)
 QT4_WRAP_CPP(HEADERS_MOC ${HEADERS})
 ADD_EXECUTABLE(casterm ${SOURCES} ${HEADERS_MOC})
-ADD_DEFINITIONS(-I$ENV{QNX_TARGET}/usr/include/qt4 -I$ENV{QNX_TARGET}/usr/include/qt4/QtCore)
+ADD_DEFINITIONS(-I$ENV{QNX_TARGET}/usr/include/qt4 -I$ENV{QNX_TARGET}/usr/include/qt4/QtCore -I${CMAKE_CURRENT_SOURCE_DIR}/../include)
 SET(CASTERM_LIBRARIES -L../lib -L$ENV{QNX_TARGET}/armle-v7/usr/lib/qt4/lib -lterm bbcascades QtCore QtDeclarative QtScript QtGui QtSql QtNetwork QtXml QtXmlPatterns QtSvg slog2)
 TARGET_LINK_LIBRARIES(casterm ${CASTERM_LIBRARIES})
 
@@ -23,7 +23,7 @@ ADD_CUSTOM_COMMAND(OUTPUT casterm.bar
 				   -e ${CMAKE_CURRENT_BINARY_DIR}/../lib/libterm.so lib/libterm.so
 				   -e ${CMAKE_CURRENT_SOURCE_DIR}/../icon.png res/icon.png
 				   -e ${CMAKE_CURRENT_SOURCE_DIR}/../splashscreen.png res/splashscreen.png
-                   DEPENDS casterm ${CMAKE_CURRENT_SOURCE_DIR}/bar-descriptor.xml ${CMAKE_CURRENT_BINARY_DIR}/../lib/libterm.so
+                   DEPENDS casterm ${CMAKE_CURRENT_SOURCE_DIR}/bar-descriptor.xml ${CMAKE_CURRENT_SOURCE_DIR}/assets/main.qml ${CMAKE_CURRENT_BINARY_DIR}/../lib/libterm.so
 				  )
 
 ADD_CUSTOM_TARGET(castermbar ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/casterm.bar)
