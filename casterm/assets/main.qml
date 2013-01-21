@@ -5,6 +5,7 @@ Page {
         objectName: "terminal"
         ListView {
             objectName: "terminalLines"
+            focusPolicy: FocusPolicy.KeyAndTouch
             listItemComponents: [
                 ListItemComponent {
                     StandardListItem {

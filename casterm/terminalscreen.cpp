@@ -1,5 +1,6 @@
 #include "terminalscreen.hpp"
 #include "logging.h"
+#include <bb/cascades/core/keyevent.h>
 
 using namespace bb::cascades;
 
@@ -23,11 +24,14 @@ TerminalScreen::TerminalScreen( term_t handle, int argc, char *argv[], AbstractP
 
     notifier = new QSocketNotifier( term_get_file_descriptor(terminal), QSocketNotifier::Read );
     QObject::connect(notifier, SIGNAL(activated(int)), this, SLOT(terminal_data()));
+    keyListener = KeyListener::create().onKeyReleased(this, SLOT(onKeyReleasedHandler(bb::cascades::KeyEvent *)));
+    mStringList->addKeyListener(keyListener);
 }
 
 TerminalScreen::~TerminalScreen()
 {
     delete notifier;
+    delete keyListener;
 }
 
 void TerminalScreen::term_update( term_t term, int x, int y, int width, int height )
@@ -44,4 +48,12 @@ void TerminalScreen::terminal_data()
     if( !term_process_child( terminal ) ) {
         exit(0);
     }
+}
+
+void TerminalScreen::onKeyReleasedHandler(bb::cascades::KeyEvent *event)
+{
+    char c;
+
+    c = event->key();
+    term_send_data( terminal, &c, 1 );
 }

@@ -4,6 +4,7 @@
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/ListView>
 #include <bb/cascades/QListDataModel>
+#include <bb/cascades/core/keylistener.h>
 #include <libterm.h>
 
 class TerminalScreen : public QObject
@@ -19,10 +20,12 @@ private:
     int height;
     term_t terminal;
     QSocketNotifier *notifier;
+    bb::cascades::KeyListener *keyListener;
 	bb::cascades::ListView *mStringList;
 	bb::cascades::QStringListDataModel *mStringListModel;
 private slots:
     void terminal_data();
+    void onKeyReleasedHandler(bb::cascades::KeyEvent *);
 };
 
 #endif
