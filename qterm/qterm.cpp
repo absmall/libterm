@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <bps/bps.h>
+#include "logging.h"
 #ifdef BPS_VERSION
 #include <bps/virtualkeyboard.h>
 #else
@@ -35,8 +36,6 @@
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
-    term_create( &terminal );
-    term_begin( terminal, WIDTH, HEIGHT, 0 );
     init();
 }
 
@@ -76,48 +75,38 @@ void QTerm::init()
 
     // Setup the initial font
 
+#ifdef __QNX__
+    font = new QFont("Andale Mono");
+#else
     font = new QFont();
-    font->setStyleHint(QFont::Courier);//QFont::TypeWriter);
+    font->setStyleHint(QFont::Monospace);
+    font->setStyleStrategy(QFont::NoAntialias);
+    font->setFamily("Monospace");
+    font->setFixedPitch(true);
+    font->setKerning(false);
+#endif
     if( QApplication::desktop()->screenGeometry().width() < 1000 ) {
         font->setPointSize(6);
     } else {
         font->setPointSize(12);
     }
-    font->setStyleStrategy(QFont::NoAntialias);
-    font->setFamily("Monospace");
-    font->setFixedPitch(true);
-    font->setKerning(false);
 
     // Workaround for a bug in OSX - Dave reports that maxWidth returns 0,
     // when width of different characters returns the correct value
     QFontMetrics metrics(*font);
-    char_width = metrics.maxWidth();
-    if(char_width==0) {
+    if(metrics.maxWidth() == 0) {
         fontWorkAround = true;
-        char_width = metrics.width(QChar('X'));
     } else {
         fontWorkAround = false;
     }
 
+    char_width = metrics.width(QChar(' '));
     char_height = metrics.lineSpacing();
     char_descent = metrics.descent();
 
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
-    pipe(bps_pipe);
-
-    buffer_config.buffer_set_name = "qterm";
-    buffer_config.num_buffers = 1;
-    buffer_config.verbosity_level = SLOG2_INFO;
-    buffer_config.buffer_config[0].buffer_name = "qterm debug";
-    buffer_config.buffer_config[0].num_pages = 2;
-    
-    // Register the Buffer Set
-    slog2_register( &buffer_config, &buffer_handle, 0 );
-    
-    bps_notifier = new QSocketNotifier( bps_pipe[0], QSocketNotifier::Read );
-    QObject::connect(bps_notifier, SIGNAL(activated(int)), this, SLOT(bps_event()));
-    pthread_create(&bps_thread, NULL, bps_handler, this);
+    showFullScreen();
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
@@ -142,6 +131,7 @@ void QTerm::resize_term()
     } else {
         kbd_height = 0;
     }
+    slog("resize term! %d %d %d %d", size().width(), char_width, size().height(), kbd_height);
     term_resize( terminal, size().width() / char_width, (size().height() - kbd_height) / char_height, 0 );
 }
 #endif
@@ -184,6 +174,7 @@ void QTerm::piekeypress(char key)
     term_send_data( terminal, &key, 1 );
 }
 
+#if 0
 #ifdef __QNX__
 void QTerm::bps_event()
 {
@@ -194,6 +185,7 @@ void QTerm::bps_event()
     QWidget::update(0, 0,
                     size().width(), size().height());
 }
+#endif
 #endif
 
 void QTerm::terminal_data()
@@ -292,6 +284,7 @@ void QTerm::getRenderedStringRect( const QString string,
 
 }
 
+#if 0
 #ifdef __QNX__
 void *QTerm::bps_handler(void *instance)
 {
@@ -303,7 +296,7 @@ void *QTerm::bps_handler(void *instance)
 		exit(1);
 	}
     thisClass->keyboardVisible = false;
-    virtualkeyboard_show();
+    //virtualkeyboard_show();
     virtualkeyboard_request_events(0);
 
     while(1) {
@@ -320,6 +313,7 @@ void *QTerm::bps_handler(void *instance)
         write(thisClass->bps_pipe[1], "1", 1);
     }
 }
+#endif
 #endif
 
 void QTerm::paintEvent(QPaintEvent *event)
@@ -345,8 +339,8 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
    
-    //fprintf(stderr,"Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
-   
+    //log("Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
+
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
     term_get_cursor_pos( terminal, &cursor_x, &cursor_y );
@@ -526,7 +520,6 @@ void QTerm::mousePressEvent(QMouseEvent *event)
 
 void QTerm::resizeEvent(QResizeEvent *event)
 {
-    slog2fa(buffer_handle, 0, SLOG2_INFO, "resize_event!");
     if( char_width != 0 && char_height != 0 ) {
 #ifdef __QNX__
         resize_term();
@@ -635,6 +628,10 @@ int init_ui(term_t terminal, int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	term_t terminal;
+
+#ifdef __QNX__
+    logging_init();
+#endif
 
 	// The initialization is split in two steps to work around the multithreaded
 	// fork bug in qnx

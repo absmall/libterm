@@ -3,9 +3,6 @@
 #include <libterm.h>
 #include <QTimer>
 #include <qpiekeyboard.h>
-#ifdef __QNX__
-#include <sys/slog2.h>
-#endif
 
 class QTerm : public QWidget
 {
@@ -31,12 +28,6 @@ private:
     int cursor_on;
     int piekey_active;
     term_t terminal;
-    int bps_pipe[2];
-    pthread_t bps_thread;
-#ifdef __QNX__
-    slog2_buffer_set_config_t buffer_config;
-    slog2_buffer_t buffer_handle;
-#endif
 
     QFont *font;
     bool keyboardVisible;
@@ -47,7 +38,7 @@ private:
     static void term_update_cursor(term_t handle, int old_x, int old_y, int new_x, int new_y);
     void getRenderedStringRect( const QString string, int attrib, 
                                 QFont *pFont, QRect *pUpdateRect );
-    static void *bps_handler(void *instance);
+    //static void *bps_handler(void *instance);
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
     QSocketNotifier *bps_notifier;
@@ -55,9 +46,6 @@ private:
     QPieKeyboard *piekeyboard;
 
 private slots:
-#ifdef __QNX__
-    void bps_event();
-#endif
     void terminal_data();
     void terminate();
     void blink_cursor();
