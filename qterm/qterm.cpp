@@ -125,6 +125,7 @@ void QTerm::init()
     setAttribute(Qt::WA_AcceptTouchEvents);
 
     prevFilter = QAbstractEventDispatcher::instance()->setEventFilter(eventFilter);
+    virtualkeyboard_show();
 }
 
 bool QTerm::eventFilter(void *message)
