@@ -7,6 +7,8 @@
 #include <signal.h>
 #include "libterm_internal.h"
 #include "terminfo_commands.h"
+#include <sys/slog2.h>
+#include "../qterm/logging.h"
 
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height))
 {
@@ -304,7 +306,7 @@ bool term_process_child(term_t handle)
     term = TO_S(handle);
 
     length = read( term->fd, buf, 100 );
-    if( length == -1 ) {
+    if( length == -1 || length == 0) {
         errno = ECHILD;
         return false;
     }
