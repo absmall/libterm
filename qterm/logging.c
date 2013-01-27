@@ -21,7 +21,7 @@ void slog(const char *fmt, ...)
 {
     va_list args;
     va_start(args,fmt);
-    slog2f(buffer_handle, 0, SLOG2_INFO, fmt,args);
+    vslog2f(buffer_handle, 0, SLOG2_INFO, fmt,args);
     va_end(args);
 }
 #else
