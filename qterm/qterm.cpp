@@ -33,14 +33,26 @@
 #define BLINK_SPEED 1000
 
 #define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
+QAbstractEventDispatcher::EventFilter QTerm::prevFilter;
+QTerm *QTerm::instance = NULL;
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
+    if( instance == NULL ) {
+        instance = this;
+    } else {
+        throw "Singleton error";
+    }
     init();
 }
 
 QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
 {
+    if( instance == NULL ) {
+        instance = this;
+    } else {
+        throw "Singleton error";
+    }
     this->terminal = terminal;
     init();
 }
@@ -107,9 +119,38 @@ void QTerm::init()
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
     showFullScreen();
+    virtualkeyboard_request_events(0);
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
+
+    prevFilter = QAbstractEventDispatcher::instance()->setEventFilter(eventFilter);
+}
+
+bool QTerm::eventFilter(void *message)
+{
+    bps_event_t * const event = static_cast<bps_event_t *>(message);
+ 
+    if (event && bps_event_get_domain(event) == virtualkeyboard_get_domain()) {
+        const int id = bps_event_get_code(event);
+        switch( id ) {
+            case VIRTUALKEYBOARD_EVENT_VISIBLE:
+                instance->keyboardVisible = true;
+                instance->resize_term();
+                break;
+            case VIRTUALKEYBOARD_EVENT_HIDDEN:
+                instance->keyboardVisible = false;
+                instance->resize_term();
+                break;
+            default:
+                break;
+        }
+    }
+ 
+    if (prevFilter)
+        return prevFilter(message);
+    else
+        return false;
 }
 
 QTerm::~QTerm()
@@ -118,6 +159,9 @@ QTerm::~QTerm()
     delete exit_notifier;
     delete font;
     delete piekeyboard;
+    if( instance == this ) {
+        instance = NULL;
+    }
     term_free( terminal );
 }
 
@@ -173,20 +217,6 @@ void QTerm::piekeypress(char key)
 {
     term_send_data( terminal, &key, 1 );
 }
-
-#if 0
-#ifdef __QNX__
-void QTerm::bps_event()
-{
-    char buf;
-    read(bps_pipe[0], &buf, 1);
-    //slog2fa(buffer_handle, 0, SLOG2_INFO, "bps_event!");
-    resize_term();
-    QWidget::update(0, 0,
-                    size().width(), size().height());
-}
-#endif
-#endif
 
 void QTerm::terminal_data()
 {
@@ -283,38 +313,6 @@ void QTerm::getRenderedStringRect( const QString string,
     delete pFontMetrics;
 
 }
-
-#if 0
-#ifdef __QNX__
-void *QTerm::bps_handler(void *instance)
-{
-    bps_event_t *event;
-    QTerm *thisClass = (QTerm *)instance;
-
-	if( bps_initialize() != BPS_SUCCESS ) {
-		fprintf(stderr, "Failed to initialize bps (%s)\n", strerror( errno ) );
-		exit(1);
-	}
-    thisClass->keyboardVisible = false;
-    //virtualkeyboard_show();
-    virtualkeyboard_request_events(0);
-
-    while(1) {
-        // get an event
-        bps_get_event(&event, -1); // blocking
-        switch(bps_event_get_code(event)) {
-            case VIRTUALKEYBOARD_EVENT_VISIBLE:
-                thisClass->keyboardVisible = true;
-                break;
-            case VIRTUALKEYBOARD_EVENT_HIDDEN:
-                thisClass->keyboardVisible = false;
-                break;
-        }
-        write(thisClass->bps_pipe[1], "1", 1);
-    }
-}
-#endif
-#endif
 
 void QTerm::paintEvent(QPaintEvent *event)
 {

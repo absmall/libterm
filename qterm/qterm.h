@@ -3,6 +3,7 @@
 #include <libterm.h>
 #include <QTimer>
 #include <qpiekeyboard.h>
+#include <QAbstractEventDispatcher>
 
 class QTerm : public QWidget
 {
@@ -29,6 +30,7 @@ private:
     int piekey_active;
     term_t terminal;
 
+    static QTerm *instance;
     QFont *font;
     bool keyboardVisible;
     bool  fontWorkAround;
@@ -38,10 +40,10 @@ private:
     static void term_update_cursor(term_t handle, int old_x, int old_y, int new_x, int new_y);
     void getRenderedStringRect( const QString string, int attrib, 
                                 QFont *pFont, QRect *pUpdateRect );
-    //static void *bps_handler(void *instance);
+    static bool eventFilter(void *message);
+    static QAbstractEventDispatcher::EventFilter prevFilter;
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
-    QSocketNotifier *bps_notifier;
     QTimer *cursor_timer;
     QPieKeyboard *piekeyboard;
 
