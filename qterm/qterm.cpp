@@ -177,6 +177,8 @@ void QTerm::resize_term()
     }
     slog("resize term! %d %d %d %d", size().width(), char_width, size().height(), kbd_height);
     term_resize( terminal, size().width() / char_width, (size().height() - kbd_height) / char_height, 0 );
+    QWidget::update(0, 0,
+                    size().width(), size().height());
 }
 #endif
 
