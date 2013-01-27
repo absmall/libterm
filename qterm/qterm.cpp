@@ -142,7 +142,11 @@ bool QTerm::eventFilter(void *message)
                 instance->keyboardVisible = false;
                 instance->resize_term();
                 break;
+            case VIRTUALKEYBOARD_EVENT_INFO:
+                instance->resize_term();
+                break;
             default:
+                slog("Unexpected keyboard event %d", id);
                 break;
         }
     }
@@ -175,7 +179,7 @@ void QTerm::resize_term()
     } else {
         kbd_height = 0;
     }
-    slog("resize term! %d %d %d %d", size().width(), char_width, size().height(), kbd_height);
+    slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, (size().height() - kbd_height)/ char_height);
     term_resize( terminal, size().width() / char_width, (size().height() - kbd_height) / char_height, 0 );
     QWidget::update(0, 0,
                     size().width(), size().height());
