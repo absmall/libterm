@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <qnx xmlns="http://www.qnx.com/schemas/application/1.0">
     <id>com.example.qterm</id>
+    <filename>qterm</filename>
     <name>Terminal</name>
     <versionNumber>1.0.0</versionNumber>
     <description>BB10 terminal</description>
@@ -16,11 +17,6 @@
     <env value="app/native/plugins:/usr/lib/qt4/plugins" var="QT_PLUGIN_PATH"/>
     <env value="app/native/lib:/usr/lib/qt4/lib/" var="LD_LIBRARY_PATH"/>
     <action system="true">run_native</action>
-    <asset path="qterm" type="Qnx/Elf" entry="true">qterm</asset>
-    <asset path="/home/absmall/work/libterm/obj.playbook/lib/libterm.so" type="Qnx/Elf">lib/libterm.so</asset>
-    <asset path="/home/absmall/work/libterm/icon.png">icon.png</asset>
-    <asset path="/home/absmall/work/libterm/splashscreen.png">splashscreen.png</asset>
-    <asset path="/home/absmall/work/libterm/splashscreen.png">splashscreen.png</asset>
     <icon>
         <image>icon.png</image>
     </icon>
