@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libterm_internal.h>
+#include "term_logging.h"
 
 void term_process_output_data(term_t_i *term, char *buf, int length)
 {
@@ -53,6 +54,8 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
             term->grid.attribs[term->crow][term->ccol] = term->cattr;
             term->grid.colours[term->crow][term->ccol] = term->ccolour;
             term_add_dirty_rect( term, term->ccol, term->crow, 1, 1 );
+        } else {
+            slog("Skipped writing %c out of bounds at (%d,%d)", term->output_bytes[0], term->crow, term->ccol);
         }
         memmove( term->output_bytes, term->output_bytes + 1, term->output_byte_count - 1 );
         term->output_byte_count --;
