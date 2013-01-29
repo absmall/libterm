@@ -33,7 +33,9 @@
 #define BLINK_SPEED 1000
 
 #define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
+#ifdef __QNX__
 QAbstractEventDispatcher::EventFilter QTerm::prevFilter;
+#endif
 QTerm *QTerm::instance = NULL;
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
@@ -119,15 +121,17 @@ void QTerm::init()
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
     showFullScreen();
+    keyboardVisible = false;
     virtualkeyboard_request_events(0);
+    virtualkeyboard_show();
+    prevFilter = QAbstractEventDispatcher::instance()->setEventFilter(eventFilter);
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
 
-    prevFilter = QAbstractEventDispatcher::instance()->setEventFilter(eventFilter);
-    virtualkeyboard_show();
 }
 
+#ifdef __QNX__
 bool QTerm::eventFilter(void *message)
 {
     bps_event_t * const event = static_cast<bps_event_t *>(message);
@@ -136,14 +140,17 @@ bool QTerm::eventFilter(void *message)
         const int id = bps_event_get_code(event);
         switch( id ) {
             case VIRTUALKEYBOARD_EVENT_VISIBLE:
+                slog("Keyboard visible");
                 instance->keyboardVisible = true;
                 instance->resize_term();
                 break;
             case VIRTUALKEYBOARD_EVENT_HIDDEN:
+                slog("Keyboard hidden");
                 instance->keyboardVisible = false;
                 instance->resize_term();
                 break;
             case VIRTUALKEYBOARD_EVENT_INFO:
+                slog("Keyboard event");
                 instance->resize_term();
                 break;
             default:
@@ -157,6 +164,7 @@ bool QTerm::eventFilter(void *message)
     else
         return false;
 }
+#endif
 
 QTerm::~QTerm()
 {

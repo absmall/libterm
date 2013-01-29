@@ -40,8 +40,10 @@ private:
     static void term_update_cursor(term_t handle, int old_x, int old_y, int new_x, int new_y);
     void getRenderedStringRect( const QString string, int attrib, 
                                 QFont *pFont, QRect *pUpdateRect );
+#ifdef __QNX__
     static bool eventFilter(void *message);
     static QAbstractEventDispatcher::EventFilter prevFilter;
+#endif
     QSocketNotifier *notifier;
     QSocketNotifier *exit_notifier;
     QTimer *cursor_timer;

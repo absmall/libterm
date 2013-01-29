@@ -1,7 +1,9 @@
+#include <stdio.h>
+#include <stdarg.h>
 #include "logging.h"
 
 #ifdef __QNX__
-slog2_buffer_t              buffer_handle;
+static slog2_buffer_t              buffer_handle;
 
 void logging_init()
 {
@@ -29,7 +31,7 @@ void slog(const char *fmt, ...)
 {
     va_list args;
     va_start(args,fmt);
-    printf(buffer_handle, 0, SLOG2_INFO, fmt,args);
+    printf(fmt,args);
     va_end(args);
 }
 #endif

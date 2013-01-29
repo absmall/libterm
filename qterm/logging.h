@@ -1,15 +1,17 @@
 #ifndef __LOGGING_H__
 #define __LOGGING_H__
 
+#ifdef __QNX__
 #include <sys/slog2.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern slog2_buffer_t buffer_handle;
-
+#ifdef __QNX__
 void logging_init();
+#endif
 
 void slog(const char *fmt, ...);
 
