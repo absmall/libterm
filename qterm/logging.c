@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "logging.h"
+#include "term_logging.h"
 
 #ifdef __QNX__
 static slog2_buffer_t              buffer_handle;

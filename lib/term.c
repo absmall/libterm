@@ -7,7 +7,7 @@
 #include <signal.h>
 #include "libterm_internal.h"
 #include "terminfo_commands.h"
-#include "../qterm/logging.h"
+#include "term_logging.h"
 
 void term_register_update(term_t handle, void (*update)(term_t handle, int x, int y, int width, int height))
 {

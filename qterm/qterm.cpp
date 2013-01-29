@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <bps/bps.h>
-#include "logging.h"
+#include "term_logging.h"
 #ifdef BPS_VERSION
 #include <bps/virtualkeyboard.h>
 #else
