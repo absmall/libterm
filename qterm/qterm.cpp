@@ -182,7 +182,6 @@ QTerm::~QTerm()
 void QTerm::resize_term()
 {
     int kbd_height;
-    sleep(1);
     if( keyboardVisible ) {
         virtualkeyboard_get_height( &kbd_height );
     } else {
