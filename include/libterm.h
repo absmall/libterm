@@ -55,6 +55,10 @@ bool term_create(term_t *handle);
 // Specify what type of terminal to emulate
 int term_set_emulation(term_t handle, term_type type);
 
+// Specify whether the terminal grid should auto-expand to support lines with
+// width longer than the grid
+int term_set_autoexpand(term_t handle, bool enable);
+
 // Set a shell to use after forking
 bool term_set_shell(term_t handle, char *shell);
 // Set the program to use instead of a login shell

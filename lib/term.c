@@ -210,29 +210,74 @@ void term_scroll( term_t handle, int row )
 int term_resize( term_t handle, int new_width, int new_height, int new_scrollback )
 {
     int ret;
-    struct winsize ws;
-    term_t_i *term;
     term_grid g;
     int old_crow, old_ccol;
-    int width, height, offset_y_src, offset_y_dst, new_history;
-
-    term = TO_S(handle);
+    struct winsize ws;
+    term_t_i *term = TO_S(handle);
 
     if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + new_height == term->grid.history) return 0;
-
-    // Copy the narrower of the two
-    if( term->grid.width < new_width ) {
-        width = term->grid.width;
-    } else {
-        width = new_width;
-    }
-
-    // Convenience variable
-    new_history = new_height + new_scrollback;
 
     // Remember the previous cursor position
     old_crow = term->crow;
     old_ccol = term->ccol;
+
+    if( term_resize_internal( handle, new_width, new_height, new_scrollback, term->extrawidth, &g ) ) {
+        return 1;
+    }
+
+    ws.ws_row = new_height;
+    ws.ws_col = new_width;
+    ws.ws_xpixel = new_width;
+    ws.ws_ypixel = new_height;
+
+    ret = ioctl(term->fd, TIOCSWINSZ, &ws);
+
+    if( ret != -1 ) {
+        term_release_grid( &term->grid );
+        memcpy( &term->grid, &g, sizeof( term_grid ) );
+
+        // Now our internals are up-to-date, notify the application
+        ret = kill(term->child, SIGWINCH);
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow - term->row);
+    } else {
+        term_release_grid( &g );
+    }
+
+}
+
+int term_resize_internal( term_t handle, int new_width, int new_height, int new_scrollback, int new_extrawidth, term_grid *g )
+{
+    term_t_i *term;
+    term_grid local_grid;
+    int ret = 0;
+    bool finalize;
+    int width, height, offset_y_src, offset_y_dst, new_history;
+    int old_crow, old_ccol;
+
+    if( g != NULL ) {
+        finalize = false;
+    } else {
+        finalize = true;
+        g = &local_grid;
+    }
+
+    term = TO_S(handle);
+
+    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + new_height == term->grid.history && new_extrawidth == term->extrawidth) return 0;
+
+    // Remember the previous cursor position
+    old_crow = term->crow;
+    old_ccol = term->ccol;
+
+    // Copy the narrower of the two
+    if( term->grid.width + term->extrawidth < new_width + new_extrawidth ) {
+        width = term->grid.width + term->extrawidth;
+    } else {
+        width = new_width + new_extrawidth;
+    }
+
+    // Convenience variable
+    new_history = new_height + new_scrollback;
 
     // We want to copy such that the first lines after the scrollback are in
     // the same position, unless that would push the cursor off the screen
@@ -265,32 +310,23 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
         height = new_history - offset_y_dst;
     }
 
-    ws.ws_row = new_height;
-    ws.ws_col = new_width;
-    ws.ws_xpixel = new_width;
-    ws.ws_ypixel = new_height;
+    g->width = new_width;
+    g->height = new_height;
+    g->history = new_history;
 
-    g.width = new_width;
-    g.height = new_height;
-    g.history = new_history;
-
-    if( !term_allocate_grid( &g ) ) {
+    if( !term_allocate_grid( g ) ) {
         return -1;
     }
 
-    term_copy_grid( &g, &term->grid, offset_y_src, offset_y_dst, width, height );
+    term_copy_grid( g, &term->grid, offset_y_src, offset_y_dst, width, height );
 
-    ret = ioctl(term->fd, TIOCSWINSZ, &ws);
-
-    if( ret != -1 ) {
+    if( finalize ) {
         term_release_grid( &term->grid );
-        memcpy( &term->grid, &g, sizeof( term_grid ) );
+        memcpy( &term->grid, g, sizeof( term_grid ) );
 
         // Now our internals are up-to-date, notify the application
         ret = kill(term->child, SIGWINCH);
         if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow - term->row);
-    } else {
-        term_release_grid( &g );
     }
 
     return ret;
@@ -378,6 +414,19 @@ bool term_create(term_t *t)
 
     *t = TO_H(term);
     return true;
+}
+
+int term_set_autoexpand(term_t handle, bool enabled)
+{
+    term_t_i *term = TO_S( handle );
+    
+    term->autoexpand = enabled;
+
+    // Bring down to actual width
+    if( !term->autoexpand ) {
+        term->extrawidth = 0;
+        term_resize_internal( handle, term->grid.width, term->grid.height, term->grid.history - term->grid.height, term->extrawidth, NULL );
+    }
 }
 
 bool term_set_shell(term_t handle, char *shell)

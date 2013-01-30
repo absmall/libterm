@@ -14,6 +14,13 @@ WINDOW *wnd;
 int cursor_x = -1;
 int cursor_y = -1;
 
+void slog(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args,fmt);
+    va_end(args);
+}
+
 void update(term_t handle, int x, int y, int width, int height)
 {
     int i, j;
