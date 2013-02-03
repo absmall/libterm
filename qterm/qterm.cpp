@@ -1,10 +1,11 @@
 #include <QPainter>
 #include <QAbstractEventDispatcher>
-#include <QDesktopWidget>
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QPaintEvent>
 #include <QFontMetrics>
 #include <QTextStream>
+#include <QScrollArea>
 #include <qterm.h>
 #include <stdio.h>
 #include <QKeyEvent>
@@ -18,7 +19,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <bps/bps.h>
-#include "term_logging.h"
 #ifdef BPS_VERSION
 #include <bps/virtualkeyboard.h>
 #else
@@ -26,10 +26,8 @@
 #include <bbsupport/Notification>
 #endif
 #endif
-#include <dlfcn.h>
+#include "term_logging.h"
 
-#define WIDTH    80
-#define HEIGHT    17
 #define BLINK_SPEED 1000
 
 #define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
@@ -120,7 +118,6 @@ void QTerm::init()
 
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
 #ifdef __QNX__
-    showFullScreen();
     keyboardVisible = false;
     virtualkeyboard_request_events(0);
     virtualkeyboard_show();
@@ -128,7 +125,6 @@ void QTerm::init()
 #endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
-
 }
 
 #ifdef __QNX__
@@ -188,9 +184,10 @@ void QTerm::resize_term()
         kbd_height = 0;
     }
     slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, (size().height() - kbd_height)/ char_height);
-    term_resize( terminal, size().width() / char_width, (size().height() - kbd_height) / char_height, 0 );
+    term_resize( terminal, parentWidget()->size().width() / char_width, HEIGHT, 0 );
+    resize(parentWidget()->size().width(), parentWidget()->size().height());
     QWidget::update(0, 0,
-                    size().width(), size().height());
+                    parentWidget()->size().width(), HEIGHT * char_height);
 }
 #endif
 
@@ -230,6 +227,11 @@ void QTerm::term_update_cursor(term_t handle, int old_x, int old_y, int new_x, i
 void QTerm::piekeypress(char key)
 {
     term_send_data( terminal, &key, 1 );
+}
+
+void QTerm::resizeRequest(QSize size)
+{
+    setMinimumSize(size);
 }
 
 void QTerm::terminal_data()
@@ -543,15 +545,6 @@ void QTerm::resizeEvent(QResizeEvent *event)
                     size().width(), size().height());
 }
 
-#ifdef FAKE_MAIN
-extern "C" int _main(int argc, char *argv[]);
-
-int fake_main(term_t handle, int argc, char *argv[])
-{
-    return _main(argc, argv);
-}
-#endif
-
 bool QTerm::event(QEvent *event)
 {
     QList<QTouchEvent::TouchPoint> touchPoints;
@@ -594,59 +587,4 @@ bool QTerm::event(QEvent *event)
     }
 
     return false;
-}
-
-term_t init_term(int argc, char *argv[])
-{
-    term_t terminal;
-
-    if( !term_create( &terminal ) ) {
-        fprintf(stderr, "Failed to create terminal (%s)\n", strerror( errno ) );
-        exit(1);
-    }
-
-    // This allows qterm to be used as a library. This is a workaround until
-    // the infrastructure for having applications communicate is finished
-#ifdef FAKE_MAIN
-    if( !term_set_program( terminal, argv[0]) ) {
-        fprintf(stderr, "Couldn't set argv[0] (%s)\n", strerror( errno ) );
-        exit(1);
-    }
-    if( !term_set_fork_callback( terminal, fake_main ) ) {
-        fprintf(stderr, "Couldn't set fake main (%s)\n", strerror( errno ) );
-        exit(1);
-    }
-#endif
-
-    //term_set_emulation( terminal, TERM_TYPE_ANSI );
-    if( !term_begin( terminal, WIDTH, HEIGHT, 0 ) ) {
-        fprintf(stderr, "Failed to begin terminal (%s)\n", strerror( errno ) );
-        exit(1);
-    }
-
-	return terminal;
-}
-
-int init_ui(term_t terminal, int argc, char *argv[])
-{
-	QApplication app(argc, argv);
- 
-	QTerm term(NULL, terminal);
-	term.show();
-
-	return app.exec();
-}
-
-int main(int argc, char *argv[])
-{
-	term_t terminal;
-
-#ifdef __QNX__
-    logging_init();
-#endif
-
-	// The initialization is split in two steps to work around the multithreaded
-	// fork bug in qnx
-	terminal = init_term( argc, argv );
-	return init_ui( terminal, argc, argv );
 }

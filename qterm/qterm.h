@@ -1,3 +1,6 @@
+#ifndef __QTERM_H__
+#define __QTERM_H__
+
 #include <QWidget>
 #include <QSocketNotifier>
 #include <libterm.h>
@@ -17,6 +20,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *);
     void resizeEvent(QResizeEvent *);
+    void parentResizeEvent(QResizeEvent *);
     void update_grid(int, int, int, int);
     void mousePressEvent(QMouseEvent *event);
     bool event(QEvent *event);
@@ -54,4 +58,7 @@ private slots:
     void terminate();
     void blink_cursor();
     void piekeypress(char key);
+    void resizeRequest(QSize size);
 };
+
+#endif /* __QTERM_H__ */

@@ -31,7 +31,8 @@ void slog(const char *fmt, ...)
 {
     va_list args;
     va_start(args,fmt);
-    printf(fmt,args);
+    vprintf(fmt,args);
+    printf("\n");
     va_end(args);
 }
 #endif
