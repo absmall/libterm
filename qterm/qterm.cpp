@@ -174,22 +174,19 @@ QTerm::~QTerm()
     term_free( terminal );
 }
 
-#ifdef __QNX__
 void QTerm::resize_term()
 {
-    int kbd_height;
+    int kbd_height = 0;
+#ifdef __QNX__
     if( keyboardVisible ) {
         virtualkeyboard_get_height( &kbd_height );
-    } else {
-        kbd_height = 0;
     }
-    slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, (size().height() - kbd_height)/ char_height);
-    term_resize( terminal, parentWidget()->size().width() / char_width, HEIGHT, 0 );
-    resize(parentWidget()->size().width(), parentWidget()->size().height());
-    QWidget::update(0, 0,
-                    parentWidget()->size().width(), HEIGHT * char_height);
-}
 #endif
+    slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, (size().height() - kbd_height)/ char_height);
+    term_resize( terminal, size().width() / char_width, size().height() / char_height, 0 );
+    QWidget::update(0, 0,
+                    size().width(), size().height());
+}
 
 void QTerm::term_bell(term_t handle)
 {
@@ -535,14 +532,8 @@ void QTerm::mousePressEvent(QMouseEvent *event)
 void QTerm::resizeEvent(QResizeEvent *event)
 {
     if( char_width != 0 && char_height != 0 ) {
-#ifdef __QNX__
         resize_term();
-#else
-        term_resize( terminal, event->size().width() / char_width, event->size().height() / char_height, 0 );
-#endif
     }
-    QWidget::update(0, 0,
-                    size().width(), size().height());
 }
 
 bool QTerm::event(QEvent *event)
