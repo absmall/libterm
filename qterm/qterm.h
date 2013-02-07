@@ -19,7 +19,6 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *);
-    void resizeEvent(QResizeEvent *);
     void parentResizeEvent(QResizeEvent *);
     void update_grid(int, int, int, int);
     void mousePressEvent(QMouseEvent *event);

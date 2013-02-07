@@ -29,6 +29,7 @@
 #include "term_logging.h"
 
 #define BLINK_SPEED 1000
+#define HEIGHT 100
 
 #define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
 #ifdef __QNX__
@@ -182,10 +183,11 @@ void QTerm::resize_term()
         virtualkeyboard_get_height( &kbd_height );
     }
 #endif
-    slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, (size().height() - kbd_height)/ char_height);
-    term_resize( terminal, size().width() / char_width, size().height() / char_height, 0 );
-    QWidget::update(0, 0,
-                    size().width(), size().height());
+    slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, HEIGHT);
+    resize(size().width(), HEIGHT * char_height);
+    term_resize( terminal, size().width() / char_width, HEIGHT, 0 );
+/*    QWidget::update(0, 0,
+                    size().width(), size().height()); */
 }
 
 void QTerm::term_bell(term_t handle)
@@ -229,6 +231,7 @@ void QTerm::piekeypress(char key)
 void QTerm::resizeRequest(QSize size)
 {
     setMinimumSize(size);
+    resize_term();
 }
 
 void QTerm::terminal_data()
@@ -350,7 +353,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
    
-    //log("Rect: (%d, %d) %d x %d\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
+    //slog("Rect: (%d, %d) %d x %d", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
 
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
@@ -409,6 +412,7 @@ void QTerm::paintEvent(QPaintEvent *event)
         getRenderedStringRect( qString, currentAttrib, NULL, &stringRect);
 
         intersectedRect = stringRect.intersected( event->rect() );
+        intersectedRect.setTop(stringRect.y());
 
         if (intersectedRect.height() == 0) { 
             // Don't render this string as it is not in the event's height
@@ -527,13 +531,6 @@ void QTerm::mousePressEvent(QMouseEvent *event)
 #ifndef __QNX__
     piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
 #endif
-}
-
-void QTerm::resizeEvent(QResizeEvent *event)
-{
-    if( char_width != 0 && char_height != 0 ) {
-        resize_term();
-    }
 }
 
 bool QTerm::event(QEvent *event)
