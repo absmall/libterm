@@ -51,7 +51,7 @@ const wchar_t **term_get_grid(term_t handle)
 
     term = TO_S(handle);
 
-    return (const wchar_t **)term->grid.grid + term->row;
+    return (const wchar_t **)term->grid.grid + term->grid.history - term->grid.height;
 }
 
 const uint32_t **term_get_attribs(term_t handle)
@@ -60,7 +60,7 @@ const uint32_t **term_get_attribs(term_t handle)
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid.attribs + term->row;
+    return (const uint32_t **)term->grid.attribs + term->grid.history - term->grid.height;
 }
 
 const uint32_t **term_get_colours(term_t handle)
@@ -69,7 +69,7 @@ const uint32_t **term_get_colours(term_t handle)
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid.colours + term->row;
+    return (const uint32_t **)term->grid.colours + term->grid.history - term->grid.height;
 }
 
 const char *term_get_line(term_t handle, int row)
@@ -80,12 +80,13 @@ const char *term_get_line(term_t handle, int row)
 
     term = TO_S(handle);
 
-    if( row < term->row || row >= term->grid.history - term->row ) {
+    row += term->grid.history - term->grid.height;
+    if( row < 0 || row >= term->grid.history ) {
         errno = EINVAL;
         return NULL;
     }
 
-    grid_row = term->grid.grid[term->row + row];
+    grid_row = term->grid.grid[row];
     length = wcstombs(NULL, grid_row, 0) + 1;
     if( length > term->conversion_buffer_size ) {
         if( term->conversion_buffer != NULL ) {
@@ -194,8 +195,6 @@ void term_scroll( term_t handle, int row )
 
     term = TO_S(handle);
 
-    term->row = row;
-    
     if( row < 0 ) {
         row = 0;
     }
@@ -203,8 +202,6 @@ void term_scroll( term_t handle, int row )
     if( row > term->grid.history - term->grid.height ) {
         row = term->grid.history - term->grid.height;
     }
-
-    term->row = row;
 }
 
 int term_resize( term_t handle, int new_width, int new_height, int new_scrollback )
@@ -238,7 +235,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 
         // Now our internals are up-to-date, notify the application
         ret = kill(term->child, SIGWINCH);
-        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow - term->row);
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol - (term->grid.history - term->grid.height), term->ccol, term->crow - (term->grid.history - term->grid.height));
     } else {
         term_release_grid( &g );
     }
@@ -281,7 +278,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
 
     // We want to copy such that the first lines after the scrollback are in
     // the same position, unless that would push the cursor off the screen
-    if( term->crow >= new_height ) {
+    if( term->crow - (term->grid.history - term->grid.height) >= new_height ) {
         // Put the cursor at the end
         if( term->crow < new_history ) {
             offset_y_src = 0;
@@ -290,7 +287,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
             offset_y_src = term->crow - new_history + 1;
             offset_y_dst = 0;
         }
-        term->crow = new_height - 1;
+        term->crow = new_history - 1;
     } else {
         // Match up the first lines
         if( term->grid.history - term->grid.height < new_scrollback ) {
@@ -300,7 +297,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
             offset_y_src = (term->grid.history - term->grid.height) - new_scrollback;
             offset_y_dst = 0;
         }
-        term->crow += (term->grid.history - term->grid.height) - new_scrollback;
+        term->crow += new_scrollback - (term->grid.history - term->grid.height);
     }
 
     // Figure out the height based on the later start to the earlier end
@@ -326,7 +323,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
 
         // Now our internals are up-to-date, notify the application
         ret = kill(term->child, SIGWINCH);
-        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow - term->row);
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol - (term->grid.history - term->grid.height), term->ccol, term->crow - (term->grid.history - term->grid.height));
     }
 
     return ret;
@@ -555,7 +552,7 @@ int term_get_cursor_pos(term_t handle, int *x, int *y)
     term_t_i *term = TO_S(handle);
 
     *x = term->ccol;
-    *y = term->crow - term->row;
+    *y = term->crow - (term->grid.history - term->grid.height);
 
     return 0;
 }

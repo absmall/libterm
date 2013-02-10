@@ -29,6 +29,7 @@ private:
     int char_width;
     int char_height;
     int char_descent;
+    int scrollback_height;
     int cursor_on;
     int piekey_active;
     term_t terminal;

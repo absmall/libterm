@@ -94,7 +94,7 @@ void escape_cud1(term_t_i *term)
     term->dirty_cursor.exists = true;
     if( term->crow >= term->grid.history ) {
         term_shiftrows_up(term);
-        term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
+        term_add_dirty_rect( term, 0, term->grid.history - term->grid.height, term->grid.width, term->grid.height );
     }
 }
 
@@ -126,7 +126,7 @@ void escape_cup(term_t_i *term)
 {
     char *n;
 
-    term->crow = strtoul( term->output_bytes + 2, &n, 10 ) - 1;
+    term->crow = strtoul( term->output_bytes + 2, &n, 10 ) - 1 + term->grid.history - term->grid.height;
     if( term->crow >= term->grid.height ) term->crow = term->grid.height - 1;
     term->ccol = strtoul( n + 1, NULL, 10 ) - 1;
     if( term->ccol >= term->grid.width ) term->crow = term->grid.width - 1;
@@ -137,8 +137,8 @@ void escape_cup(term_t_i *term)
 void escape_cuu(term_t_i *term)
 {
     int up = atoi( term->output_bytes + 2 );
-    if( term->crow < up ) {
-        term->crow = 0;
+    if( term->crow - up < term->grid.history - term->grid.height ) {
+        term->crow = term->grid.history - term->grid.height;
     }  else {
         term->crow -= up;
     }
@@ -148,7 +148,7 @@ void escape_cuu(term_t_i *term)
 // up one line
 void escape_cuu1(term_t_i *term)
 {
-    if( term->crow > 0 ) {
+    if( term->crow > term->grid.history - term->grid.height ) {
         term->crow --;
         term->dirty_cursor.exists = true;
     }
@@ -164,7 +164,7 @@ void escape_ed(term_t_i *term)
             term->grid.attribs[ i ][ j ] = 0;
         }
     }
-    term_add_dirty_rect( term, term->ccol, term->crow, term->grid.width - term->ccol, term->grid.height - term->crow );
+    term_add_dirty_rect( term, term->ccol, term->crow, term->grid.width - term->ccol, term->grid.history - term->crow );
 }
 
 // Clear to end of line
@@ -402,7 +402,7 @@ void escape_nel(term_t_i *term)
     term->dirty_cursor.exists = true;
     if( term->crow >= term->grid.history ) {
         term_shiftrows_up(term);
-        term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
+        term_add_dirty_rect( term, 0, term->grid.history - term->grid.height, term->grid.width, term->grid.height );
     }
 }
 
@@ -424,7 +424,7 @@ void escape_rev(term_t_i *term)
 void escape_ri(term_t_i *term)
 {
     term_shiftrows_down(term);
-    term_add_dirty_rect( term, 0, 0, term->grid.width, term->grid.height );
+    term_add_dirty_rect( term, 0, term->grid.history - term->grid.height, term->grid.width, term->grid.height );
 }
 
 // end alternate character set
@@ -523,10 +523,10 @@ void escape_tbc(term_t_i *term)
 void escape_vpa(term_t_i *term)
 {
     int vpos = atoi( term->output_bytes + 2 );
-    if( vpos >= term->grid.history ) {
+    if( vpos >= term->grid.height ) {
         term->crow = term->grid.history - 1;
     }  else {
-        term->crow = vpos;
+        term->crow = vpos + term->grid.history - term->grid.height;
     }
     term->dirty_cursor.exists = true;
 }

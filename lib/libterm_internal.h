@@ -36,8 +36,6 @@ typedef struct {
 } term_dirty_cursor;
 
 typedef struct term_t_i {
-    // Current top row of the buffer
-    int row;
     // Cursor row
     int crow;
     // Cursor column

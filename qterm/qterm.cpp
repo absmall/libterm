@@ -178,16 +178,17 @@ QTerm::~QTerm()
 void QTerm::resize_term()
 {
     int kbd_height = 0;
+    int visible_height;
 #ifdef __QNX__
     if( keyboardVisible ) {
         virtualkeyboard_get_height( &kbd_height );
     }
 #endif
-    slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, HEIGHT);
+    visible_height = (minimumSize().height() - kbd_height) / char_height;
+    //slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, HEIGHT);
     resize(size().width(), HEIGHT * char_height);
-    term_resize( terminal, size().width() / char_width, HEIGHT, 0 );
-/*    QWidget::update(0, 0,
-                    size().width(), size().height()); */
+    scrollback_height = HEIGHT - visible_height;
+    term_resize( terminal, size().width() / char_width, visible_height, scrollback_height );
 }
 
 void QTerm::term_bell(term_t handle)
@@ -353,7 +354,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
    
-    //slog("Rect: (%d, %d) %d x %d", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
+    slog("Rect: (%d, %d) %d x %d", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
 
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
@@ -376,14 +377,14 @@ void QTerm::paintEvent(QPaintEvent *event)
        painter.setPen(fgColor);
        painter.setBrush(fgColor);
        painter.drawRect( cursor_x_coord + 1, 
-                         cursor_y * char_height + 1,
+                         (cursor_y + scrollback_height) * char_height + 1,
                          char_width - 2, char_height - 2); 
     }
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
 
         
-    for (i=0; i< gridHeight;i++) {
+    for (i=0; i< HEIGHT;i++) {
         unsigned int currentAttrib; 
         unsigned int currentColor;
         bool currentOnCursor;
@@ -397,15 +398,16 @@ void QTerm::paintEvent(QPaintEvent *event)
         QRect stringRect;
         QRect intersectedRect;
        
-        currentAttrib = attribs[i][chunkStart];
-        currentColor = colors[i][chunkStart];
+        currentAttrib = attribs[i - scrollback_height][chunkStart];
+        currentColor = colors[i - scrollback_height][chunkStart];
         currentOnCursor = ON_CURSOR(0, i);
         color = term_get_fg_color(currentAttrib, currentColor);
-        str = term_get_line( terminal, i );
+        str = term_get_line( terminal, i - scrollback_height );
         qString = qString.append(str);
         painter.setPen( QColor( (color >> 16) & 0xFF,
                                 (color >> 8 ) & 0xFF,
                                 (color & 0xFF) ) );
+        slog("%d: %s", i, str);
 
         stringRect.setX( 0 );
         stringRect.setY( i * char_height );
@@ -421,8 +423,8 @@ void QTerm::paintEvent(QPaintEvent *event)
 
         /* Chunk each string whenever we need to change rendering params */
         for(chunkPos=0; chunkPos< gridWidth; chunkPos++) {
-            if( attribs[i][chunkPos] != currentAttrib ||
-                colors[i][chunkPos] != currentColor ||
+            if( attribs[i - scrollback_height][chunkPos] != currentAttrib ||
+                colors[i - scrollback_height][chunkPos] != currentColor ||
                 ON_CURSOR(chunkPos, i) != currentOnCursor) {
                 // flag to tell outer loop to recalc the substring
                 recalcSubString = true;
@@ -468,8 +470,8 @@ void QTerm::paintEvent(QPaintEvent *event)
                 // Update the local variables
                 last_x_pos += intersectedRect.width();
                 intersectedRect.translate( intersectedRect.width(), 0 );
-                currentColor = colors[i][chunkPos];
-                currentAttrib = attribs[i][chunkPos];
+                currentColor = colors[i - scrollback_height][chunkPos];
+                currentAttrib = attribs[i - scrollback_height][chunkPos];
                 currentOnCursor = ON_CURSOR(chunkPos, i);
                 chunkStart=chunkPos;
             }
