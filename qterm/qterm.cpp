@@ -207,7 +207,7 @@ void QTerm::term_update(term_t handle, int x, int y, int width, int height)
 {
     QTerm *term = (QTerm *)term_get_user_data( handle );
 
-    term->update_grid(x, y, width, height);
+    term->update(x, y, width, height);
 }
 
 void QTerm::term_update_cursor(term_t handle, int old_x, int old_y, int new_x, int new_y)
@@ -254,6 +254,17 @@ void QTerm::blink_cursor()
     cursor_on ^= 1;
     term_get_cursor_pos( terminal, &cursor_x, &cursor_y );
     update_grid( cursor_x, cursor_y, 1, 1);
+}
+
+void QTerm::update(int grid_x_min,
+                   int grid_y_min,
+                   int grid_width,
+                   int grid_height)
+{
+    update_grid(grid_x_min, grid_y_min, grid_width, grid_height);
+
+    // Notify parent of update to allow scrolling
+    emit gridUpdated(QRect((grid_x_min + HEIGHT - scrollback_height) * char_width, grid_y_min * char_height, grid_width * char_width, grid_height * char_height));
 }
 
 // Called to update the grid.
@@ -354,7 +365,7 @@ void QTerm::paintEvent(QPaintEvent *event)
     // First erase the grid with its current dimensions
     painter.drawRect(event->rect());
    
-    slog("Rect: (%d, %d) %d x %d", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
+    //slog("Rect: (%d, %d) %d x %d", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height());
 
     painter.setPen(fgColor);
     painter.setBrush(fgColor);
@@ -407,7 +418,6 @@ void QTerm::paintEvent(QPaintEvent *event)
         painter.setPen( QColor( (color >> 16) & 0xFF,
                                 (color >> 8 ) & 0xFF,
                                 (color & 0xFF) ) );
-        slog("%d: %s", i, str);
 
         stringRect.setX( 0 );
         stringRect.setY( i * char_height );

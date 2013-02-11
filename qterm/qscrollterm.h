@@ -18,6 +18,9 @@ protected:
 signals:
     void parentResize(QSize size);
 
+private slots:
+    void childUpdated(QRect region);
+
 private:
     QTerm term;
 };
