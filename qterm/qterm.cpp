@@ -310,7 +310,7 @@ void QTerm::update_grid(int grid_x_min,
         coords_x_min = grid_x_min * char_width;
         coords_x_max = grid_width * char_width;
     }
-    coords_y_min = grid_y_min * char_height;
+    coords_y_min = (grid_y_min + scrollback_height) * char_height;
     coords_y_max = grid_height * char_height;
     QWidget::update(coords_x_min, coords_y_min,
                     coords_x_max, coords_y_max);
@@ -335,7 +335,7 @@ void QTerm::getRenderedStringRect( const QString string,
     pTmpFont->setUnderline( attrib & TERM_ATTRIB_UNDERSCORE );
     pFontMetrics = new QFontMetrics( *pTmpFont );
 
-    pUpdateRect->setWidth( pFontMetrics->width(  string ));
+    pUpdateRect->setWidth( pFontMetrics->width( string ));
     pUpdateRect->setHeight( char_height );
     
     delete pFontMetrics;
@@ -424,12 +424,12 @@ void QTerm::paintEvent(QPaintEvent *event)
         getRenderedStringRect( qString, currentAttrib, NULL, &stringRect);
 
         intersectedRect = stringRect.intersected( event->rect() );
-        intersectedRect.setTop(stringRect.y());
 
         if (intersectedRect.height() == 0) { 
             // Don't render this string as it is not in the event's height
             continue;
         }
+        intersectedRect.setTop(stringRect.y());
 
         /* Chunk each string whenever we need to change rendering params */
         for(chunkPos=0; chunkPos< gridWidth; chunkPos++) {
@@ -472,7 +472,7 @@ void QTerm::paintEvent(QPaintEvent *event)
                 // need to manually add xpos until we have x-cliping.
                 painter.drawText( last_x_pos,
                                  intersectedRect.y(),
-                                 intersectedRect.width(),
+                                 stringRect.width(),
                                  intersectedRect.height(),
                                   Qt::TextExpandTabs,
                                   subString.toString() );
@@ -500,7 +500,7 @@ void QTerm::paintEvent(QPaintEvent *event)
         }
         painter.setFont( *font );
         painter.drawText( last_x_pos, intersectedRect.y(),
-                          intersectedRect.width(), intersectedRect.height(),
+                          stringRect.width(), intersectedRect.height(),
                           Qt::TextExpandTabs,
                           subString.toString(),
                           &intersectedRect );
