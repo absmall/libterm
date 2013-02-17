@@ -49,7 +49,12 @@ void term_process_output_data(term_t_i *term, char *buf, int length)
         }
 
         // If it's not an escape, it's a regular character
-        if( term->crow >= 0 && term->crow < term->grid.history && term->ccol >= 0 && term->ccol < term->grid.width ) {
+        if( term->crow >= 0 && term->crow < term->grid.history && term->ccol >= 0 && (term->ccol < term->grid.width || term->autoexpand) ) {
+            if( term->ccol > term->grid.width + term->extrawidth ) {
+                // Autoexpanding
+                term->extrawidth = term->ccol;
+                term_resize_internal( TO_H( term ), term->grid.width, term->grid.height, term->grid.history - term->grid.height, term->extrawidth, NULL );
+            }
             term->grid.grid[term->crow][term->ccol] = term->output_bytes[0];
             term->grid.attribs[term->crow][term->ccol] = term->cattr;
             term->grid.colours[term->crow][term->ccol] = term->ccolour;
