@@ -5,7 +5,7 @@
 QScrollTerm::QScrollTerm(QWidget *parent, term_t terminal) : term(this, terminal)
 {
     QObject::connect(this, SIGNAL(parentResize(QSize)), &term, SLOT(resizeRequest(QSize)));
-    QObject::connect(&term, SIGNAL(gridUpdated(QRect)), this, SLOT(childUpdated(QRect)));
+    QObject::connect(&term, SIGNAL(gridUpdated()), this, SLOT(childUpdated()));
     setFocusProxy(&term);
     setFocusPolicy(Qt::StrongFocus);
     setWidget(&term);
@@ -16,8 +16,8 @@ void QScrollTerm::resizeEvent(QResizeEvent *event)
     emit parentResize(event->size());
 }
 
-void QScrollTerm::childUpdated(QRect region)
+void QScrollTerm::childUpdated()
 {
-    slog("ensurevisible %d %d", region.x(), region.y());
-    ensureVisible(region.x(), region.y(), 0, 0);
+    QWidget *child = widget();
+    ensureVisible(child->width(), child->height(), 0, 0);
 }

@@ -19,7 +19,7 @@ signals:
     void parentResize(QSize size);
 
 private slots:
-    void childUpdated(QRect region);
+    void childUpdated();
 
 private:
     QTerm term;

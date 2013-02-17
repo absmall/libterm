@@ -56,7 +56,7 @@ private:
     QPieKeyboard *piekeyboard;
 
 signals:
-    void gridUpdated(QRect region);
+    void gridUpdated();
 
 private slots:
     void terminal_data();

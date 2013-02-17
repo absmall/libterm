@@ -264,7 +264,7 @@ void QTerm::update(int grid_x_min,
     update_grid(grid_x_min, grid_y_min, grid_width, grid_height);
 
     // Notify parent of update to allow scrolling
-    emit gridUpdated(QRect((grid_x_min + HEIGHT - scrollback_height) * char_width, grid_y_min * char_height, grid_width * char_width, grid_height * char_height));
+    emit gridUpdated();
 }
 
 // Called to update the grid.
