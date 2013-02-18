@@ -45,31 +45,31 @@ int term_get_file_descriptor(term_t handle)
     return term->fd;
 }
 
-const wchar_t **term_get_grid(term_t handle)
+const wchar_t *const *term_get_grid(term_t handle)
 {
     term_t_i *term;
 
     term = TO_S(handle);
 
-    return (const wchar_t **)term->grid.grid + term->grid.history - term->grid.height;
+    return term->grid.grid;
 }
 
-const uint32_t **term_get_attribs(term_t handle)
+const uint32_t *const *term_get_attribs(term_t handle)
 {
     term_t_i *term;
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid.attribs + term->grid.history - term->grid.height;
+    return term->grid.attribs;
 }
 
-const uint32_t **term_get_colours(term_t handle)
+const uint32_t *const *term_get_colours(term_t handle)
 {
     term_t_i *term;
 
     term = TO_S(handle);
 
-    return (const uint32_t **)term->grid.colours + term->grid.history - term->grid.height;
+    return term->grid.colours;
 }
 
 const char *term_get_line(term_t handle, int row)
@@ -80,8 +80,7 @@ const char *term_get_line(term_t handle, int row)
 
     term = TO_S(handle);
 
-    row += term->grid.history - term->grid.height;
-    if( row < 0 || row >= term->grid.history ) {
+    if( row < -term->grid.history || row >= term->grid.height ) {
         errno = EINVAL;
         return NULL;
     }
@@ -189,21 +188,6 @@ uint32_t term_get_bg_color(uint32_t attrib, uint32_t colour)
     }
 }
 
-void term_scroll( term_t handle, int row )
-{
-    term_t_i *term;
-
-    term = TO_S(handle);
-
-    if( row < 0 ) {
-        row = 0;
-    }
-
-    if( row > term->grid.history - term->grid.height ) {
-        row = term->grid.history - term->grid.height;
-    }
-}
-
 int term_resize( term_t handle, int new_width, int new_height, int new_scrollback )
 {
     int ret;
@@ -212,7 +196,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
     struct winsize ws;
     term_t_i *term = TO_S(handle);
 
-    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + new_height == term->grid.history) return 0;
+    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback == term->grid.history) return 0;
 
     // Remember the previous cursor position
     old_crow = term->crow;
@@ -235,7 +219,7 @@ int term_resize( term_t handle, int new_width, int new_height, int new_scrollbac
 
         // Now our internals are up-to-date, notify the application
         ret = kill(term->child, SIGWINCH);
-        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol - (term->grid.history - term->grid.height), term->ccol, term->crow - (term->grid.history - term->grid.height));
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow);
     } else {
         term_release_grid( &g );
     }
@@ -248,7 +232,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
     term_grid local_grid;
     int ret = 0;
     bool finalize;
-    int width, height, offset_y_src, offset_y_dst, new_history;
+    int width, height, offset_y_src, offset_y_dst;
     int old_crow, old_ccol;
 
     if( g != NULL ) {
@@ -260,7 +244,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
 
     term = TO_S(handle);
 
-    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback + new_height == term->grid.history && new_extrawidth == term->extrawidth) return 0;
+    if( new_width == term->grid.width && new_height == term->grid.height && new_scrollback == term->grid.history && new_extrawidth == term->extrawidth) return 0;
 
     // Remember the previous cursor position
     old_crow = term->crow;
@@ -273,49 +257,22 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
         width = new_width + new_extrawidth;
     }
 
-    // Convenience variable
-    new_history = new_height + new_scrollback;
-
     // We want to copy such that the first lines after the scrollback are in
     // the same position, unless that would push the cursor off the screen
-    if( term->crow - (term->grid.history - term->grid.height) >= new_height ) {
+    if( term->crow >= new_height ) {
         // Put the cursor at the end
-        if( term->crow < new_history ) {
-            offset_y_src = 0;
-            offset_y_dst = new_history - term->crow;
-        } else {
-            offset_y_src = term->crow - new_history + 1;
-            offset_y_dst = 0;
-        }
-        term->crow = new_history - 1;
-    } else {
-        // Match up the first lines
-        if( term->grid.history - term->grid.height < new_scrollback ) {
-            offset_y_src = 0;
-            offset_y_dst = new_scrollback - (term->grid.history - term->grid.height);
-        } else {
-            offset_y_src = (term->grid.history - term->grid.height) - new_scrollback;
-            offset_y_dst = 0;
-        }
-        term->crow += new_scrollback - (term->grid.history - term->grid.height);
-    }
-
-    // Figure out the height based on the later start to the earlier end
-    if( term->grid.history - offset_y_src < new_history - offset_y_dst ) {
-        height = term->grid.history - offset_y_src;
-    } else {
-        height = new_history - offset_y_dst;
+        term->crow = new_height - 1;
     }
 
     g->width = new_width;
     g->height = new_height;
-    g->history = new_history;
+    g->history = new_scrollback;
 
     if( !term_allocate_grid( g ) ) {
         return -1;
     }
 
-    term_copy_grid( g, &term->grid, offset_y_src, offset_y_dst, width, height );
+    term_copy_grid( g, &term->grid );
 
     if( finalize ) {
         term_release_grid( &term->grid );
@@ -323,7 +280,7 @@ int term_resize_internal( term_t handle, int new_width, int new_height, int new_
 
         // Now our internals are up-to-date, notify the application
         ret = kill(term->child, SIGWINCH);
-        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol - (term->grid.history - term->grid.height), term->ccol, term->crow - (term->grid.history - term->grid.height));
+        if( term->cursor_update != NULL ) term->cursor_update(TO_H(term), old_crow, old_ccol, term->ccol, term->crow);
     }
 
     return ret;
@@ -422,7 +379,7 @@ int term_set_autoexpand(term_t handle, bool enabled)
     // Bring down to actual width
     if( !term->autoexpand ) {
         term->extrawidth = 0;
-        term_resize_internal( handle, term->grid.width, term->grid.height, term->grid.history - term->grid.height, term->extrawidth, NULL );
+        term_resize_internal( handle, term->grid.width, term->grid.height, 0, term->extrawidth, NULL );
     }
 }
 
@@ -474,7 +431,7 @@ bool term_begin(term_t handle, int width, int height, int scrollback)
 
     term->grid.width = width;
     term->grid.height = height;
-    term->grid.history = height + scrollback;
+    term->grid.history = scrollback;
     term->crow = scrollback;
 
     if( !term_allocate_grid(&term->grid) ) {
@@ -552,7 +509,7 @@ int term_get_cursor_pos(term_t handle, int *x, int *y)
     term_t_i *term = TO_S(handle);
 
     *x = term->ccol;
-    *y = term->crow - (term->grid.history - term->grid.height);
+    *y = term->crow;
 
     return 0;
 }

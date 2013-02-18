@@ -352,8 +352,8 @@ void QTerm::paintEvent(QPaintEvent *event)
     QColor bgColor(0,0,0);
     int gridWidth, gridHeight;
     int cursor_x, cursor_y;
-    const uint32_t **colors;
-    const uint32_t **attribs;
+    const uint32_t *const *colors;
+    const uint32_t *const *attribs;
 
     painter.setBackgroundMode(Qt::TransparentMode);
     painter.setBrush(QColor(8, 0, 0));

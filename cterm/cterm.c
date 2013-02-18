@@ -24,7 +24,7 @@ void slog(const char *fmt, ...)
 void update(term_t handle, int x, int y, int width, int height)
 {
     int i, j;
-    const wchar_t **grid = term_get_grid(handle);
+    const wchar_t *const *grid = term_get_grid(handle);
 
 
     wattroff( wnd, A_REVERSE );

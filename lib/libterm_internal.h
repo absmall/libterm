@@ -90,7 +90,7 @@ typedef struct term_t_i {
 
 bool term_allocate_grid(term_grid *grid);
 int term_resize_internal( term_t handle, int new_width, int new_height, int new_scrollback, int new_extra_width, term_grid *g );
-void term_copy_grid(term_grid *dst, term_grid *src, int offset_y_src, int offset_y_dst, int width, int height);
+void term_copy_grid(term_grid *dst, term_grid *src);
 void term_release_grid(term_grid *grid);
 void term_process_output_data(term_t_i *term, char *buf, int length);
 int term_send_escape(term_t_i *term, char *buf, int length);
