@@ -19,12 +19,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <bps/bps.h>
-#ifdef BPS_VERSION
-#include <bps/virtualkeyboard.h>
-#else
-#include <bbsupport/Keyboard>
-#include <bbsupport/Notification>
-#endif
 #endif
 #include "term_logging.h"
 
@@ -32,28 +26,14 @@
 #define HEIGHT 100
 
 #define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
-#ifdef __QNX__
-QAbstractEventDispatcher::EventFilter QTerm::prevFilter;
-#endif
-QTerm *QTerm::instance = NULL;
 
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
-    if( instance == NULL ) {
-        instance = this;
-    } else {
-        throw "Singleton error";
-    }
     init();
 }
 
 QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
 {
-    if( instance == NULL ) {
-        instance = this;
-    } else {
-        throw "Singleton error";
-    }
     this->terminal = terminal;
     init();
 }
@@ -118,50 +98,9 @@ void QTerm::init()
     char_descent = metrics.descent();
 
     QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
-#ifdef __QNX__
-    keyboardVisible = false;
-    virtualkeyboard_request_events(0);
-    virtualkeyboard_show();
-    prevFilter = QAbstractEventDispatcher::instance()->setEventFilter(eventFilter);
-#endif
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
 }
-
-#ifdef __QNX__
-bool QTerm::eventFilter(void *message)
-{
-    bps_event_t * const event = static_cast<bps_event_t *>(message);
- 
-    if (event && bps_event_get_domain(event) == virtualkeyboard_get_domain()) {
-        const int id = bps_event_get_code(event);
-        switch( id ) {
-            case VIRTUALKEYBOARD_EVENT_VISIBLE:
-                slog("Keyboard visible");
-                instance->keyboardVisible = true;
-                instance->resize_term();
-                break;
-            case VIRTUALKEYBOARD_EVENT_HIDDEN:
-                slog("Keyboard hidden");
-                instance->keyboardVisible = false;
-                instance->resize_term();
-                break;
-            case VIRTUALKEYBOARD_EVENT_INFO:
-                slog("Keyboard event");
-                instance->resize_term();
-                break;
-            default:
-                slog("Unexpected keyboard event %d", id);
-                break;
-        }
-    }
- 
-    if (prevFilter)
-        return prevFilter(message);
-    else
-        return false;
-}
-#endif
 
 QTerm::~QTerm()
 {
@@ -169,23 +108,14 @@ QTerm::~QTerm()
     delete exit_notifier;
     delete font;
     delete piekeyboard;
-    if( instance == this ) {
-        instance = NULL;
-    }
     term_free( terminal );
 }
 
 void QTerm::resize_term()
 {
-    int kbd_height = 0;
     int visible_height;
-#ifdef __QNX__
-    if( keyboardVisible ) {
-        virtualkeyboard_get_height( &kbd_height );
-    }
-#endif
-    visible_height = (minimumSize().height() - kbd_height) / char_height;
-    //slog("resize term! %d %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, kbd_height, size().width()/char_width, HEIGHT);
+    visible_height = minimumSize().height() / char_height;
+    //slog("resize term! %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, size().width()/char_width, HEIGHT);
     resize(size().width(), HEIGHT * char_height);
     scrollback_height = HEIGHT - visible_height;
     term_resize( terminal, size().width() / char_width, visible_height, scrollback_height );

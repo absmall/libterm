@@ -8,6 +8,15 @@
 #define WIDTH    80
 #define HEIGHT   100
 
+#ifdef FAKE_MAIN
+extern "C" int _main(int argc, char *argv[]);
+
+int fake_main(term_t handle, int argc, char *argv[])
+{
+    return _main(argc, argv);
+}
+#endif
+
 term_t init_term(int argc, char *argv[])
 {
     term_t terminal;
@@ -51,15 +60,6 @@ int init_ui(term_t terminal, int argc, char *argv[])
 
 	return app.exec();
 }
-
-#ifdef FAKE_MAIN
-extern "C" int _main(int argc, char *argv[]);
-
-int fake_main(term_t handle, int argc, char *argv[])
-{
-    return _main(argc, argv);
-}
-#endif
 
 int main(int argc, char *argv[])
 {
