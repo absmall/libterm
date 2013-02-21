@@ -3,9 +3,15 @@
 
 class QVkbHandler : public QWidget
 {
+    Q_OBJECT
+
+public:
     QVkbHandler();
     ~QVkbHandler();
     void resize();
+protected:
+    void resizeEvent(QResizeEvent *);
+
 
 private:
     static QVkbHandler *instance;

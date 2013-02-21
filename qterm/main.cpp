@@ -4,6 +4,9 @@
 #include <errno.h>
 #include "qscrollterm.h"
 #include "term_logging.h"
+#ifdef __QNX__
+#include "qvkbhandler.h"
+#endif
 
 #define WIDTH    80
 #define HEIGHT   100
@@ -52,11 +55,15 @@ int init_ui(term_t terminal, int argc, char *argv[])
 {
 	QApplication app(argc, argv);
  
-	QScrollTerm term(NULL, terminal);
 #ifdef __QNX__
-    term.showFullScreen();
+    QVkbHandler vkbHandler;
+    QScrollTerm term(&vkbHandler, terminal);
+    vkbHandler.showFullScreen();
+    vkbHandler.show();
+#else
+    QScrollTerm term(NULL, terminal);
+    term.show();
 #endif
-	term.show();
 
 	return app.exec();
 }
@@ -69,8 +76,8 @@ int main(int argc, char *argv[])
     logging_init();
 #endif
 
-	// The initialization is split in two steps to work around the multithreaded
-	// fork bug in qnx
-	terminal = init_term( argc, argv );
-	return init_ui( terminal, argc, argv );
+    // The initialization is split in two steps to work around the multithreaded
+    // fork bug in qnx
+    terminal = init_term( argc, argv );
+    return init_ui( terminal, argc, argv );
 }

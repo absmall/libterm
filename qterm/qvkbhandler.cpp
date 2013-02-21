@@ -30,6 +30,12 @@ void QVkbHandler::resize()
     if( keyboardVisible ) {
         virtualkeyboard_get_height( &kbd_height );
     }
+    ((QWidget *)children()[0])->setGeometry(0, 0, width(), height()-kbd_height);
+}
+
+void QVkbHandler::resizeEvent(QResizeEvent *event)
+{
+    resize();
 }
 
 bool QVkbHandler::eventFilter(void *message)
