@@ -162,6 +162,8 @@ void QTerm::piekeypress(char key)
 void QTerm::resizeRequest(QSize size)
 {
     setMinimumSize(size);
+    size.setHeight(QWIDGETSIZE_MAX);
+    setMaximumSize(size);
     resize_term();
 }
 
