@@ -2,7 +2,7 @@
 <qnx xmlns="http://www.qnx.com/schemas/application/1.0">
     <id>com.example.qterm</id>
     <filename>qterm</filename>
-    <name>Terminal</name>
+    <name>Command shell</name>
     <versionNumber>1.0.26</versionNumber>
     <description>BB10 terminal</description>
     <initialWindow>
