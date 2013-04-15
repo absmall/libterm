@@ -9,9 +9,8 @@ class QPieKeyboard : public QObject
 public:
     QPieKeyboard(QWidget *parent = 0);
     ~QPieKeyboard( );
-    void initialize(int sections, const char *keylist);
-    void activate(int x1, int y1, int x2, int y2);
-    void testMode(int delay);
+    void initialize(int keys, const char *keylist);
+    void activate(int touchId, int x1, int y1);
     void moveTouch(int touchId, int x, int y);
     void release();
  
@@ -20,21 +19,14 @@ signals:
 
 private:
     char *reorder(int sections, char *keylist);
-    // Indicates the left and right piekeys are swapped in position
-    bool swapped;
+    int keycount;
     int sections;
-    QPieKey left;
-    QPieKey right;
-    int testDelay;
-    int testX, testY;
-    QTimer testTimer;
-    char *leftSelection;
-    char *rightSelection;
+    QPieKey *keys;
+    char **selections;
+    QWidget *parent;
 
 private slots:
-    void testTime();
     void piekeypressed(char key);
-    void leftSelectionChanged(char *selection);
-    void rightSelectionChanged(char *selection);
+    void selectionChanged(int index, char *selection);
     void released();
 };

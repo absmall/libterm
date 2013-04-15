@@ -45,10 +45,7 @@ void QTerm::init()
     cursor_on = 1;
     piekey_active = 0;
     piekeyboard = new QPieKeyboard(this);
-    piekeyboard->initialize( 6, "abcdefghijklmnopqrstuvwxyz|\n        " );
-#ifndef __QNX__
-    piekeyboard->testMode(3);
-#endif
+    piekeyboard->initialize( 2, "abcdefghijklmnopqrstuvwxyz|\n        " );
 
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
@@ -470,13 +467,6 @@ void QTerm::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void QTerm::mousePressEvent(QMouseEvent *event)
-{
-#ifndef __QNX__
-    piekeyboard->activate(event->x(), event->y(), event->x()+10, event->y()+10);
-#endif
-}
-
 bool QTerm::event(QEvent *event)
 {
     QList<QTouchEvent::TouchPoint> touchPoints;
@@ -494,8 +484,8 @@ bool QTerm::event(QEvent *event)
                     if( touchPoints.length() >= 2 ) {
                         if( !piekey_active ) {
                             piekey_active = 1;
-                            piekeyboard->activate(touchPoints[0].pos().x(), touchPoints[0].pos().y(),
-                                                  touchPoints[1].pos().x(), touchPoints[1].pos().y() );
+                            piekeyboard->activate(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
+                            piekeyboard->activate(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
                         }
                         piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
                         piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
@@ -507,7 +497,7 @@ bool QTerm::event(QEvent *event)
                     }
                     return true;
                 case QEvent::TouchEnd:
-                    piekeyboard->release();
+                    //piekeyboard->release();
                     piekey_active = 0;
                     return true;
                 default:

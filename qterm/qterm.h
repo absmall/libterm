@@ -21,7 +21,6 @@ protected:
     void parentResizeEvent(QResizeEvent *);
     void update(int, int, int, int);
     void update_grid(int, int, int, int);
-    void mousePressEvent(QMouseEvent *event);
     bool event(QEvent *event);
  
 private:

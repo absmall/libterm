@@ -1,86 +1,75 @@
+#include <math.h>
 #include <stdio.h>
+#include <QWidget>
 #include <qpiekeyboard.h>
 
-#define SWAP(a,b) {typeof(a) temp; temp=a; a=b; b=temp;}
-
-QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), left(parent), right(parent), testTimer(this)
+QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), parent(parent)
 {
-    testDelay = 0;
     sections = 0;
-    QObject::connect(&testTimer, SIGNAL(timeout()), this, SLOT(testTime()));
-    QObject::connect(&left, SIGNAL(selectionChanged(char *)), this, SLOT(leftSelectionChanged(char *)));
-    QObject::connect(&right, SIGNAL(selectionChanged(char *)), this, SLOT(rightSelectionChanged(char *)));
-    QObject::connect(&left, SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
-    QObject::connect(&right, SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
-    QObject::connect(&left, SIGNAL(released()), this, SLOT(released()));
-    QObject::connect(&right, SIGNAL(released()), this, SLOT(released()));
-
-    leftSelection = NULL;
-    rightSelection = NULL;
+    selections = NULL;
 }
 
 QPieKeyboard::~QPieKeyboard()
 {
 }
 
-void QPieKeyboard::testMode(int delay)
+void QPieKeyboard::initialize(int keycount, const char *keylist)
 {
-    testDelay = delay;
-}
-
-void QPieKeyboard::initialize(int sections, const char *keylist)
-{
+    int i;
     char *baselist;
     char *reorderlist;
+    if( keycount > 2 ) {
+        throw "More than 2 piekeys are not supported yet";
+    }
 
-    this->sections = sections;
+    // sections is key'th root of number of characters to show, rounded up to the nearest integer
+    sections = strlen(keylist);
+    sections = ceil(pow(sections-0.001, 1.0/keycount));
+    this->keycount = keycount;
+    keys = new QPieKey[keycount];
+    selections = new char *[keycount];
+    for( i = 0; i < keycount; i ++ ) {
+        QObject::connect(&keys[i], SIGNAL(selectionChanged(int i, char *)), this, SLOT(selectionChanged(int i, char *)));
+        QObject::connect(&keys[i], SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
+        QObject::connect(&keys[i], SIGNAL(released()), this, SLOT(released()));
+        keys[i].setParent(parent);
+    }
 
-    baselist = new char[sections*sections];
-    memset(baselist, 0, sections*sections);
-    memcpy(baselist, keylist, strlen(keylist));
-    reorderlist = reorder(sections, baselist);
+    // This can be generalized to any number of piekeys, but haven't done it yet
+    if( keycount == 1 ) {
+        keys[0].initialize(sections, keylist);
+    } else if( keycount == 2 ){
+        baselist = new char[sections*sections];
+        memset(baselist, 0, sections*sections);
+        memcpy(baselist, keylist, strlen(keylist));
+        reorderlist = reorder(sections, baselist);
 
-    left.initialize(sections, baselist);
-    right.initialize(sections, reorderlist);
+        keys[0].initialize(sections, baselist);
+        keys[1].initialize(sections, reorderlist);
 
-    delete baselist;
-    delete reorderlist;
+        delete baselist;
+        delete reorderlist;
+    }
 }
 
-void QPieKeyboard::activate(int x1, int y1, int x2, int y2)
+void QPieKeyboard::activate(int touchId, int x, int y)
 {
-    leftSelection = NULL;
-    rightSelection = NULL;
-    if( x1 < x2 ) {
-		SWAP(x1, x2);
-		SWAP(y1, y2);
-        swapped = true;
-    } else {
-        swapped = false;
+    int i;
+    for( i = 0; i < keycount; i ++ ) {
+        selections[i] = NULL;
     }
-    left.activate(x1, y1);
-    left.select( rightSelection );
-    if( !testDelay ) {
-        right.activate(x2, y2);
-        right.select( leftSelection );
-    } else {
-        testX = x2;
-        testY = y2;
-        testTimer.start(testDelay*1000);
+    keys[touchId].activate(x, y);
+    for( i = 0; i < keycount; i ++ ) {
+        // TODO - This needs to change to support > 2 piekeys
+        if( i != touchId ) {
+            keys[i].select( selections[!touchId] );
+        }
     }
 }
 
 void QPieKeyboard::moveTouch(int touchId, int x, int y)
 {
-    if( swapped ) {
-        touchId ^= 1;
-    }
-
-    if( touchId == 0 ) {
-        left.moveTouch(x - left.x(), y - left.y());
-    } else if( touchId == 1 ) {
-        right.moveTouch(x - right.x(), y - right.y());
-    }
+    keys[touchId].moveTouch(x-keys[touchId].x(), y-keys[touchId].y());
 }
 
 char *QPieKeyboard::reorder(int sections, char *keylist)
@@ -99,35 +88,30 @@ char *QPieKeyboard::reorder(int sections, char *keylist)
     return ret;
 }
 
-void QPieKeyboard::testTime()
-{
-    testTimer.stop();
-    right.activate(testX, testY);
-    right.select( leftSelection );
-}
-
 void QPieKeyboard::piekeypressed(char key)
 {
     // Just pass this along to the parent
     emit keypress(key);
 }
 
-void QPieKeyboard::leftSelectionChanged(char *selection)
+void QPieKeyboard::selectionChanged(int index, char *selection)
 {
-    leftSelection = selection;
-    right.select( leftSelection );
-}
+    int i;
+    selections[index] = selection;
 
-void QPieKeyboard::rightSelectionChanged(char *selection)
-{
-    rightSelection = selection;
-    left.select( rightSelection );
+    for( i = 0; i < keycount; i ++ ) {
+        if( i != index ) {
+            keys[i].select( selection );
+        }
+    }
 }
 
 void QPieKeyboard::release()
 {
-    left.hide();
-    right.hide();
+    int i;
+    for( i = 0; i < keycount; i ++ ) {
+        keys[i].hide();
+    }
 }
 
 void QPieKeyboard::released()
