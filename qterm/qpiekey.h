@@ -9,9 +9,9 @@ public:
     QPieKey(QWidget *parent = 0);
     ~QPieKey( );
 
-    void initialize(int sections, const char *charlist);
+    void initialize(int keys, int sections, const char *charlist);
     void activate(int x, int y);
-    void select(const char *selection);
+    void select(int key, const char *selection);
     void moveTouch(int x, int y);
  
 protected:
@@ -28,10 +28,12 @@ private:
     void size_ring();
     double angle;
     int sections;
+    int letters_per_section;
     int highlighted_section;
     char **charlist;
     char *highlighted_chars;
     QBitmap *bitmap;
-    std::string selection;
+    std::string *selections;
     int size;
+    int keys;
 };

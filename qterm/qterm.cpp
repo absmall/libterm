@@ -27,6 +27,8 @@
 
 #define ON_CURSOR(x,y) (cursor_on && cursor_x == x && cursor_y == y)
 
+#define PIEKEYS     1
+
 QTerm::QTerm(QWidget *parent) : QWidget(parent)
 {
     init();
@@ -45,7 +47,7 @@ void QTerm::init()
     cursor_on = 1;
     piekey_active = 0;
     piekeyboard = new QPieKeyboard(this);
-    piekeyboard->initialize( 2, "abcdefghijklmnopqrstuvwxyz|\n        " );
+    piekeyboard->initialize( PIEKEYS, "abcdef" );
 
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
@@ -481,14 +483,16 @@ bool QTerm::event(QEvent *event)
                 case QEvent::TouchBegin:
                     return true;
                 case QEvent::TouchUpdate:
-                    if( touchPoints.length() >= 2 ) {
+                    if( touchPoints.length() >= PIEKEYS ) {
                         if( !piekey_active ) {
                             piekey_active = 1;
-                            piekeyboard->activate(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
-                            piekeyboard->activate(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                            for(int i = 0; i < PIEKEYS; i ++ ) {
+                                piekeyboard->activate(i, touchPoints[i].pos().x(), touchPoints[i].pos().y());
+                            }
                         }
-                        piekeyboard->moveTouch(0, touchPoints[0].pos().x(), touchPoints[0].pos().y());
-                        piekeyboard->moveTouch(1, touchPoints[1].pos().x(), touchPoints[1].pos().y());
+                        for(int i = 0; i < PIEKEYS; i ++ ) {
+                            piekeyboard->moveTouch(i, touchPoints[i].pos().x(), touchPoints[i].pos().y());
+                        }
                     } else {
                         if( piekey_active ) {
                             piekeyboard->release();
@@ -497,7 +501,7 @@ bool QTerm::event(QEvent *event)
                     }
                     return true;
                 case QEvent::TouchEnd:
-                    //piekeyboard->release();
+                    piekeyboard->release();
                     piekey_active = 0;
                     return true;
                 default:

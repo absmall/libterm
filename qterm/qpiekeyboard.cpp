@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <QWidget>
 #include <qpiekeyboard.h>
+#include "term_logging.h"
 
 QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), parent(parent)
 {
@@ -25,6 +26,7 @@ void QPieKeyboard::initialize(int keycount, const char *keylist)
     // sections is key'th root of number of characters to show, rounded up to the nearest integer
     sections = strlen(keylist);
     sections = ceil(pow(sections-0.001, 1.0/keycount));
+    slog("Sections: %d for %s", sections, keylist);
     this->keycount = keycount;
     keys = new QPieKey[keycount];
     selections = new char *[keycount];
@@ -37,15 +39,15 @@ void QPieKeyboard::initialize(int keycount, const char *keylist)
 
     // This can be generalized to any number of piekeys, but haven't done it yet
     if( keycount == 1 ) {
-        keys[0].initialize(sections, keylist);
+        keys[0].initialize(keycount, sections, keylist);
     } else if( keycount == 2 ){
         baselist = new char[sections*sections];
         memset(baselist, 0, sections*sections);
         memcpy(baselist, keylist, strlen(keylist));
         reorderlist = reorder(sections, baselist);
 
-        keys[0].initialize(sections, baselist);
-        keys[1].initialize(sections, reorderlist);
+        keys[0].initialize(keycount, sections, baselist);
+        keys[1].initialize(keycount, sections, reorderlist);
 
         delete baselist;
         delete reorderlist;
@@ -62,7 +64,7 @@ void QPieKeyboard::activate(int touchId, int x, int y)
     for( i = 0; i < keycount; i ++ ) {
         // TODO - This needs to change to support > 2 piekeys
         if( i != touchId ) {
-            keys[i].select( selections[!touchId] );
+            keys[i].select( touchId, selections[!touchId] );
         }
     }
 }
@@ -101,7 +103,7 @@ void QPieKeyboard::selectionChanged(int index, char *selection)
 
     for( i = 0; i < keycount; i ++ ) {
         if( i != index ) {
-            keys[i].select( selection );
+            keys[i].select( index, selection );
         }
     }
 }

@@ -4,12 +4,17 @@
 #include <QPaintEvent>
 #include <math.h>
 #include <stdio.h>
+#include "term_logging.h"
+
+using namespace std;
 
 QPieKey::QPieKey(QWidget *parent) : QWidget(parent)
 {
     sections = 0;
     size = 0;
+    keys = 0;
     charlist = NULL;
+    selections = NULL;
 
     hide();
 }
@@ -21,7 +26,7 @@ QPieKey::~QPieKey()
 void QPieKey::paintEvent(QPaintEvent *event)
 {
     int inSelection = 0, selectedChar;
-    int i, j;
+    int i, j,k;
     double charangle;
     QPainter painter(this);
     QChar character;
@@ -36,15 +41,23 @@ void QPieKey::paintEvent(QPaintEvent *event)
         }
         painter.setBrush(QColor(0, 0, 0));
         for( i = 0; i < sections; i ++ ) {
-            for( j = 0; j < sections; j ++ ) {
+            for( j = 0; j < letters_per_section; j ++ ) {
                 // The angle of the section extends from angle*(i-0.5) to
                 // angle*(i+0.5). We want to center 'sections' characters
                 // with equal angular spacing in this area. Add a full width
                 // on each side to separate a section from its neighbour
                 character = QChar(charlist[i][j]);
                 charangle = angle*((j+1.0)/(sections+1.0)+i-0.5);
-                selectedChar = (highlighted_section == -1 || highlighted_section == i)
-                    && (strchr( selection.c_str(), character.toLatin1() ) != NULL);
+                selectedChar = (highlighted_section == -1 || highlighted_section == i);
+                if( selectedChar ) {
+                    for( k = 0; k < keys; k ++ ) {
+                        if( k == i ) continue;
+                        if( strchr( selections[k].c_str(), character.toLatin1() ) == NULL ) {
+                            selectedChar = false;
+                            break;
+                        }
+                    }
+                }
                 if( selectedChar != inSelection ) {
                     QFont font;
                     inSelection = selectedChar;
@@ -94,10 +107,16 @@ void QPieKey::moveTouch(int x, int y)
     if( section != highlighted_section ) {
         if( section == -1 ) {
             // We're losing our selection, send the signal now
-            for(int i = 0; i < sections; i ++ ) {
+            for(int i = 0; i < letters_per_section; i ++ ) {
+                int j;
                 size_t s;
-                if( (s = selection.find( charlist[highlighted_section][i] )) != std::string::npos ) {
-                    emit(keypress(selection[s]));
+                for( j = 0; j < keys; j ++ ) {
+                    if( (s = selections[j].find( charlist[highlighted_section][i] )) == string::npos ) {
+                        break;
+                    }
+                }
+                if( j == keys ) {
+                    emit(keypress(charlist[highlighted_section][i]));
                 }
             }
             emit selectionChanged(NULL);
@@ -116,9 +135,10 @@ void QPieKey::mouseReleaseEvent(QMouseEvent *event)
     emit released();
 }
  
-void QPieKey::initialize(int sections, const char *charlist)
+void QPieKey::initialize(int keys, int sections, const char *charlist)
 {
     int i;
+    this->keys = keys;
     if( this->charlist != NULL ) {
         for(i = 0; i < this->sections; i ++ ) {
             delete this->charlist[i];
@@ -126,11 +146,16 @@ void QPieKey::initialize(int sections, const char *charlist)
         delete [] this->charlist;
     }
 
+    if( this->selections != NULL ) {
+        delete [] this->selections;
+    }
+    this->selections = new string[keys];
+    this->letters_per_section = strlen(charlist) / sections;
     this->sections = sections;
-    this->charlist = new char *[sections];
+    this->charlist = new char *[letters_per_section];
     for( i = 0; i < sections; i ++ ) {
-        this->charlist[i] = new char[sections];
-        memcpy(this->charlist[i], charlist + i*sections, sections);
+        this->charlist[i] = new char[letters_per_section];
+        memcpy(this->charlist[i], charlist + i*sections, letters_per_section);
     }
 
     angle = 2*M_PI / sections;
@@ -147,13 +172,9 @@ void QPieKey::activate(int x, int y)
     grabMouse();
 }
 
-void QPieKey::select(const char *selection)
+void QPieKey::select(int key, const char *selection)
 {
-    if( selection != NULL ) {
-        this->selection = selection;
-    }  else {
-        this->selection = "";
-    }
+    this->selections[key] = selection ? selection : "";
     update(0,0, size*2, size*2);
 }
 
