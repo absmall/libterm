@@ -42,12 +42,16 @@ QTerm::QTerm(QWidget *parent, term_t terminal) : QWidget(parent)
 
 void QTerm::init()
 {
+    std::vector<Qt::Key> keys;
     char_width = 0;
     char_height = 0;
     cursor_on = 1;
     piekey_active = 0;
+    keys.push_back(Qt::Key_A);
+    keys.push_back(Qt::Key_B);
+    keys.push_back(Qt::Key_C);
     piekeyboard = new QPieKeyboard(this);
-    piekeyboard->initialize( PIEKEYS, "abcdef" );
+    piekeyboard->initialize( PIEKEYS, keys );
 
     term_set_user_data( terminal, this );
     term_register_update( terminal, term_update );
@@ -483,7 +487,7 @@ bool QTerm::event(QEvent *event)
                 case QEvent::TouchBegin:
                     return true;
                 case QEvent::TouchUpdate:
-                    if( touchPoints.length() >= PIEKEYS ) {
+                    if( touchPoints.length() == PIEKEYS ) {
                         if( !piekey_active ) {
                             piekey_active = 1;
                             for(int i = 0; i < PIEKEYS; i ++ ) {

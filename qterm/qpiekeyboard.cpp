@@ -4,6 +4,8 @@
 #include <qpiekeyboard.h>
 #include "term_logging.h"
 
+using namespace std;
+
 QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), parent(parent)
 {
     sections = 0;
@@ -14,22 +16,21 @@ QPieKeyboard::~QPieKeyboard()
 {
 }
 
-void QPieKeyboard::initialize(int keycount, const char *keylist)
+void QPieKeyboard::initialize(int keycount, const std::vector<Qt::Key> &keylist)
 {
     int i;
-    char *baselist;
-    char *reorderlist;
+    vector<Qt::Key> baselist;
+    vector<Qt::Key> reorderlist;
     if( keycount > 2 ) {
         throw "More than 2 piekeys are not supported yet";
     }
 
     // sections is key'th root of number of characters to show, rounded up to the nearest integer
-    sections = strlen(keylist);
+    sections = keylist.size();
     sections = ceil(pow(sections-0.001, 1.0/keycount));
-    slog("Sections: %d for %s", sections, keylist);
     this->keycount = keycount;
     keys = new QPieKey[keycount];
-    selections = new char *[keycount];
+    selections = new const vector<Qt::Key> *[keycount];
     for( i = 0; i < keycount; i ++ ) {
         QObject::connect(&keys[i], SIGNAL(selectionChanged(int i, char *)), this, SLOT(selectionChanged(int i, char *)));
         QObject::connect(&keys[i], SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
@@ -39,34 +40,23 @@ void QPieKeyboard::initialize(int keycount, const char *keylist)
 
     // This can be generalized to any number of piekeys, but haven't done it yet
     if( keycount == 1 ) {
-        keys[0].initialize(keycount, sections, keylist);
+        keys[0].initialize(sections, keylist);
     } else if( keycount == 2 ){
-        baselist = new char[sections*sections];
-        memset(baselist, 0, sections*sections);
-        memcpy(baselist, keylist, strlen(keylist));
+        baselist = vector<Qt::Key>(keylist.size());
         reorderlist = reorder(sections, baselist);
 
-        keys[0].initialize(keycount, sections, baselist);
-        keys[1].initialize(keycount, sections, reorderlist);
-
-        delete baselist;
-        delete reorderlist;
+        keys[0].initialize(sections, baselist);
+        keys[1].initialize(sections, reorderlist);
     }
 }
 
 void QPieKeyboard::activate(int touchId, int x, int y)
 {
-    int i;
+    int i, j;
     for( i = 0; i < keycount; i ++ ) {
         selections[i] = NULL;
     }
     keys[touchId].activate(x, y);
-    for( i = 0; i < keycount; i ++ ) {
-        // TODO - This needs to change to support > 2 piekeys
-        if( i != touchId ) {
-            keys[i].select( touchId, selections[!touchId] );
-        }
-    }
 }
 
 void QPieKeyboard::moveTouch(int touchId, int x, int y)
@@ -74,12 +64,12 @@ void QPieKeyboard::moveTouch(int touchId, int x, int y)
     keys[touchId].moveTouch(x-keys[touchId].x(), y-keys[touchId].y());
 }
 
-char *QPieKeyboard::reorder(int sections, char *keylist)
+vector<Qt::Key> QPieKeyboard::reorder(int sections, vector<Qt::Key> keylist)
 {
     int i, j;
-    char *ret;
+    vector<Qt::Key> ret;
 
-    ret = new char[sections*sections];
+    ret = vector<Qt::Key>(keylist.size());
 
     for(i = 0; i < sections; i ++ ) {
         for( j = 0; j < sections; j ++ ) {
@@ -90,15 +80,19 @@ char *QPieKeyboard::reorder(int sections, char *keylist)
     return ret;
 }
 
-void QPieKeyboard::piekeypressed(char key)
+void QPieKeyboard::piekeypressed(Qt::Key key)
 {
     // Just pass this along to the parent
     emit keypress(key);
 }
 
-void QPieKeyboard::selectionChanged(int index, char *selection)
+void QPieKeyboard::selectionChanged(const vector<Qt::Key> *selection)
 {
-    int i;
+    int i, index;
+    QObject *s = sender();
+    for(index = 0; index < keycount; index ++ ) {
+        if( &keys[index] == s ) break;
+    }
     selections[index] = selection;
 
     for( i = 0; i < keycount; i ++ ) {

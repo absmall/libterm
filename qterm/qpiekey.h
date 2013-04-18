@@ -1,6 +1,8 @@
 #include <QWidget>
 #include <QBitmap>
 #include <string>
+#include <vector>
+#include <map>
 
 class QPieKey : public QWidget
 {
@@ -9,9 +11,9 @@ public:
     QPieKey(QWidget *parent = 0);
     ~QPieKey( );
 
-    void initialize(int keys, int sections, const char *charlist);
+    void initialize(int sections, const std::vector<Qt::Key> &keylist);
     void activate(int x, int y);
-    void select(int key, const char *selection);
+    void select(int key, const std::vector<Qt::Key> *selection);
     void moveTouch(int x, int y);
  
 protected:
@@ -20,20 +22,20 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
 
 signals:
-    void keypress(char key);
-    void selectionChanged(char *keys);
+    void keypress(Qt::Key key);
+    void selectionChanged(const std::vector<Qt::Key> *keys);
     void released();
 
 private:
     void size_ring();
+    QChar toChar(Qt::Key key);
     double angle;
     int sections;
     int letters_per_section;
     int highlighted_section;
-    char **charlist;
-    char *highlighted_chars;
+    std::vector<std::vector<Qt::Key> > keylist;
     QBitmap *bitmap;
-    std::string *selections;
+    std::map<int, const std::vector<Qt::Key> *> selections;
     int size;
     int keys;
 };

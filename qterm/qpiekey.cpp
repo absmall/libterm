@@ -12,9 +12,6 @@ QPieKey::QPieKey(QWidget *parent) : QWidget(parent)
 {
     sections = 0;
     size = 0;
-    keys = 0;
-    charlist = NULL;
-    selections = NULL;
 
     hide();
 }
@@ -23,13 +20,20 @@ QPieKey::~QPieKey()
 {
 }
 
+QChar QPieKey::toChar(Qt::Key key)
+{
+    if( key >= Qt::Key_A && key <= Qt::Key_Z ) {
+        return key - Qt::Key_A + 'a';
+    }
+}
+
 void QPieKey::paintEvent(QPaintEvent *event)
 {
     int inSelection = 0, selectedChar;
     int i, j,k;
     double charangle;
     QPainter painter(this);
-    QChar character;
+    Qt::Key character;
 
     painter.setBrush(QColor(128, 128, 128));
     painter.drawRect(event->rect());
@@ -46,13 +50,13 @@ void QPieKey::paintEvent(QPaintEvent *event)
                 // angle*(i+0.5). We want to center 'sections' characters
                 // with equal angular spacing in this area. Add a full width
                 // on each side to separate a section from its neighbour
-                character = QChar(charlist[i][j]);
+                character = keylist[i][j];
                 charangle = angle*((j+1.0)/(sections+1.0)+i-0.5);
                 selectedChar = (highlighted_section == -1 || highlighted_section == i);
                 if( selectedChar ) {
-                    for( k = 0; k < keys; k ++ ) {
-                        if( k == i ) continue;
-                        if( strchr( selections[k].c_str(), character.toLatin1() ) == NULL ) {
+                    for(map<int, const vector<Qt::Key> *>::const_iterator k = selections.begin(); k != selections.end(); k ++ ) {
+                        if( k->second == NULL ) continue;
+                        if( std::find(k->second->begin(), k->second->end(), selectedChar) == k->second->end() ) {
                             selectedChar = false;
                             break;
                         }
@@ -73,7 +77,7 @@ void QPieKey::paintEvent(QPaintEvent *event)
                     painter.setFont(font);
                 }
 
-                painter.drawText(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, character);
+                painter.drawText(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, toChar(character));
             }
         }
         for( i = 0; i < sections; i ++ ) {
@@ -108,21 +112,20 @@ void QPieKey::moveTouch(int x, int y)
         if( section == -1 ) {
             // We're losing our selection, send the signal now
             for(int i = 0; i < letters_per_section; i ++ ) {
-                int j;
-                size_t s;
-                for( j = 0; j < keys; j ++ ) {
-                    if( (s = selections[j].find( charlist[highlighted_section][i] )) == string::npos ) {
+                std::map<int, const std::vector<Qt::Key> *>::const_iterator j;
+                for(j = selections.begin(); j != selections.end(); j ++ ) {
+                    if( std::find(j->second->begin(), j->second->end(), keylist[highlighted_section][i]) == j->second->end() ) {
                         break;
                     }
                 }
-                if( j == keys ) {
-                    emit(keypress(charlist[highlighted_section][i]));
+                if( j == selections.end() ) {
+                    emit(keypress(keylist[highlighted_section][i]));
                 }
             }
             emit selectionChanged(NULL);
         } else {
             // We're gaining a selection, notify our parent
-            emit selectionChanged(charlist[ section ]);
+            emit selectionChanged(&keylist[ section ]);
         }
         highlighted_section = section;
         update(0,0, size*2, size*2);
@@ -135,27 +138,19 @@ void QPieKey::mouseReleaseEvent(QMouseEvent *event)
     emit released();
 }
  
-void QPieKey::initialize(int keys, int sections, const char *charlist)
+void QPieKey::initialize(int sections, const vector<Qt::Key> &keylist)
 {
-    int i;
-    this->keys = keys;
-    if( this->charlist != NULL ) {
-        for(i = 0; i < this->sections; i ++ ) {
-            delete this->charlist[i];
-        }
-        delete [] this->charlist;
-    }
+    int i, j;
 
-    if( this->selections != NULL ) {
-        delete [] this->selections;
-    }
-    this->selections = new string[keys];
-    this->letters_per_section = strlen(charlist) / sections;
+    this->selections.clear();
+    letters_per_section = keylist.size() / sections;
     this->sections = sections;
-    this->charlist = new char *[letters_per_section];
+    this->keylist.clear();
     for( i = 0; i < sections; i ++ ) {
-        this->charlist[i] = new char[letters_per_section];
-        memcpy(this->charlist[i], charlist + i*sections, letters_per_section);
+        this->keylist.push_back(vector<Qt::Key>());
+        for( j = 0; j < letters_per_section; j ++ ) {
+            this->keylist.back().push_back(keylist[i*letters_per_section+j]);
+        }
     }
 
     angle = 2*M_PI / sections;
@@ -167,14 +162,15 @@ void QPieKey::activate(int x, int y)
 {
     // Center the widget on the mouse coordinates
     highlighted_section = -1;
+    selections.clear();
     setGeometry(x - width() / 2, y - height() / 2, width(), height());
     show();
     grabMouse();
 }
 
-void QPieKey::select(int key, const char *selection)
+void QPieKey::select(int key, const vector<Qt::Key> *selection)
 {
-    this->selections[key] = selection ? selection : "";
+    this->selections[key] = selection;
     update(0,0, size*2, size*2);
 }
 

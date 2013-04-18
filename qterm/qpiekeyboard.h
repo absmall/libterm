@@ -9,24 +9,24 @@ class QPieKeyboard : public QObject
 public:
     QPieKeyboard(QWidget *parent = 0);
     ~QPieKeyboard( );
-    void initialize(int keys, const char *keylist);
+    void initialize(int keys, const std::vector<Qt::Key> &keylist);
     void activate(int touchId, int x1, int y1);
     void moveTouch(int touchId, int x, int y);
     void release();
  
 signals:
-    void keypress(char key);
+    void keypress(Qt::Key key);
 
 private:
-    char *reorder(int sections, char *keylist);
+    std::vector<Qt::Key> reorder(int sections, std::vector<Qt::Key> keylist);
     int keycount;
     int sections;
     QPieKey *keys;
-    char **selections;
+    const std::vector<Qt::Key> **selections;
     QWidget *parent;
 
 private slots:
-    void piekeypressed(char key);
-    void selectionChanged(int index, char *selection);
+    void piekeypressed(Qt::Key key);
+    void selectionChanged(const std::vector<Qt::Key> *selection);
     void released();
 };
