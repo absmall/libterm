@@ -47,9 +47,11 @@ void QTerm::init()
     char_height = 0;
     cursor_on = 1;
     piekey_active = 0;
-    keys.push_back(Qt::Key_A);
-    keys.push_back(Qt::Key_B);
-    keys.push_back(Qt::Key_C);
+    keys.push_back(Qt::Key_Tab);
+    keys.push_back(Qt::Key_Left);
+    keys.push_back(Qt::Key_Up);
+    keys.push_back(Qt::Key_Right);
+    keys.push_back(Qt::Key_Down);
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( PIEKEYS, keys );
 
@@ -164,6 +166,9 @@ void QTerm::keypress(Qt::Key key)
         case Qt::Key_CapsLock:
         case Qt::Key_Shift:
             break;
+        case Qt::Key_Tab:
+            term_send_data( terminal, "\t", 1 );
+            break;
         case Qt::Key_Return:
             term_send_data( terminal, "\n", 1 );
             break;
@@ -186,7 +191,6 @@ void QTerm::keypress(Qt::Key key)
             // Treat as ascii and hope for the best. Works in a lot of cases
             {
                 char c = (char)key;
-                slog("See char %c",c);
                 term_send_data( terminal, &c, 1 );
             }
             break;
