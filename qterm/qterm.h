@@ -54,7 +54,7 @@ private slots:
     void terminal_data();
     void terminate();
     void blink_cursor();
-    void piekeypress(char key);
+    void keypress(Qt::Key key);
     void resizeRequest(QSize size);
 };
 

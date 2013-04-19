@@ -100,7 +100,7 @@ void QTerm::init()
     char_height = metrics.lineSpacing();
     char_descent = metrics.descent();
 
-    QObject::connect(piekeyboard, SIGNAL(keypress(char)), this, SLOT(piekeypress(char)));
+    QObject::connect(piekeyboard, SIGNAL(keypress(Qt::Key)), this, SLOT(keypress(Qt::Key)));
     cursor_timer->start(BLINK_SPEED);
     setAttribute(Qt::WA_AcceptTouchEvents);
 }
@@ -157,9 +157,40 @@ void QTerm::term_update_cursor(term_t handle, int old_x, int old_y, int new_x, i
     term->update_grid( new_x, new_y, 1, 1);
 }
 
-void QTerm::piekeypress(char key)
+void QTerm::keypress(Qt::Key key)
 {
-    term_send_data( terminal, &key, 1 );
+    // TODO - Merge this with keyPressEvent
+    switch(key) {
+        case Qt::Key_CapsLock:
+        case Qt::Key_Shift:
+            break;
+        case Qt::Key_Return:
+            term_send_data( terminal, "\n", 1 );
+            break;
+        case Qt::Key_Backspace:
+            term_send_data( terminal, "\b", 1 );
+            break;
+        case Qt::Key_Up:
+            term_send_special( terminal, TERM_KEY_UP );
+            break;
+        case Qt::Key_Down:
+            term_send_special( terminal, TERM_KEY_DOWN );
+            break;
+        case Qt::Key_Right:
+            term_send_special( terminal, TERM_KEY_RIGHT );
+            break;
+        case Qt::Key_Left:
+            term_send_special( terminal, TERM_KEY_LEFT );
+            break;
+        default:
+            // Treat as ascii and hope for the best. Works in a lot of cases
+            {
+                char c = (char)key;
+                slog("See char %c",c);
+                term_send_data( terminal, &c, 1 );
+            }
+            break;
+    }
 }
 
 void QTerm::resizeRequest(QSize size)

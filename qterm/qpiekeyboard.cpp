@@ -32,8 +32,8 @@ void QPieKeyboard::initialize(int keycount, const std::vector<Qt::Key> &keylist)
     keys = new QPieKey[keycount];
     selections = new const vector<Qt::Key> *[keycount];
     for( i = 0; i < keycount; i ++ ) {
-        QObject::connect(&keys[i], SIGNAL(selectionChanged(int i, char *)), this, SLOT(selectionChanged(int i, char *)));
-        QObject::connect(&keys[i], SIGNAL(keypress(char)), this, SLOT(piekeypressed(char)));
+        QObject::connect(&keys[i], SIGNAL(selectionChanged(const std::vector<Qt::Key> *)), this, SLOT(selectionChanged(const std::vector<Qt::Key> *)));
+        QObject::connect(&keys[i], SIGNAL(keypress(Qt::Key)), this, SLOT(piekeypressed(Qt::Key)));
         QObject::connect(&keys[i], SIGNAL(released()), this, SLOT(released()));
         keys[i].setParent(parent);
     }
