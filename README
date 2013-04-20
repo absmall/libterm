@@ -1,18 +1,26 @@
-This package includes three components:
+This package includes five components:
 1) A shared library for terminal functionality (libterm.so)
 2) A curses-based terminal (cterm)
 3) A qt-based terminal (qterm)
+4) A cascades-based terminal (cascades is a BB10 gui framework, this is incomplete)
+5) A shared library that an application can link to in order to embed a terminal emulator.
 
 Building for linux:
 -------------------
 1) mkdir obj
 2) cd obj
-3) In the libterm directory, run 'cmake ..; make'. This will build libterm.so, cterm and qterm.
+3) Run 'cmake ..; make'. This will build libterm.so, cterm and qterm.
 
 Building for playbook:
 ----------------------
 1) mkdir obj.playbook
 2) cd obj.playbook
 3) set the QTDIR environment variable to be the location in which qmake is installed (the qmake executable should be present in $QTDIR/bin/qmake)
-4) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=../ntoarm.cmake ..; make'. This will build libterm.so, qterm and qterm.bar
-Note: cterm is not supported on playbook
+4) In the libterm directory, run 'cmake -DCMAKE_TOOLCHAIN_FILE=../ntoarm.cmake ..; make'. This will build libterm.so, qterm, libqterm and qterm.bar
+
+Linking to libqterm:
+--------------------
+To make use of libqterm, rename the main function from "main" to "_main" and
+link to libqterm. That's all! This will make a command-line application
+automatically show a Qt window that serves as a terminal emulator for the
+application.
