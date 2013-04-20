@@ -80,22 +80,40 @@ void QPieKey::paintEvent(QPaintEvent *event)
 
                 switch( character ) {
                     case Qt::Key_Tab:
-                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/tab.png"));
+                        {
+                            QPixmap img("app/native/tab.png");
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                        }
                         break;
                     case Qt::Key_Escape:
-                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/escape.png"));
+                        {
+                            QPixmap img("app/native/escape.png");
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                        }
                         break;
                     case Qt::Key_Up:
-                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/up.png"));
+                        {
+                            QPixmap img("app/native/up.png");
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                        }
                         break;
                     case Qt::Key_Down:
-                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/down.png"));
+                        {
+                            QPixmap img("app/native/down.png");
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                        }
                         break;
                     case Qt::Key_Right:
-                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/right.png"));
+                        {
+                            QPixmap img("app/native/right.png");
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                        }
                         break;
                     case Qt::Key_Left:
-                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/left.png"));
+                        {
+                            QPixmap img("app/native/left.png");
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                        }
                         break;
                     default:
                         painter.drawText(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, toChar(character));
