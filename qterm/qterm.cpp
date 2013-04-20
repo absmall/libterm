@@ -47,12 +47,14 @@ void QTerm::init()
     char_height = 0;
     cursor_on = 1;
     piekey_active = 0;
-    keys.push_back(Qt::Key_Tab);
-    keys.push_back(Qt::Key_Left);
     keys.push_back(Qt::Key_Up);
-    keys.push_back(Qt::Key_Right);
-    keys.push_back(Qt::Key_Down);
     keys.push_back(Qt::Key_Escape);
+    keys.push_back(Qt::Key_Right);
+    keys.push_back(Qt::Key_AsciiTilde);
+    keys.push_back(Qt::Key_Down);
+    keys.push_back(Qt::Key_Bar);
+    keys.push_back(Qt::Key_Left);
+    keys.push_back(Qt::Key_Tab);
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( PIEKEYS, keys );
 
