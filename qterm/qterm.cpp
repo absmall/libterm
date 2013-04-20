@@ -546,9 +546,13 @@ bool QTerm::event(QEvent *event)
                     }
                     return true;
                 case QEvent::TouchEnd:
-                    piekeyboard->release();
-                    piekey_active = 0;
-                    return true;
+                    if( piekey_active ) {
+                        piekeyboard->release();
+                        piekey_active = 0;
+                        return true;
+                    }
+                    // Workaround for qt bug - it doesn't do the refresh properly when the piekey is released in some cases
+                    QWidget::update(0, 0, width(), height());
                 default:
                     break;
             }
