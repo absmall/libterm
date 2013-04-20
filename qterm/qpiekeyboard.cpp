@@ -4,6 +4,13 @@
 #include <qpiekeyboard.h>
 #include "term_logging.h"
 
+#include "tab.xpm"
+#include "escape.xpm"
+#include "up_arrow.xpm"
+#include "down_arrow.xpm"
+#include "left_arrow.xpm"
+#include "right_arrow.xpm"
+
 using namespace std;
 
 QPieKeyboard::QPieKeyboard(QWidget *parent) : QObject(NULL), parent(parent)
@@ -29,22 +36,22 @@ void QPieKeyboard::initialize(int keycount, const std::vector<Qt::Key> &keylist)
     for( std::vector<Qt::Key>::const_iterator i = keylist.begin(); i != keylist.end(); i ++ ) {
         switch( *i ) {
             case Qt::Key_Tab:
-                pixmapCache[*i] = QPixmap("app/native/tab.png");
+                pixmapCache[*i] = QPixmap(tab);
                 break;
             case Qt::Key_Escape:
-                pixmapCache[*i] = QPixmap("app/native/escape.png");
+                pixmapCache[*i] = QPixmap(escape);
                 break;
             case Qt::Key_Up:
-                pixmapCache[*i] = QPixmap("app/native/up.png");
+                pixmapCache[*i] = QPixmap(up_arrow);
                 break;
             case Qt::Key_Down:
-                pixmapCache[*i] = QPixmap("app/native/down.png");
+                pixmapCache[*i] = QPixmap(down_arrow);
                 break;
             case Qt::Key_Right:
-                pixmapCache[*i] = QPixmap("app/native/right.png");
+                pixmapCache[*i] = QPixmap(right_arrow);
                 break;
             case Qt::Key_Left:
-                pixmapCache[*i] = QPixmap("app/native/left.png");
+                pixmapCache[*i] = QPixmap(left_arrow);
                 break;
         }
     }
