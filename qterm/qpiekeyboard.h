@@ -1,6 +1,8 @@
 #include <vector>
 #include <QWidget>
 #include <QTimer>
+#include <QMap>
+#include <QPixmap>
 #include <qpiekey.h>
 
 class QPieKeyboard : public QObject
@@ -13,6 +15,7 @@ public:
     void activate(int touchId, int x1, int y1);
     void moveTouch(int touchId, int x, int y);
     void release();
+    const QPixmap &cacheImage(Qt::Key key);
  
 signals:
     void keypress(Qt::Key key);
@@ -24,6 +27,7 @@ private:
     QPieKey *keys;
     const std::vector<Qt::Key> **selections;
     QWidget *parent;
+    QMap<Qt::Key, QPixmap> pixmapCache;
 
 private slots:
     void piekeypressed(Qt::Key key);

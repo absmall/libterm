@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "qpiekeyboard.h"
 #include "term_logging.h"
 
 using namespace std;
@@ -80,38 +81,13 @@ void QPieKey::paintEvent(QPaintEvent *event)
 
                 switch( character ) {
                     case Qt::Key_Tab:
-                        {
-                            QPixmap img("app/native/tab.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
-                        }
-                        break;
                     case Qt::Key_Escape:
-                        {
-                            QPixmap img("app/native/escape.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
-                        }
-                        break;
                     case Qt::Key_Up:
-                        {
-                            QPixmap img("app/native/up.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
-                        }
-                        break;
                     case Qt::Key_Down:
-                        {
-                            QPixmap img("app/native/down.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
-                        }
-                        break;
                     case Qt::Key_Right:
-                        {
-                            QPixmap img("app/native/right.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
-                        }
-                        break;
                     case Qt::Key_Left:
                         {
-                            QPixmap img("app/native/left.png");
+                            const QPixmap &img = keyboard->cacheImage(character);
                             painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
@@ -179,10 +155,11 @@ void QPieKey::mouseReleaseEvent(QMouseEvent *event)
     emit released();
 }
  
-void QPieKey::initialize(int sections, const vector<Qt::Key> &keylist)
+void QPieKey::initialize(QPieKeyboard *keyboard, int sections, const vector<Qt::Key> &keylist)
 {
     int i, j;
 
+    this->keyboard = keyboard;
     this->selections.clear();
     letters_per_section = keylist.size() / sections;
     this->sections = sections;

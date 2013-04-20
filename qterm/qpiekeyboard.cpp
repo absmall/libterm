@@ -25,6 +25,30 @@ void QPieKeyboard::initialize(int keycount, const std::vector<Qt::Key> &keylist)
         throw "More than 2 piekeys are not supported yet";
     }
 
+    // Load any pixmaps in the string to cache
+    for( std::vector<Qt::Key>::const_iterator i = keylist.begin(); i != keylist.end(); i ++ ) {
+        switch( *i ) {
+            case Qt::Key_Tab:
+                pixmapCache[*i] = QPixmap("app/native/tab.png");
+                break;
+            case Qt::Key_Escape:
+                pixmapCache[*i] = QPixmap("app/native/escape.png");
+                break;
+            case Qt::Key_Up:
+                pixmapCache[*i] = QPixmap("app/native/up.png");
+                break;
+            case Qt::Key_Down:
+                pixmapCache[*i] = QPixmap("app/native/down.png");
+                break;
+            case Qt::Key_Right:
+                pixmapCache[*i] = QPixmap("app/native/right.png");
+                break;
+            case Qt::Key_Left:
+                pixmapCache[*i] = QPixmap("app/native/left.png");
+                break;
+        }
+    }
+
     // sections is key'th root of number of characters to show, rounded up to the nearest integer
     sections = keylist.size();
     sections = ceil(pow(sections-0.001, 1.0/keycount));
@@ -40,13 +64,13 @@ void QPieKeyboard::initialize(int keycount, const std::vector<Qt::Key> &keylist)
 
     // This can be generalized to any number of piekeys, but haven't done it yet
     if( keycount == 1 ) {
-        keys[0].initialize(sections, keylist);
+        keys[0].initialize(this, sections, keylist);
     } else if( keycount == 2 ){
         baselist = vector<Qt::Key>(keylist.size());
         reorderlist = reorder(sections, baselist);
 
-        keys[0].initialize(sections, baselist);
-        keys[1].initialize(sections, reorderlist);
+        keys[0].initialize(this, sections, baselist);
+        keys[1].initialize(this, sections, reorderlist);
     }
 }
 
@@ -108,6 +132,11 @@ void QPieKeyboard::release()
     for( i = 0; i < keycount; i ++ ) {
         keys[i].hide();
     }
+}
+
+const QPixmap &QPieKeyboard::cacheImage(Qt::Key key)
+{
+    return pixmapCache[key];
 }
 
 void QPieKeyboard::released()
