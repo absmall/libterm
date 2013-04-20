@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+<style type="text/css"><![CDATA[ *{fill:none;stroke:#000;stroke-width:8} line{stroke-width:0.1764} ]]></style>
+<defs><clipPath id="c"><path d="M6,112 150,150 110,3H300V300H6z"/></clipPath></defs>
+<line x1="0" y1="300" x2="0" y2="276"/>
+<line x1="300" y1="300" x2="300" y2="276"/>
+<line x1="0" y1="300" x2="24" y2="300"/>
+<line x1="300" y1="300" x2="276" y2="300"/>
+<line x1="0" y1="0" x2="0" y2="24"/>
+<line x1="0" y1="0" x2="24" y2="0"/>
+<line x1="300" y1="0" x2="276" y2="0"/>
+<line x1="300" y1="0" x2="300" y2="24"/>
+<path d="m 52,49 90,21-72,70zM107,106l102,106"/>
+<circle clip-path="url(#c)" cx="150" cy="150" r="116"/>
+</svg>
