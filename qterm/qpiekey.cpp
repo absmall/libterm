@@ -52,7 +52,7 @@ void QPieKey::paintEvent(QPaintEvent *event)
                 // with equal angular spacing in this area. Add a full width
                 // on each side to separate a section from its neighbour
                 character = keylist[i][j];
-                charangle = angle*((j+1.0)/(sections+1.0)+i-0.5);
+                charangle = angle*(j/letters_per_section + i);
                 selectedChar = (highlighted_section == -1 || highlighted_section == i);
                 if( selectedChar ) {
                     for(map<int, const vector<Qt::Key> *>::const_iterator k = selections.begin(); k != selections.end(); k ++ ) {
@@ -82,37 +82,37 @@ void QPieKey::paintEvent(QPaintEvent *event)
                     case Qt::Key_Tab:
                         {
                             QPixmap img("app/native/tab.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
                     case Qt::Key_Escape:
                         {
                             QPixmap img("app/native/escape.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
                     case Qt::Key_Up:
                         {
                             QPixmap img("app/native/up.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
                     case Qt::Key_Down:
                         {
                             QPixmap img("app/native/down.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
                     case Qt::Key_Right:
                         {
                             QPixmap img("app/native/right.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
                     case Qt::Key_Left:
                         {
                             QPixmap img("app/native/left.png");
-                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4+img.height()/2, img);
+                            painter.drawPixmap(size+size*sin(charangle)*3/4-img.width()/2, size-size*cos(charangle)*3/4-img.height()/2, img);
                         }
                         break;
                     default:
