@@ -52,6 +52,7 @@ void QTerm::init()
     keys.push_back(Qt::Key_Up);
     keys.push_back(Qt::Key_Right);
     keys.push_back(Qt::Key_Down);
+    keys.push_back(Qt::Key_Escape);
     piekeyboard = new QPieKeyboard(this);
     piekeyboard->initialize( PIEKEYS, keys );
 
@@ -489,6 +490,9 @@ void QTerm::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_Backspace:
             term_send_data( terminal, "\b", 1 );
+            break;
+        case Qt::Key_Escape:
+            term_send_data( terminal, "\x1B", 1 );
             break;
         case Qt::Key_Up:
             term_send_special( terminal, TERM_KEY_UP );

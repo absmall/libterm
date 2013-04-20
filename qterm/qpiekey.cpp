@@ -4,6 +4,7 @@
 #include <QPaintEvent>
 #include <math.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "term_logging.h"
 
 using namespace std;
@@ -77,7 +78,29 @@ void QPieKey::paintEvent(QPaintEvent *event)
                     painter.setFont(font);
                 }
 
-                painter.drawText(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, toChar(character));
+                switch( character ) {
+                    case Qt::Key_Tab:
+                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/tab.png"));
+                        break;
+                    case Qt::Key_Escape:
+                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/escape.png"));
+                        break;
+                    case Qt::Key_Up:
+                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/up.png"));
+                        break;
+                    case Qt::Key_Down:
+                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/down.png"));
+                        break;
+                    case Qt::Key_Right:
+                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/right.png"));
+                        break;
+                    case Qt::Key_Left:
+                        painter.drawPixmap(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, QPixmap("app/native/left.png"));
+                        break;
+                    default:
+                        painter.drawText(size+size*sin(charangle)*3/4-painter.fontMetrics().width(character)/2, size-size*cos(charangle)*3/4+painter.fontMetrics().height()/2, toChar(character));
+                        break;
+                }
             }
         }
         for( i = 0; i < sections; i ++ ) {
