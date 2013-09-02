@@ -1,5 +1,6 @@
 #include <bps/virtualkeyboard.h>
 #include <qvkbhandler.h>
+#include <unistd.h>
 #include "term_logging.h"
 
 QAbstractEventDispatcher::EventFilter QVkbHandler::prevFilter;
@@ -26,11 +27,15 @@ QVkbHandler::~QVkbHandler()
 
 void QVkbHandler::resize()
 {
+    QWidget *child;
     int kbd_height = 0;
     if( keyboardVisible ) {
         virtualkeyboard_get_height( &kbd_height );
     }
-    ((QWidget *)children()[0])->setGeometry(0, 0, width(), height()-kbd_height);
+    slog("Do resize");
+    child = ((QWidget *)children()[0]);
+    child->setGeometry(0, 0, width(), height()-kbd_height);
+    slog("Resize done");
 }
 
 void QVkbHandler::resizeEvent(QResizeEvent *event)

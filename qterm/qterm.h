@@ -35,6 +35,7 @@ private:
 
     QFont *font;
     bool  fontWorkAround;
+    bool workaround;
     void resize_term();
     static void term_bell(term_t handle);
     static void term_update(term_t handle, int x, int y, int width, int height);

@@ -47,6 +47,7 @@ void QTerm::init()
     char_height = 0;
     cursor_on = 1;
     piekey_active = 0;
+    workaround = false;
     keys.push_back(Qt::Key_Up);
     keys.push_back(Qt::Key_Escape);
     keys.push_back(Qt::Key_Right);
@@ -123,10 +124,14 @@ void QTerm::resize_term()
 {
     int visible_height;
     visible_height = minimumSize().height() / char_height;
-    //slog("resize term! %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, size().width()/char_width, HEIGHT);
+    slog("resize term! %d %d %d -> (%dx%d)", size().width(), size().height(), char_width, size().width()/char_width, HEIGHT);
     resize(size().width(), HEIGHT * char_height);
     scrollback_height = HEIGHT - visible_height;
     term_resize( terminal, size().width() / char_width, visible_height, scrollback_height );
+    // Workaround for a Qt bug - missing a redraw after resizing
+    workaround = true;
+    cursor_timer->stop();
+    cursor_timer->start(1);
 }
 
 void QTerm::term_bell(term_t handle)
@@ -227,6 +232,13 @@ void QTerm::blink_cursor()
     cursor_on ^= 1;
     term_get_cursor_pos( terminal, &cursor_x, &cursor_y );
     update_grid( cursor_x, cursor_y, 1, 1);
+    if( workaround ) {
+        // Workaround for Qt bug
+        update(0, 0, size().width() / char_width, minimumSize().height() / char_height);
+        workaround = false;
+        cursor_timer->stop();
+        cursor_timer->start(BLINK_SPEED);
+    }
 }
 
 void QTerm::update(int grid_x_min,

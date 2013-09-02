@@ -13,7 +13,11 @@ QScrollTerm::QScrollTerm(QWidget *parent, term_t terminal) : QScrollArea(parent)
 
 void QScrollTerm::resizeEvent(QResizeEvent *event)
 {
+    QWidget *child = widget();
+
     emit parentResize(event->size());
+    slog("resize event");
+    ensureVisible(child->width(), child->height(), 0, 0);
 }
 
 void QScrollTerm::childUpdated()
