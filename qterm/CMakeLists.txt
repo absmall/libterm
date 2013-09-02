@@ -26,7 +26,8 @@ INSTALL(TARGETS qtermlib LIBRARY DESTINATION lib)
 TARGET_LINK_LIBRARIES(qterm bps slog2)
 ADD_CUSTOM_COMMAND(OUTPUT qterm.bar
                    COMMAND blackberry-nativepackager
-                   -devMode
+                   -sign
+                   -storepass $PASSWORD
                    -package qterm.bar
 				   ${CMAKE_CURRENT_SOURCE_DIR}/bar-descriptor.xml
                    -e ${CMAKE_CURRENT_BINARY_DIR}/qterm qterm
@@ -36,7 +37,19 @@ ADD_CUSTOM_COMMAND(OUTPUT qterm.bar
                    DEPENDS qterm bar-descriptor.xml ${CMAKE_CURRENT_BINARY_DIR}/../lib/libterm.so
 				  )
 
-ADD_CUSTOM_TARGET(qtermbar ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/qterm.bar)
+ADD_CUSTOM_COMMAND(OUTPUT qterm-debug.bar
+                   COMMAND blackberry-nativepackager
+                   -devMode
+                   -package qterm-debug.bar
+				   ${CMAKE_CURRENT_SOURCE_DIR}/bar-descriptor.xml
+                   -e ${CMAKE_CURRENT_BINARY_DIR}/qterm qterm
+                   -e ${CMAKE_CURRENT_BINARY_DIR}/../lib/libterm.so lib/libterm.so
+                   -e ${CMAKE_CURRENT_SOURCE_DIR}/../splashscreen.png splashscreen.png
+                   -e ${CMAKE_CURRENT_SOURCE_DIR}/../icon.png icon.png
+                   DEPENDS qterm bar-descriptor.xml ${CMAKE_CURRENT_BINARY_DIR}/../lib/libterm.so
+				  )
+
+ADD_CUSTOM_TARGET(qtermbar ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/qterm.bar ${CMAKE_CURRENT_BINARY_DIR}/qterm-debug.bar)
 
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "qnx")
 TARGET_LINK_LIBRARIES(qterm term)
