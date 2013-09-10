@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <qnx xmlns="http://www.qnx.com/schemas/application/1.0">
-    <id>com.example.qterm</id>
+    <id>org.dyndns.smeagle.qterm</id>
     <filename>qterm</filename>
     <name>Command shell</name>
-    <versionNumber>1.0.26</versionNumber>
+    <versionNumber>1.0.2</versionNumber>
     <description>BB10 terminal</description>
     <initialWindow>
         <systemChrome>none</systemChrome>
@@ -11,8 +11,8 @@
         <autoOrients>true</autoOrients>
         <aspectRatio>landscape</aspectRatio>
     </initialWindow>
-    <author>Home</author>
-    <authorId>gYAAgJZ5S0RObHOlpRFR1_d5Luo</authorId>
+    <author>Aaron Small</author>
+    <authorId>gYAAgNWv6u7pboCe5pzDHD7DuQM</authorId>
     <env value="app/native/imports" var="QML_IMPORT_PATH"/>
     <env value="app/native/plugins:/usr/lib/qt4/plugins" var="QT_PLUGIN_PATH"/>
     <env value="app/native/lib:/usr/lib/qt4/lib/" var="LD_LIBRARY_PATH"/>

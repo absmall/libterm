@@ -12,7 +12,6 @@ public:
 protected:
     void resizeEvent(QResizeEvent *);
 
-
 private:
     static QVkbHandler *instance;
     bool keyboardVisible;
