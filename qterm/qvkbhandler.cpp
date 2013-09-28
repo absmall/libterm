@@ -4,6 +4,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QTextEdit>
+#include <QCheckBox>
+#include <QSettings>
 #include <qvkbhandler.h>
 #include <unistd.h>
 #include "term_logging.h"
@@ -17,6 +19,32 @@ QVkbHandler::QVkbHandler()
         instance = this;
     } else {
         throw "Singleton error";
+    }
+
+    QSettings settings("org.dyndns.smeagle", "qterm");
+    bool showHelp;
+    showHelp = settings.value("show_help", true).toBool();
+    if(showHelp) {
+        QDialog dialog(this);
+        QVBoxLayout layout;
+        QTextEdit text(&dialog);
+        QPushButton ok(&dialog);
+        QCheckBox check(&dialog);
+        dialog.setLayout(&layout);
+        layout.addWidget(&text);
+        layout.addWidget(&check);
+        layout.addWidget(&ok);
+        text.setFocusPolicy(Qt::NoFocus);
+        text.setReadOnly(true);
+        connect(&ok, SIGNAL(pressed()), &dialog, SLOT(accept()));
+
+        text.setText("For help, swipe down from the top of the screen");
+        ok.setText("Ok");
+        check.setText("Don't show this again");
+        slog("Show dialog");
+        dialog.exec();
+        slog("Done dialog");
+        settings.setValue("show_help", !check.isChecked());
     }
 
     keyboardVisible = false;
