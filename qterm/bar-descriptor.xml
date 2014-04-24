@@ -13,13 +13,17 @@
     </initialWindow>
     <author>Aaron Small</author>
     <authorId>gYAAgNWv6u7pboCe5pzDHD7DuQM</authorId>
-    <env value="app/native/imports" var="QML_IMPORT_PATH"/>
-    <env value="app/native/plugins:/usr/lib/qt4/plugins" var="QT_PLUGIN_PATH"/>
-    <env value="app/native/lib:/usr/lib/qt4/lib/" var="LD_LIBRARY_PATH"/>
+    <env var="QML_IMPORT_PATH" value="app/native/imports"/>
+    <env var="QT_PLUGIN_PATH" value="app/native/plugins:/usr/lib/qt4/plugins"/>
+    <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib/"/>
+    <asset entry="true" type="Qnx/Elf" path="qterm/qterm">qterm</asset>
+    <asset path="lib">lib</asset>
     <action system="true">run_native</action>
     <action>access_shared</action>
     <icon>
-        <image>icon.png</image>
+        <image>%SRC_DIR%/icon.png</image>
     </icon>
-    <splashscreen>splashscreen.png:splashscreen.png</splashscreen>
+    <splashscreen>
+        <image>%SRC_DIR%/splashscreen.png</image>
+    </splashscreen>
 </qnx>
